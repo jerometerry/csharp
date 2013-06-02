@@ -1,0 +1,532 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{BD1EA643-EC95-4C3E-A326-138D11C6407A}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>jterry.scripting.web</RootNamespace>
+    <AssemblyName>jterry.scripting.web</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <UseIISExpress>false</UseIISExpress>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="About.aspx" />
+    <Content Include="Account\ChangePassword.aspx" />
+    <Content Include="Account\ChangePasswordSuccess.aspx" />
+    <Content Include="Account\Login.aspx" />
+    <Content Include="Account\Register.aspx" />
+    <Content Include="Content\themes\base\images\animated-overlay.gif" />
+    <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
+    <Content Include="Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_55_fbf9ee_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_65_ffffff_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_75_dadada_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_75_e6e6e6_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_95_fef1ec_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
+    <Content Include="Content\themes\base\images\ui-icons_222222_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_2e83ff_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_454545_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_888888_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_cd0a0a_256x240.png" />
+    <Content Include="Content\themes\base\jquery-ui.css" />
+    <Content Include="Content\themes\base\jquery.ui.accordion.css" />
+    <Content Include="Content\themes\base\jquery.ui.all.css" />
+    <Content Include="Content\themes\base\jquery.ui.autocomplete.css" />
+    <Content Include="Content\themes\base\jquery.ui.base.css" />
+    <Content Include="Content\themes\base\jquery.ui.button.css" />
+    <Content Include="Content\themes\base\jquery.ui.core.css" />
+    <Content Include="Content\themes\base\jquery.ui.datepicker.css" />
+    <Content Include="Content\themes\base\jquery.ui.dialog.css" />
+    <Content Include="Content\themes\base\jquery.ui.menu.css" />
+    <Content Include="Content\themes\base\jquery.ui.progressbar.css" />
+    <Content Include="Content\themes\base\jquery.ui.resizable.css" />
+    <Content Include="Content\themes\base\jquery.ui.selectable.css" />
+    <Content Include="Content\themes\base\jquery.ui.slider.css" />
+    <Content Include="Content\themes\base\jquery.ui.spinner.css" />
+    <Content Include="Content\themes\base\jquery.ui.tabs.css" />
+    <Content Include="Content\themes\base\jquery.ui.theme.css" />
+    <Content Include="Content\themes\base\jquery.ui.tooltip.css" />
+    <Content Include="Content\themes\base\minified\images\animated-overlay.gif" />
+    <Content Include="Content\themes\base\minified\images\ui-bg_flat_0_aaaaaa_40x100.png" />
+    <Content Include="Content\themes\base\minified\images\ui-bg_flat_75_ffffff_40x100.png" />
+    <Content Include="Content\themes\base\minified\images\ui-bg_glass_55_fbf9ee_1x400.png" />
+    <Content Include="Content\themes\base\minified\images\ui-bg_glass_65_ffffff_1x400.png" />
+    <Content Include="Content\themes\base\minified\images\ui-bg_glass_75_dadada_1x400.png" />
+    <Content Include="Content\themes\base\minified\images\ui-bg_glass_75_e6e6e6_1x400.png" />
+    <Content Include="Content\themes\base\minified\images\ui-bg_glass_95_fef1ec_1x400.png" />
+    <Content Include="Content\themes\base\minified\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
+    <Content Include="Content\themes\base\minified\images\ui-icons_222222_256x240.png" />
+    <Content Include="Content\themes\base\minified\images\ui-icons_2e83ff_256x240.png" />
+    <Content Include="Content\themes\base\minified\images\ui-icons_454545_256x240.png" />
+    <Content Include="Content\themes\base\minified\images\ui-icons_888888_256x240.png" />
+    <Content Include="Content\themes\base\minified\images\ui-icons_cd0a0a_256x240.png" />
+    <Content Include="Content\themes\base\minified\jquery-ui.min.css" />
+    <Content Include="Content\themes\base\minified\jquery.ui.accordion.min.css" />
+    <Content Include="Content\themes\base\minified\jquery.ui.autocomplete.min.css" />
+    <Content Include="Content\themes\base\minified\jquery.ui.button.min.css" />
+    <Content Include="Content\themes\base\minified\jquery.ui.core.min.css" />
+    <Content Include="Content\themes\base\minified\jquery.ui.datepicker.min.css" />
+    <Content Include="Content\themes\base\minified\jquery.ui.dialog.min.css" />
+    <Content Include="Content\themes\base\minified\jquery.ui.menu.min.css" />
+    <Content Include="Content\themes\base\minified\jquery.ui.progressbar.min.css" />
+    <Content Include="Content\themes\base\minified\jquery.ui.resizable.min.css" />
+    <Content Include="Content\themes\base\minified\jquery.ui.selectable.min.css" />
+    <Content Include="Content\themes\base\minified\jquery.ui.slider.min.css" />
+    <Content Include="Content\themes\base\minified\jquery.ui.spinner.min.css" />
+    <Content Include="Content\themes\base\minified\jquery.ui.tabs.min.css" />
+    <Content Include="Content\themes\base\minified\jquery.ui.theme.min.css" />
+    <Content Include="Content\themes\base\minified\jquery.ui.tooltip.min.css" />
+    <Content Include="ScriptEditor.aspx" />
+    <Content Include="Scripts\codemirror\addon\comment\comment.js" />
+    <Content Include="Scripts\codemirror\addon\dialog\dialog.css" />
+    <Content Include="Scripts\codemirror\addon\dialog\dialog.js" />
+    <Content Include="Scripts\codemirror\addon\display\placeholder.js" />
+    <Content Include="Scripts\codemirror\addon\edit\closebrackets.js" />
+    <Content Include="Scripts\codemirror\addon\edit\closetag.js" />
+    <Content Include="Scripts\codemirror\addon\edit\continuecomment.js" />
+    <Content Include="Scripts\codemirror\addon\edit\continuelist.js" />
+    <Content Include="Scripts\codemirror\addon\edit\matchbrackets.js" />
+    <Content Include="Scripts\codemirror\addon\fold\brace-fold.js" />
+    <Content Include="Scripts\codemirror\addon\fold\foldcode.js" />
+    <Content Include="Scripts\codemirror\addon\fold\indent-fold.js" />
+    <Content Include="Scripts\codemirror\addon\fold\xml-fold.js" />
+    <Content Include="Scripts\codemirror\addon\hint\html-hint.js" />
+    <Content Include="Scripts\codemirror\addon\hint\javascript-hint.js" />
+    <Content Include="Scripts\codemirror\addon\hint\pig-hint.js" />
+    <Content Include="Scripts\codemirror\addon\hint\python-hint.js" />
+    <Content Include="Scripts\codemirror\addon\hint\show-hint.css" />
+    <Content Include="Scripts\codemirror\addon\hint\show-hint.js" />
+    <Content Include="Scripts\codemirror\addon\hint\xml-hint.js" />
+    <Content Include="Scripts\codemirror\addon\lint\javascript-lint.js" />
+    <Content Include="Scripts\codemirror\addon\lint\json-lint.js" />
+    <Content Include="Scripts\codemirror\addon\lint\lint.css" />
+    <Content Include="Scripts\codemirror\addon\lint\lint.js" />
+    <Content Include="Scripts\codemirror\addon\mode\loadmode.js" />
+    <Content Include="Scripts\codemirror\addon\mode\multiplex.js" />
+    <Content Include="Scripts\codemirror\addon\mode\overlay.js" />
+    <Content Include="Scripts\codemirror\addon\runmode\colorize.js" />
+    <Content Include="Scripts\codemirror\addon\runmode\runmode-standalone.js" />
+    <Content Include="Scripts\codemirror\addon\runmode\runmode.js" />
+    <Content Include="Scripts\codemirror\addon\runmode\runmode.node.js" />
+    <Content Include="Scripts\codemirror\addon\search\match-highlighter.js" />
+    <Content Include="Scripts\codemirror\addon\search\search.js" />
+    <Content Include="Scripts\codemirror\addon\search\searchcursor.js" />
+    <Content Include="Scripts\codemirror\addon\selection\active-line.js" />
+    <Content Include="Scripts\codemirror\addon\selection\mark-selection.js" />
+    <Content Include="Scripts\codemirror\demo\activeline.html" />
+    <Content Include="Scripts\codemirror\demo\bidi.html" />
+    <Content Include="Scripts\codemirror\demo\btree.html" />
+    <Content Include="Scripts\codemirror\demo\buffers.html" />
+    <Content Include="Scripts\codemirror\demo\changemode.html" />
+    <Content Include="Scripts\codemirror\demo\closebrackets.html" />
+    <Content Include="Scripts\codemirror\demo\closetag.html" />
+    <Content Include="Scripts\codemirror\demo\complete.html" />
+    <Content Include="Scripts\codemirror\demo\emacs.html" />
+    <Content Include="Scripts\codemirror\demo\folding.html" />
+    <Content Include="Scripts\codemirror\demo\fullscreen.html" />
+    <Content Include="Scripts\codemirror\demo\html5complete.html" />
+    <Content Include="Scripts\codemirror\demo\indentwrap.html" />
+    <Content Include="Scripts\codemirror\demo\lint.html" />
+    <Content Include="Scripts\codemirror\demo\loadmode.html" />
+    <Content Include="Scripts\codemirror\demo\marker.html" />
+    <Content Include="Scripts\codemirror\demo\markselection.html" />
+    <Content Include="Scripts\codemirror\demo\matchhighlighter.html" />
+    <Content Include="Scripts\codemirror\demo\multiplex.html" />
+    <Content Include="Scripts\codemirror\demo\mustache.html" />
+    <Content Include="Scripts\codemirror\demo\placeholder.html" />
+    <Content Include="Scripts\codemirror\demo\preview.html" />
+    <Content Include="Scripts\codemirror\demo\resize.html" />
+    <Content Include="Scripts\codemirror\demo\runmode.html" />
+    <Content Include="Scripts\codemirror\demo\search.html" />
+    <Content Include="Scripts\codemirror\demo\spanaffectswrapping_shim.html" />
+    <Content Include="Scripts\codemirror\demo\theme.html" />
+    <Content Include="Scripts\codemirror\demo\variableheight.html" />
+    <Content Include="Scripts\codemirror\demo\vim.html" />
+    <Content Include="Scripts\codemirror\demo\visibletabs.html" />
+    <Content Include="Scripts\codemirror\demo\widget.html" />
+    <Content Include="Scripts\codemirror\demo\xmlcomplete.html" />
+    <Content Include="Scripts\codemirror\doc\baboon.png" />
+    <Content Include="Scripts\codemirror\doc\baboon_vector.svg" />
+    <Content Include="Scripts\codemirror\doc\compress.html" />
+    <Content Include="Scripts\codemirror\doc\docs.css" />
+    <Content Include="Scripts\codemirror\doc\internals.html" />
+    <Content Include="Scripts\codemirror\doc\manual.html" />
+    <Content Include="Scripts\codemirror\doc\modes.html" />
+    <Content Include="Scripts\codemirror\doc\oldrelease.html" />
+    <Content Include="Scripts\codemirror\doc\realworld.html" />
+    <Content Include="Scripts\codemirror\doc\reporting.html" />
+    <Content Include="Scripts\codemirror\doc\upgrade_v2.2.html" />
+    <Content Include="Scripts\codemirror\doc\upgrade_v3.html" />
+    <Content Include="Scripts\codemirror\index.html" />
+    <Content Include="Scripts\codemirror\keymap\emacs.js" />
+    <Content Include="Scripts\codemirror\keymap\vim.js" />
+    <Content Include="Scripts\codemirror\lib\codemirror.css" />
+    <Content Include="Scripts\codemirror\lib\codemirror.js" />
+    <Content Include="Scripts\codemirror\mode\apl\apl.js" />
+    <Content Include="Scripts\codemirror\mode\apl\index.html" />
+    <Content Include="Scripts\codemirror\mode\asterisk\asterisk.js" />
+    <Content Include="Scripts\codemirror\mode\asterisk\index.html" />
+    <Content Include="Scripts\codemirror\mode\clike\clike.js" />
+    <Content Include="Scripts\codemirror\mode\clike\index.html" />
+    <Content Include="Scripts\codemirror\mode\clike\scala.html" />
+    <Content Include="Scripts\codemirror\mode\clojure\clojure.js" />
+    <Content Include="Scripts\codemirror\mode\clojure\index.html" />
+    <Content Include="Scripts\codemirror\mode\cobol\cobol.js" />
+    <Content Include="Scripts\codemirror\mode\cobol\index.html" />
+    <Content Include="Scripts\codemirror\mode\coffeescript\coffeescript.js" />
+    <Content Include="Scripts\codemirror\mode\coffeescript\index.html" />
+    <Content Include="Scripts\codemirror\mode\commonlisp\commonlisp.js" />
+    <Content Include="Scripts\codemirror\mode\commonlisp\index.html" />
+    <Content Include="Scripts\codemirror\mode\css\css.js" />
+    <Content Include="Scripts\codemirror\mode\css\index.html" />
+    <Content Include="Scripts\codemirror\mode\css\scss.html" />
+    <Content Include="Scripts\codemirror\mode\css\scss_test.js" />
+    <Content Include="Scripts\codemirror\mode\css\test.js" />
+    <Content Include="Scripts\codemirror\mode\diff\diff.js" />
+    <Content Include="Scripts\codemirror\mode\diff\index.html" />
+    <Content Include="Scripts\codemirror\mode\d\d.js" />
+    <Content Include="Scripts\codemirror\mode\d\index.html" />
+    <Content Include="Scripts\codemirror\mode\ecl\ecl.js" />
+    <Content Include="Scripts\codemirror\mode\ecl\index.html" />
+    <Content Include="Scripts\codemirror\mode\erlang\erlang.js" />
+    <Content Include="Scripts\codemirror\mode\erlang\index.html" />
+    <Content Include="Scripts\codemirror\mode\gas\gas.js" />
+    <Content Include="Scripts\codemirror\mode\gas\index.html" />
+    <Content Include="Scripts\codemirror\mode\gfm\gfm.js" />
+    <Content Include="Scripts\codemirror\mode\gfm\index.html" />
+    <Content Include="Scripts\codemirror\mode\gfm\test.js" />
+    <Content Include="Scripts\codemirror\mode\go\go.js" />
+    <Content Include="Scripts\codemirror\mode\go\index.html" />
+    <Content Include="Scripts\codemirror\mode\groovy\groovy.js" />
+    <Content Include="Scripts\codemirror\mode\groovy\index.html" />
+    <Content Include="Scripts\codemirror\mode\haml\haml.js" />
+    <Content Include="Scripts\codemirror\mode\haml\index.html" />
+    <Content Include="Scripts\codemirror\mode\haml\test.js" />
+    <Content Include="Scripts\codemirror\mode\haskell\haskell.js" />
+    <Content Include="Scripts\codemirror\mode\haskell\index.html" />
+    <Content Include="Scripts\codemirror\mode\haxe\haxe.js" />
+    <Content Include="Scripts\codemirror\mode\haxe\index.html" />
+    <Content Include="Scripts\codemirror\mode\htmlembedded\htmlembedded.js" />
+    <Content Include="Scripts\codemirror\mode\htmlembedded\index.html" />
+    <Content Include="Scripts\codemirror\mode\htmlmixed\htmlmixed.js" />
+    <Content Include="Scripts\codemirror\mode\htmlmixed\index.html" />
+    <Content Include="Scripts\codemirror\mode\http\http.js" />
+    <Content Include="Scripts\codemirror\mode\http\index.html" />
+    <Content Include="Scripts\codemirror\mode\javascript\index.html" />
+    <Content Include="Scripts\codemirror\mode\javascript\javascript.js" />
+    <Content Include="Scripts\codemirror\mode\javascript\typescript.html" />
+    <Content Include="Scripts\codemirror\mode\jinja2\index.html" />
+    <Content Include="Scripts\codemirror\mode\jinja2\jinja2.js" />
+    <Content Include="Scripts\codemirror\mode\less\index.html" />
+    <Content Include="Scripts\codemirror\mode\less\less.js" />
+    <Content Include="Scripts\codemirror\mode\livescript\index.html" />
+    <Content Include="Scripts\codemirror\mode\livescript\livescript.js" />
+    <Content Include="Scripts\codemirror\mode\lua\index.html" />
+    <Content Include="Scripts\codemirror\mode\lua\lua.js" />
+    <Content Include="Scripts\codemirror\mode\markdown\index.html" />
+    <Content Include="Scripts\codemirror\mode\markdown\markdown.js" />
+    <Content Include="Scripts\codemirror\mode\markdown\test.js" />
+    <Content Include="Scripts\codemirror\mode\meta.js" />
+    <Content Include="Scripts\codemirror\mode\mirc\index.html" />
+    <Content Include="Scripts\codemirror\mode\mirc\mirc.js" />
+    <Content Include="Scripts\codemirror\mode\ntriples\index.html" />
+    <Content Include="Scripts\codemirror\mode\ntriples\ntriples.js" />
+    <Content Include="Scripts\codemirror\mode\ocaml\index.html" />
+    <Content Include="Scripts\codemirror\mode\ocaml\ocaml.js" />
+    <Content Include="Scripts\codemirror\mode\pascal\index.html" />
+    <Content Include="Scripts\codemirror\mode\pascal\pascal.js" />
+    <Content Include="Scripts\codemirror\mode\perl\index.html" />
+    <Content Include="Scripts\codemirror\mode\perl\perl.js" />
+    <Content Include="Scripts\codemirror\mode\php\index.html" />
+    <Content Include="Scripts\codemirror\mode\php\php.js" />
+    <Content Include="Scripts\codemirror\mode\pig\index.html" />
+    <Content Include="Scripts\codemirror\mode\pig\pig.js" />
+    <Content Include="Scripts\codemirror\mode\properties\index.html" />
+    <Content Include="Scripts\codemirror\mode\properties\properties.js" />
+    <Content Include="Scripts\codemirror\mode\python\index.html" />
+    <Content Include="Scripts\codemirror\mode\python\LICENSE.txt" />
+    <Content Include="Scripts\codemirror\mode\python\python.js" />
+    <Content Include="Scripts\codemirror\mode\q\index.html" />
+    <Content Include="Scripts\codemirror\mode\q\q.js" />
+    <Content Include="Scripts\codemirror\mode\rpm\changes\changes.js" />
+    <Content Include="Scripts\codemirror\mode\rpm\changes\index.html" />
+    <Content Include="Scripts\codemirror\mode\rpm\spec\index.html" />
+    <Content Include="Scripts\codemirror\mode\rpm\spec\spec.css" />
+    <Content Include="Scripts\codemirror\mode\rpm\spec\spec.js" />
+    <Content Include="Scripts\codemirror\mode\rst\index.html" />
+    <Content Include="Scripts\codemirror\mode\rst\LICENSE.txt" />
+    <Content Include="Scripts\codemirror\mode\rst\rst.js" />
+    <Content Include="Scripts\codemirror\mode\ruby\index.html" />
+    <Content Include="Scripts\codemirror\mode\ruby\ruby.js" />
+    <Content Include="Scripts\codemirror\mode\rust\index.html" />
+    <Content Include="Scripts\codemirror\mode\rust\rust.js" />
+    <Content Include="Scripts\codemirror\mode\r\index.html" />
+    <Content Include="Scripts\codemirror\mode\r\r.js" />
+    <Content Include="Scripts\codemirror\mode\sass\index.html" />
+    <Content Include="Scripts\codemirror\mode\sass\sass.js" />
+    <Content Include="Scripts\codemirror\mode\scheme\index.html" />
+    <Content Include="Scripts\codemirror\mode\scheme\scheme.js" />
+    <Content Include="Scripts\codemirror\mode\shell\index.html" />
+    <Content Include="Scripts\codemirror\mode\shell\shell.js" />
+    <Content Include="Scripts\codemirror\mode\sieve\index.html" />
+    <Content Include="Scripts\codemirror\mode\sieve\sieve.js" />
+    <Content Include="Scripts\codemirror\mode\smalltalk\index.html" />
+    <Content Include="Scripts\codemirror\mode\smalltalk\smalltalk.js" />
+    <Content Include="Scripts\codemirror\mode\smarty\index.html" />
+    <Content Include="Scripts\codemirror\mode\smarty\smarty.js" />
+    <Content Include="Scripts\codemirror\mode\sparql\index.html" />
+    <Content Include="Scripts\codemirror\mode\sparql\sparql.js" />
+    <Content Include="Scripts\codemirror\mode\sql\index.html" />
+    <Content Include="Scripts\codemirror\mode\sql\sql.js" />
+    <Content Include="Scripts\codemirror\mode\stex\index.html" />
+    <Content Include="Scripts\codemirror\mode\stex\stex.js" />
+    <Content Include="Scripts\codemirror\mode\stex\test.js" />
+    <Content Include="Scripts\codemirror\mode\tcl\index.html" />
+    <Content Include="Scripts\codemirror\mode\tcl\tcl.js" />
+    <Content Include="Scripts\codemirror\mode\tiddlywiki\index.html" />
+    <Content Include="Scripts\codemirror\mode\tiddlywiki\tiddlywiki.css" />
+    <Content Include="Scripts\codemirror\mode\tiddlywiki\tiddlywiki.js" />
+    <Content Include="Scripts\codemirror\mode\tiki\index.html" />
+    <Content Include="Scripts\codemirror\mode\tiki\tiki.css" />
+    <Content Include="Scripts\codemirror\mode\tiki\tiki.js" />
+    <Content Include="Scripts\codemirror\mode\turtle\index.html" />
+    <Content Include="Scripts\codemirror\mode\turtle\turtle.js" />
+    <Content Include="Scripts\codemirror\mode\vbscript\index.html" />
+    <Content Include="Scripts\codemirror\mode\vbscript\vbscript.js" />
+    <Content Include="Scripts\codemirror\mode\vb\index.html" />
+    <Content Include="Scripts\codemirror\mode\vb\LICENSE.txt" />
+    <Content Include="Scripts\codemirror\mode\vb\vb.js" />
+    <Content Include="Scripts\codemirror\mode\velocity\index.html" />
+    <Content Include="Scripts\codemirror\mode\velocity\velocity.js" />
+    <Content Include="Scripts\codemirror\mode\verilog\index.html" />
+    <Content Include="Scripts\codemirror\mode\verilog\verilog.js" />
+    <Content Include="Scripts\codemirror\mode\xml\index.html" />
+    <Content Include="Scripts\codemirror\mode\xml\xml.js" />
+    <Content Include="Scripts\codemirror\mode\xquery\index.html" />
+    <Content Include="Scripts\codemirror\mode\xquery\test.js" />
+    <Content Include="Scripts\codemirror\mode\xquery\xquery.js" />
+    <Content Include="Scripts\codemirror\mode\yaml\index.html" />
+    <Content Include="Scripts\codemirror\mode\yaml\yaml.js" />
+    <Content Include="Scripts\codemirror\mode\z80\index.html" />
+    <Content Include="Scripts\codemirror\mode\z80\z80.js" />
+    <Content Include="Scripts\codemirror\test\comment_test.js" />
+    <Content Include="Scripts\codemirror\test\doc_test.js" />
+    <Content Include="Scripts\codemirror\test\driver.js" />
+    <Content Include="Scripts\codemirror\test\index.html" />
+    <Content Include="Scripts\codemirror\test\lint\acorn.js" />
+    <Content Include="Scripts\codemirror\test\lint\lint.js" />
+    <Content Include="Scripts\codemirror\test\lint\parse-js.js" />
+    <Content Include="Scripts\codemirror\test\lint\walk.js" />
+    <Content Include="Scripts\codemirror\test\mode_test.css" />
+    <Content Include="Scripts\codemirror\test\mode_test.js" />
+    <Content Include="Scripts\codemirror\test\phantom_driver.js" />
+    <Content Include="Scripts\codemirror\test\run.js" />
+    <Content Include="Scripts\codemirror\test\test.js" />
+    <Content Include="Scripts\codemirror\test\vim_test.js" />
+    <Content Include="Scripts\codemirror\theme\ambiance-mobile.css" />
+    <Content Include="Scripts\codemirror\theme\ambiance.css" />
+    <Content Include="Scripts\codemirror\theme\blackboard.css" />
+    <Content Include="Scripts\codemirror\theme\cobalt.css" />
+    <Content Include="Scripts\codemirror\theme\eclipse.css" />
+    <Content Include="Scripts\codemirror\theme\elegant.css" />
+    <Content Include="Scripts\codemirror\theme\erlang-dark.css" />
+    <Content Include="Scripts\codemirror\theme\lesser-dark.css" />
+    <Content Include="Scripts\codemirror\theme\midnight.css" />
+    <Content Include="Scripts\codemirror\theme\monokai.css" />
+    <Content Include="Scripts\codemirror\theme\neat.css" />
+    <Content Include="Scripts\codemirror\theme\night.css" />
+    <Content Include="Scripts\codemirror\theme\rubyblue.css" />
+    <Content Include="Scripts\codemirror\theme\solarized.css" />
+    <Content Include="Scripts\codemirror\theme\twilight.css" />
+    <Content Include="Scripts\codemirror\theme\vibrant-ink.css" />
+    <Content Include="Scripts\codemirror\theme\xq-dark.css" />
+    <Content Include="Scripts\codemirror\theme\xq-light.css" />
+    <Content Include="Scripts\jquery-2.0.1-vsdoc.js" />
+    <Content Include="Scripts\jquery-2.0.1.js" />
+    <Content Include="Scripts\jquery-2.0.1.min.js" />
+    <Content Include="Scripts\jquery-ui-1.10.3.js" />
+    <Content Include="Scripts\jquery-ui-1.10.3.min.js" />
+    <Content Include="Styles\Site.css" />
+    <Content Include="Default.aspx" />
+    <Content Include="Global.asax" />
+    <Content Include="Web.config" />
+    <Content Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="About.aspx.cs">
+      <DependentUpon>About.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="About.aspx.designer.cs">
+      <DependentUpon>About.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Account\ChangePassword.aspx.cs">
+      <DependentUpon>ChangePassword.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Account\ChangePassword.aspx.designer.cs">
+      <DependentUpon>ChangePassword.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Account\ChangePasswordSuccess.aspx.cs">
+      <DependentUpon>ChangePasswordSuccess.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Account\ChangePasswordSuccess.aspx.designer.cs">
+      <DependentUpon>ChangePasswordSuccess.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Account\Login.aspx.cs">
+      <DependentUpon>Login.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Account\Login.aspx.designer.cs">
+      <DependentUpon>Login.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Account\Register.aspx.cs">
+      <DependentUpon>Register.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Account\Register.aspx.designer.cs">
+      <DependentUpon>Register.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Default.aspx.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Default.aspx.designer.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScriptEditor.aspx.cs">
+      <DependentUpon>ScriptEditor.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ScriptEditor.aspx.designer.cs">
+      <DependentUpon>ScriptEditor.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Site.Master.cs">
+      <DependentUpon>Site.Master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Site.Master.designer.cs">
+      <DependentUpon>Site.Master</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Account\Web.config" />
+    <Content Include="Site.Master" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\jterry.scripting.api\jterry.scripting.api.csproj">
+      <Project>{9BBBE3BC-EB44-4633-A1F1-5592B556784B}</Project>
+      <Name>jterry.scripting.api</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\jterry.scripting.host\jterry.scripting.host.csproj">
+      <Project>{4F0D18A0-61F4-4523-AA26-22764D5EF066}</Project>
+      <Name>jterry.scripting.host</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="packages.config" />
+    <None Include="Scripts\codemirror\.gitattributes" />
+    <None Include="Scripts\codemirror\.gitignore" />
+    <None Include="Scripts\codemirror\.travis.yml" />
+    <None Include="Scripts\codemirror\bin\compress" />
+    <None Include="Scripts\codemirror\bin\lint" />
+    <None Include="Scripts\codemirror\bin\source-highlight" />
+    <None Include="Scripts\codemirror\CONTRIBUTING.md" />
+    <None Include="Scripts\codemirror\LICENSE" />
+    <None Include="Scripts\codemirror\mode\coffeescript\LICENSE" />
+    <None Include="Scripts\codemirror\mode\livescript\LICENSE" />
+    <None Include="Scripts\codemirror\mode\livescript\livescript.ls" />
+    <None Include="Scripts\codemirror\mode\pascal\LICENSE" />
+    <None Include="Scripts\codemirror\mode\perl\LICENSE" />
+    <None Include="Scripts\codemirror\mode\ruby\LICENSE" />
+    <None Include="Scripts\codemirror\mode\r\LICENSE" />
+    <None Include="Scripts\codemirror\mode\sieve\LICENSE" />
+    <None Include="Scripts\codemirror\mode\xquery\LICENSE" />
+    <None Include="Scripts\codemirror\package.json" />
+    <None Include="Scripts\codemirror\README.md" />
+    <None Include="Scripts\jquery-2.0.1.min.map" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>49382</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>
+          </IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
