@@ -1,4 +1,7 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ScriptEditor.aspx.cs" Inherits="jterry.scripting.web.ScriptEditor" ValidateRequest="false" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" 
+    CodeBehind="ScriptEditor.aspx.cs" 
+    Inherits="jterry.scripting.web.ScriptEditor" 
+    ValidateRequest="false" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -32,12 +35,12 @@
                 matchBrackets: true
             });
 
-            editor.setSize(960, 600)
+            editor.setSize(960, 500)
 
             $("#helpDialog").dialog({
                 autoOpen: false,
                 width: 800,
-                height: 600
+                height: 500
             });
 
             $("#showHelpBtn").click(function () {
@@ -72,13 +75,27 @@
 clr.AddReference("System.Core")
 import System
 from System import *
+from System.Collections.Generic import List
 clr.ImportExtensions(System.Linq)
 
 def printCurrentTime():
     print DateTime.Now.ToString()
     return
 
-printCurrentTime()</asp:TextBox>
+def getRepository(name):
+    return factory.GetRepository(name)
+
+def getAllEntities(repo):
+    return repo.GetAll()
+
+printCurrentTime()
+repo = getRepository("Customers")
+customers = getAllEntities(repo)
+print "Initial customer count: " + customers.Count.ToString()
+customer1 = repo.CreateEntity()
+customer1.Name = "My Customer"
+print "Id: " + customer1.Id.ToString() + " Name: " + customer1.Name
+print "Customer count after adding a customer: " + customers.Count.ToString()</asp:TextBox>
         
         <asp:Button ID="_btnRunScript" runat="server" onclick="_btnRunScript_Click" Text="Run Script" />
         <input id="showHelpBtn" type="submit" value="Help" />
@@ -95,16 +112,8 @@ printCurrentTime()</asp:TextBox>
     </div>
 
     <div id="helpDialog" title="Script Editor Help">
-        <p>Script Editor runs <a href="http://ironpython.net/" target="_blank">Iron Python</a> scripts on the web server, allowing developers to test the new Dashboard
-        API directly in a browser.</p>
-
-        <p>Without this scripting ability, developers would have to write one off applications 
-        to query the Dashboard API. The introduction of scripting allows greater flexibility and power
-        for Dashboard developers.</p>
-
-        <p>One of the goals for the new Dashboard API and script editor is to allow developers to write scripts
-        that leverage all the existing business logic built into dashboard, with the convenience of SQL scripts
-        run against the BGAN database.</p>
+        <p>Script Editor runs <a href="http://ironpython.net/" target="_blank">Iron Python</a> scripts on the web server, 
+        allowing developers to test their .NET API's directly in a browser.</p>
 
         <p>To use the Script Editor, developers should know a little bit of Python. The example script provided
         should contain enough of the Python syntax to get started.</p>
