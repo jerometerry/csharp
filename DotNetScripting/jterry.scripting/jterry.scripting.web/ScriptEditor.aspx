@@ -35,7 +35,7 @@
                 matchBrackets: true
             });
 
-            editor.setSize(960, 500)
+            editor.setSize(960, 400)
 
             $("#helpDialog").dialog({
                 autoOpen: false,
@@ -52,14 +52,12 @@
 
     <style type="text/css">
         .scriptEditor  {
-            width: 100%;
-            height: 800px;
             font-size: 8pt;
         }
         
         .scriptResults  {
             width: 100%;
-            height: 50px;
+            height: 150px;
             font-size: 8pt;
             border: 0;
         }
@@ -78,24 +76,26 @@ from System import *
 from System.Collections.Generic import List
 clr.ImportExtensions(System.Linq)
 
-def printCurrentTime():
-    print DateTime.Now.ToString()
-    return
-
 def getRepository(name):
     return factory.GetRepository(name)
 
 def getAllEntities(repo):
     return repo.GetAll()
 
-printCurrentTime()
+print DateTime.Now.ToString()
 repo = getRepository("Customers")
 customers = getAllEntities(repo)
 print "Initial customer count: " + customers.Count.ToString()
 customer1 = repo.CreateEntity()
 customer1.Name = "My Customer"
 print "Id: " + customer1.Id.ToString() + " Name: " + customer1.Name
-print "Customer count after adding a customer: " + customers.Count.ToString()</asp:TextBox>
+print "Customer count after adding a customer: " + customers.Count.ToString()
+existing = repo.Get(1)
+print existing.Name
+deleted = repo.Delete(existing.Id)
+print "Customer Deleted: " + deleted.ToString()
+customers = getAllEntities(repo)
+print "Customer count after delete a customer: " + customers.Count.ToString()</asp:TextBox>
         
         <asp:Button ID="_btnRunScript" runat="server" onclick="_btnRunScript_Click" Text="Run Script" />
         <input id="showHelpBtn" type="submit" value="Help" />
