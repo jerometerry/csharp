@@ -22,7 +22,7 @@ namespace jterry.scripting.web
 
         private void CreateScriptHost()
         {
-            _sdbScriptHost = new ScriptHost();
+            _sdbScriptHost = ScriptHost.Instance;
             IFactory factory = new Factory();
             _sdbScriptHost.RegisterVariable("factory", factory);
         }

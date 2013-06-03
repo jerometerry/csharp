@@ -1,14 +1,7 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" 
-    CodeBehind="ScriptEditor.aspx.cs" 
-    Inherits="jterry.scripting.web.ScriptEditor" 
-    ValidateRequest="false" %>
+﻿<%@ Page Title="Script Editor" Language="C#" AutoEventWireup="true" MasterPageFile="~/Site.master" 
+    CodeBehind="ScriptEditor.aspx.cs" Inherits="jterry.scripting.web.ScriptEditor" ValidateRequest="false" %>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head runat="server">
-    <title></title>
-
+<asp:Content ID="HeaderContent" runat="server" ContentPlaceHolderID="HeadContent">
     <link href="<%=Page.ResolveUrl("~/Content/themes/base/minified/jquery-ui.min.css")%>" rel="stylesheet" type="text/css" />
     <link href="<%=Page.ResolveUrl("~/Scripts/codemirror/lib/codemirror.css")%>" rel="stylesheet" type="text/css" />
 
@@ -24,7 +17,7 @@
     <script type="text/javascript">
 
         $(document).ready(function () {
-            var editor = CodeMirror.fromTextArea(document.getElementById("_script"), {
+            var editor = CodeMirror.fromTextArea(document.getElementById("MainContent__script"), {
                 mode: { name: "python",
                     version: 2,
                     singleLineStringErrors: false
@@ -35,36 +28,31 @@
                 matchBrackets: true
             });
 
-            editor.setSize(960, 400)
-
-            $("#helpDialog").dialog({
-                autoOpen: false,
-                width: 800,
-                height: 500
-            });
-
-            $("#showHelpBtn").click(function () {
-                $("#helpDialog").dialog('open');
-                return false;
-            });
+            editor.setSize(900, 300)
         });
     </script>
 
     <style type="text/css">
         .scriptEditor  {
-            font-size: 8pt;
+            font-size: 10pt;
         }
         
         .scriptResults  {
             width: 100%;
-            height: 150px;
+            height: 100px;
             font-size: 8pt;
             border: 0;
         }
+        
+        legend { 
+          padding-top: 0;
+          padding-bottom; }
+        fieldset, td { 
+          padding-top: 0;
+        }
     </style>
-</head>
-<body>
-    <form id="form1" runat="server">
+</asp:Content>
+<asp:Content ID="BodyContent" runat="server" ContentPlaceHolderID="MainContent">
     <div>
         <fieldset>
         <legend>Script</legend>
@@ -72,7 +60,6 @@
         <asp:TextBox ID="_script" runat="server" TextMode="MultiLine" CssClass="scriptEditor"></asp:TextBox>
         
         <asp:Button ID="_btnRunScript" runat="server" onclick="_btnRunScript_Click" Text="Run Script" />
-        <input id="showHelpBtn" type="submit" value="Help" />
 
         </fieldset>
 
@@ -84,14 +71,4 @@
         
         </fieldset>
     </div>
-
-    <div id="helpDialog" title="Script Editor Help">
-        <p>Script Editor runs <a href="http://ironpython.net/" target="_blank">Iron Python</a> scripts on the web server, 
-        allowing developers to test their .NET API's directly in a browser.</p>
-
-        <p>To use the Script Editor, developers should know a little bit of Python. The example script provided
-        should contain enough of the Python syntax to get started.</p>
-    </div>
-    </form>
-</body>
-</html>
+</asp:Content>

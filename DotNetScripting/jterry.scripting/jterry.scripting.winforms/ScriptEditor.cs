@@ -59,7 +59,7 @@ namespace jterry.scripting.winforms
 
         private void CreateScriptHost()
         {
-            _sdbScriptHost = new ScriptHost();
+            _sdbScriptHost = ScriptHost.Instance;
             _sdbScriptHost.OutputRedirector.StringWritten += new OutputEventHandler(output_StringWritten);
 
             IFactory factory = new Factory();

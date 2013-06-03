@@ -1,4 +1,4 @@
-﻿<%@ Page Title="Home Page" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true"
+﻿<%@ Page Title="Home Page" Language="C#" AutoEventWireup="true" MasterPageFile="~/Site.master" 
     CodeBehind="Default.aspx.cs" Inherits="jterry.scripting.web._Default" %>
 
 <asp:Content ID="HeaderContent" runat="server" ContentPlaceHolderID="HeadContent">
@@ -13,8 +13,5 @@
     <p>
         You can also find <a href="http://go.microsoft.com/fwlink/?LinkID=152368&amp;clcid=0x409"
             title="MSDN ASP.NET Docs">documentation on ASP.NET at MSDN</a>.
-    </p>
-    <p>
-        <a href="<%=ResolveUrl("~/ScriptEditor.aspx")%>" target="_blank">Script Editor</a>
     </p>
 </asp:Content>

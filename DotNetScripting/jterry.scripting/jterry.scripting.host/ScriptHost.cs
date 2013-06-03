@@ -20,7 +20,19 @@ namespace jterry.scripting.host
             }
         }
 
-        public ScriptHost()
+        private static ScriptHost _instance;
+
+        public static ScriptHost Instance
+        {
+            get
+            {
+                if (_instance == null)
+                    _instance = new ScriptHost();
+                return _instance;
+            }
+        }
+
+        private ScriptHost()
         {
             m_engine = Python.CreateEngine();
             m_scope = m_engine.CreateScope();
