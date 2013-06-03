@@ -32,6 +32,7 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._miScriptEditor = new System.Windows.Forms.ToolStripMenuItem();
             this._btnScriptEditor = new System.Windows.Forms.Button();
+            this._readme = new System.Windows.Forms.RichTextBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -41,7 +42,7 @@
             this.fileToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(479, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(624, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -70,16 +71,30 @@
             this._btnScriptEditor.UseVisualStyleBackColor = true;
             this._btnScriptEditor.Click += new System.EventHandler(this._btnScriptEditor_Click);
             // 
+            // _readme
+            // 
+            this._readme.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this._readme.Location = new System.Drawing.Point(12, 81);
+            this._readme.Name = "_readme";
+            this._readme.ReadOnly = true;
+            this._readme.Size = new System.Drawing.Size(600, 349);
+            this._readme.TabIndex = 2;
+            this._readme.Text = "";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(479, 309);
+            this.ClientSize = new System.Drawing.Size(624, 442);
+            this.Controls.Add(this._readme);
             this.Controls.Add(this._btnScriptEditor);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -93,6 +108,7 @@
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem _miScriptEditor;
         private System.Windows.Forms.Button _btnScriptEditor;
+        private System.Windows.Forms.RichTextBox _readme;
     }
 }
 

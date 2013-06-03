@@ -5,5 +5,8 @@
     <Setting Name="DefaultScript" Type="System.String" Scope="User">
       <Value Profile="(Default)">DefaultScript.py</Value>
     </Setting>
+    <Setting Name="Readme" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Readme.rtf</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

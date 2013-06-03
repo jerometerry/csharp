@@ -48,5 +48,17 @@ namespace jterry.scripting.winforms
             string script = System.IO.File.ReadAllText(file);
             return script;
         }
+
+        private string LoadReadme()
+        {
+            string file = Properties.Settings.Default.Readme;
+            string readme = System.IO.File.ReadAllText(file);
+            return readme;
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            this._readme.Rtf = LoadReadme();
+        }
     }
 }
