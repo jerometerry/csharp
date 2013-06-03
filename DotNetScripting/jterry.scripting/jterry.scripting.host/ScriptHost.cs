@@ -8,58 +8,44 @@ namespace jterry.scripting.host
 {
     public class ScriptHost
     {
-        ScriptEngine m_engine;
-        ScriptScope m_scope;
-        OutputRedirector m_outputRedirector;
+        ScriptEngine _engine;
+        ScriptScope _scope;
+        OutputRedirector _outputRedirector;
 
         public OutputRedirector OutputRedirector
         {
             get
             {
-                return m_outputRedirector;
+                return _outputRedirector;
             }
         }
 
-        private static ScriptHost _instance;
-
-        public static ScriptHost Instance
+        public ScriptHost()
         {
-            get
-            {
-                if (_instance == null)
-                    _instance = new ScriptHost();
-                return _instance;
-            }
-        }
-
-        private ScriptHost()
-        {
-            m_engine = Python.CreateEngine();
-            m_scope = m_engine.CreateScope();
-            m_outputRedirector = new OutputRedirector();
-            m_engine.Runtime.IO.RedirectToConsole();
-            Console.SetOut(TextWriter.Synchronized(m_outputRedirector));
+            _engine = Python.CreateEngine();
+            _scope = _engine.CreateScope();
+            _outputRedirector = new OutputRedirector();
+            _engine.Runtime.IO.RedirectToConsole();
+            Console.SetOut(TextWriter.Synchronized(_outputRedirector));
         }
 
         public void RegisterVariable(string name, object value)
         {
-            m_scope.SetVariable(name, value);
+            _scope.SetVariable(name, value);
         }
 
         public dynamic Execute(string expression)
         {
-            var source = m_engine.CreateScriptSourceFromString(expression, SourceCodeKind.Statements);
+            var source = _engine.CreateScriptSourceFromString(expression, SourceCodeKind.Statements);
             var compiled = source.Compile();
-
-            // Executes in the scope of Python
 
             try
             {
-                return compiled.Execute(m_scope);
+                return compiled.Execute(_scope);
             }
             catch (Exception ex)
             {
-                m_outputRedirector.Write(ex.ToString());
+                _outputRedirector.Write(ex.ToString());
                 return null;
             }
         }

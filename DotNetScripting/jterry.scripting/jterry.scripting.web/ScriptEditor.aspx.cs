@@ -22,9 +22,8 @@ namespace jterry.scripting.web
 
         private void CreateScriptHost()
         {
-            _sdbScriptHost = ScriptHost.Instance;
-            IFactory factory = new Factory();
-            _sdbScriptHost.RegisterVariable("factory", factory);
+            var app = HttpContext.Current.ApplicationInstance as Global;
+            _sdbScriptHost = app.ScriptHost;
         }
 
         private void LoadDefaultScript()

@@ -7,14 +7,17 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-using jterry.scripting.api;
 using jterry.scripting.host;
 
-namespace jterry.scripting.winforms
+namespace jterry.scripting.host.editor
 {
     public partial class ScriptEditor : Form
     {
-        ScriptHost _sdbScriptHost;
+        public ScriptHost ScriptHost
+        {
+            get;
+            set;
+        }
 
         public ScriptEditor()
         {
@@ -53,25 +56,13 @@ namespace jterry.scripting.winforms
 
         private void ScriptEditor_Load(object sender, EventArgs e)
         {
-            CreateScriptHost();
-            LoadDefaultScript();
+            InitializeScriptHost();
         }
 
-        private void CreateScriptHost()
+        private void InitializeScriptHost()
         {
-            _sdbScriptHost = ScriptHost.Instance;
-            _sdbScriptHost.OutputRedirector.StringWritten += new OutputEventHandler(output_StringWritten);
-
-            IFactory factory = new Factory();
-            _sdbScriptHost.RegisterVariable("factory", factory);
-            _sdbScriptHost.RegisterVariable("scriptEditor", this);
-        }
-
-        private void LoadDefaultScript()
-        {
-            string file = Properties.Settings.Default.DefaultScript;
-            string script = System.IO.File.ReadAllText(file);
-            this._scriptEditor.Text = script;
+            ScriptHost.OutputRedirector.StringWritten += new OutputEventHandler(output_StringWritten);
+            ScriptHost.RegisterVariable("scriptEditor", this);
         }
 
         private void output_StringWritten(object sender, OutputEventArgs e)
@@ -79,11 +70,15 @@ namespace jterry.scripting.winforms
             _output.AppendText(e.Value);
         }
 
-        private string Script
+        public string Script
         {
             get
             {
                 return this._scriptEditor.Text;
+            }
+            set
+            {
+                this._scriptEditor.Text = value;
             }
         }
 
@@ -91,7 +86,7 @@ namespace jterry.scripting.winforms
         {
             ClearOutput();
             string script = this.Script;
-            var res = _sdbScriptHost.Execute(script);
+            var res = ScriptHost.Execute(script);
         }
 
         private void ClearOutput()
@@ -121,6 +116,11 @@ namespace jterry.scripting.winforms
                 var lines = File.ReadAllLines(file);
                 _scriptEditor.Lines = lines;
             }
+        }
+
+        private void ScriptEditor_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            ScriptHost.OutputRedirector.StringWritten -= new OutputEventHandler(output_StringWritten);
         }
     }
 }
