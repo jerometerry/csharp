@@ -446,6 +446,11 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Include="ScriptEditor.aspx.cs">
       <DependentUpon>ScriptEditor.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -480,6 +485,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
     <None Include="Scripts\codemirror\.gitattributes" />
     <None Include="Scripts\codemirror\.gitignore" />
     <None Include="Scripts\codemirror\.travis.yml" />
@@ -499,6 +508,7 @@
     <None Include="Scripts\codemirror\mode\xquery\LICENSE" />
     <None Include="Scripts\codemirror\package.json" />
     <None Include="Scripts\codemirror\README.md" />
+    <None Include="Scripts\DefaultScript.py" />
     <None Include="Scripts\jquery-2.0.1.min.map" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

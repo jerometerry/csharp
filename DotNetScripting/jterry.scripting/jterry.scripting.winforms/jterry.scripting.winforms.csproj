@@ -75,6 +75,10 @@
     <EmbeddedResource Include="ScriptEditor.resx">
       <DependentUpon>ScriptEditor.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="app.config" />
+    <None Include="DefaultScript.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

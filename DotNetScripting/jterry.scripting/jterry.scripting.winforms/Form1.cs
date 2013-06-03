@@ -18,6 +18,16 @@ namespace jterry.scripting.winforms
 
         private void _miScriptEditor_Click(object sender, EventArgs e)
         {
+            ShowScriptEditor();
+        }
+
+        private void _btnScriptEditor_Click(object sender, EventArgs e)
+        {
+            ShowScriptEditor();
+        }
+
+        private void ShowScriptEditor()
+        {
             var dlg = new ScriptEditor();
             dlg.Show();
         }

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace jterry.scripting.winforms.Properties {
+namespace jterry.scripting.web.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -23,15 +23,12 @@ namespace jterry.scripting.winforms.Properties {
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("DefaultScript.py")]
+        [global::System.Configuration.DefaultSettingValueAttribute("~/Scripts/DefaultScript.py")]
         public string DefaultScript {
             get {
                 return ((string)(this["DefaultScript"]));
-            }
-            set {
-                this["DefaultScript"] = value;
             }
         }
     }

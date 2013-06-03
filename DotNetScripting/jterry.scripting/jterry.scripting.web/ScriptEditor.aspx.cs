@@ -6,6 +6,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using jterry.scripting.host;
 using jterry.scripting.api;
+using System.IO;
 
 namespace jterry.scripting.web
 {
@@ -15,12 +16,31 @@ namespace jterry.scripting.web
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            CreateScriptHost();
+            LoadDefaultScript();
+        }
+
+        private void CreateScriptHost()
+        {
             _sdbScriptHost = new ScriptHost();
             IFactory factory = new Factory();
             _sdbScriptHost.RegisterVariable("factory", factory);
         }
 
+        private void LoadDefaultScript()
+        {
+            string file = Properties.Settings.Default.DefaultScript;
+            string fullPath = Server.MapPath(file);
+            string script = File.ReadAllText(fullPath);
+            _script.Text = script;
+        }
+
         protected void _btnRunScript_Click(object sender, EventArgs e)
+        {
+            RunScript();
+        }
+
+        private void RunScript()
         {
             _output.Text = null;
 

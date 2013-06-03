@@ -58,8 +58,7 @@
             this._scriptEditor.Name = "_scriptEditor";
             this._scriptEditor.Size = new System.Drawing.Size(760, 239);
             this._scriptEditor.TabIndex = 3;
-            this._scriptEditor.Text = "import clr\nclr.AddReference(\"System.Core\")\nimport System\nclr.ImportExtensions(Sys" +
-    "tem.Linq)\n\nprint factory.ToString()";
+            this._scriptEditor.Text = "";
             // 
             // _miSaveScript
             // 
@@ -192,7 +191,7 @@
             this.Controls.Add(this._btnRunScript);
             this.Controls.Add(this.menuStrip1);
             this.Name = "ScriptEditor";
-            this.Text = "ScriptEditor";
+            this.Text = "Script Editor";
             this.Load += new System.EventHandler(this.ScriptEditor_Load);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);

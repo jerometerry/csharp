@@ -53,11 +53,25 @@ namespace jterry.scripting.winforms
 
         private void ScriptEditor_Load(object sender, EventArgs e)
         {
+            CreateScriptHost();
+            LoadDefaultScript();
+        }
+
+        private void CreateScriptHost()
+        {
             _sdbScriptHost = new ScriptHost();
             _sdbScriptHost.OutputRedirector.StringWritten += new OutputEventHandler(output_StringWritten);
 
             IFactory factory = new Factory();
             _sdbScriptHost.RegisterVariable("factory", factory);
+            _sdbScriptHost.RegisterVariable("scriptEditor", this);
+        }
+
+        private void LoadDefaultScript()
+        {
+            string file = Properties.Settings.Default.DefaultScript;
+            string script = System.IO.File.ReadAllText(file);
+            this._scriptEditor.Text = script;
         }
 
         private void output_StringWritten(object sender, OutputEventArgs e)
@@ -75,6 +89,7 @@ namespace jterry.scripting.winforms
 
         private void RunScript()
         {
+            ClearOutput();
             string script = this.Script;
             var res = _sdbScriptHost.Execute(script);
         }
