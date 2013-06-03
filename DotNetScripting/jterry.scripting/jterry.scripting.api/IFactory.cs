@@ -1,5 +1,4 @@
-﻿using System;
-namespace jterry.scripting.api
+﻿namespace jterry.scripting.api
 {
     public interface IFactory
     {

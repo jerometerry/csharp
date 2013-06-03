@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 using jterry.scripting.host;
 using jterry.scripting.host.editor;
-using jterry.scripting.api;
 
 namespace jterry.scripting.api.script.app
 {

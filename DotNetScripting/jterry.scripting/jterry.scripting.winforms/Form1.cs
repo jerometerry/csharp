@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
+using jterry.scripting.api;
 using jterry.scripting.host;
 using jterry.scripting.host.editor;
-using jterry.scripting.api;
 
 namespace jterry.scripting.winforms
 {
