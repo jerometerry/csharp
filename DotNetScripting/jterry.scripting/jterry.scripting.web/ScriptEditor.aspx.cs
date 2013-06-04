@@ -41,11 +41,12 @@ namespace jterry.scripting.web
         private void RunScript()
         {
             _output.Text = null;
+            _scriptHost.Output.Clear();
 
             try
             {
                 _scriptHost.Execute(_script.Text);
-                _output.Text = _scriptHost.OutputRedirector.Text;
+                _output.Text = _scriptHost.Output.Text;
             }
             catch (Exception ex)
             {

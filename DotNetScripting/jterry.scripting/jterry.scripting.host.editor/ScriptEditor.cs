@@ -54,7 +54,7 @@ namespace jterry.scripting.host.editor
 
         private void InitializeScriptHost()
         {
-            ScriptHost.OutputRedirector.StringWritten += new OutputEventHandler(output_StringWritten);
+            ScriptHost.Output.StringWritten += new OutputEventHandler(output_StringWritten);
             ScriptHost.RegisterVariable("scriptEditor", this);
         }
 
@@ -85,6 +85,7 @@ namespace jterry.scripting.host.editor
         private void ClearOutput()
         {
             _output.Clear();
+            ScriptHost.Output.Clear();
         }
 
         private void ClearScript()
@@ -113,7 +114,7 @@ namespace jterry.scripting.host.editor
 
         private void ScriptEditor_FormClosing(object sender, FormClosingEventArgs e)
         {
-            ScriptHost.OutputRedirector.StringWritten -= new OutputEventHandler(output_StringWritten);
+            ScriptHost.Output.StringWritten -= new OutputEventHandler(output_StringWritten);
         }
     }
 }

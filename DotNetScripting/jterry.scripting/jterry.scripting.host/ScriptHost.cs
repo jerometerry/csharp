@@ -12,7 +12,7 @@ namespace jterry.scripting.host
         ScriptScope _scope;
         OutputRedirector _outputRedirector;
 
-        public OutputRedirector OutputRedirector
+        public OutputRedirector Output
         {
             get
             {

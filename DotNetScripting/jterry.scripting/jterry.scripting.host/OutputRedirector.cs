@@ -17,6 +17,11 @@ namespace jterry.scripting.host
                 return _output.ToString();
             }
         }
+
+        public void Clear()
+        {
+            _output.Clear();
+        }
         #endregion
 
         #region CTOR
