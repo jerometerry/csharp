@@ -7,7 +7,7 @@ namespace jterry.scripting.web
 {
     public partial class ScriptEditor : System.Web.UI.Page
     {
-        ScriptHost _sdbScriptHost;
+        ScriptHost _scriptHost;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -22,7 +22,7 @@ namespace jterry.scripting.web
         private void CreateScriptHost()
         {
             var app = HttpContext.Current.ApplicationInstance as Global;
-            _sdbScriptHost = app.ScriptHost;
+            _scriptHost = app.ScriptHost;
         }
 
         private void LoadDefaultScript()
@@ -44,8 +44,8 @@ namespace jterry.scripting.web
 
             try
             {
-                _sdbScriptHost.Execute(_script.Text);
-                _output.Text = _sdbScriptHost.OutputRedirector.Text;
+                _scriptHost.Execute(_script.Text);
+                _output.Text = _scriptHost.OutputRedirector.Text;
             }
             catch (Exception ex)
             {
