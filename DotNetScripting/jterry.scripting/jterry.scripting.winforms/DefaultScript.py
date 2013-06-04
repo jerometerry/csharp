@@ -1,9 +1,11 @@
 import clr
+import System
+
 clr.AddReference("System.Core")
 clr.AddReference("System.Windows.Forms")
-import System
-from System import DateTime
 clr.ImportExtensions(System.Linq)
+
+from System import DateTime
 from System.Windows.Forms import Application, Form, Button
 
 print "Old Title " + scriptEditor.Text
