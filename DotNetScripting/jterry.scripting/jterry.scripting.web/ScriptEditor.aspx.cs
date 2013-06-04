@@ -12,7 +12,11 @@ namespace jterry.scripting.web
         protected void Page_Load(object sender, EventArgs e)
         {
             CreateScriptHost();
-            LoadDefaultScript();
+
+            if (this.IsPostBack == false)
+            {
+                LoadDefaultScript();
+            }
         }
 
         private void CreateScriptHost()
