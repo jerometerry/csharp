@@ -7,8 +7,9 @@ namespace jterry.scripting.api
     public class Repository : IRepository
     {
         int nextId = 1;
-        public string EntityType { get; private set; }
         List<IEntity> entities = new List<IEntity>();
+
+        public string EntityType { get; private set; }
 
         public Repository(string entityType)
         {

@@ -1,4 +1,6 @@
-﻿namespace jterry.scripting.api
+﻿using System.Collections.Generic;
+
+namespace jterry.scripting.api
 {
     public interface IRepository
     {
@@ -6,7 +8,7 @@
         bool Delete(int id);
         string EntityType { get; }
         IEntity Get(int id);
-        System.Collections.Generic.IEnumerable<IEntity> Get(string name);
-        System.Collections.Generic.IEnumerable<IEntity> GetAll();
+        IEnumerable<IEntity> Get(string name);
+        IEnumerable<IEntity> GetAll();
     }
 }

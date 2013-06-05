@@ -5,9 +5,7 @@ namespace jterry.scripting.host
 {
     public class OutputRedirector : TextWriter
     {
-        #region Event
         public event OutputEventHandler StringWritten;
-
         private StringBuilder _output = new StringBuilder();
 
         public string Text
@@ -22,9 +20,7 @@ namespace jterry.scripting.host
         {
             _output.Clear();
         }
-        #endregion
 
-        #region CTOR
         public override Encoding Encoding
         {
             get
@@ -38,16 +34,12 @@ namespace jterry.scripting.host
             base.Write(value);
             OnTextWritten(value);
         }
-        #endregion
 
-        #region Private Methods
         private void OnTextWritten(string txtWritten)
         {
             if (StringWritten != null)
                 StringWritten(this, new OutputEventArgs(txtWritten));
             _output.Append(txtWritten);
         }
-        #endregion
-
     }
 }

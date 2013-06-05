@@ -12,14 +12,6 @@ namespace jterry.scripting.host
         ScriptScope _scope;
         OutputRedirector _outputRedirector;
 
-        public OutputRedirector Output
-        {
-            get
-            {
-                return _outputRedirector;
-            }
-        }
-
         public ScriptHost()
         {
             _engine = Python.CreateEngine();
@@ -34,13 +26,20 @@ namespace jterry.scripting.host
             _scope.SetVariable(name, value);
         }
 
+        public OutputRedirector Output
+        {
+            get
+            {
+                return _outputRedirector;
+            }
+        }
+
         public dynamic Execute(string expression)
         {
-            var source = _engine.CreateScriptSourceFromString(expression, SourceCodeKind.Statements);
-            var compiled = source.Compile();
-
             try
             {
+                var source = _engine.CreateScriptSourceFromString(expression, SourceCodeKind.Statements);
+                var compiled = source.Compile();
                 return compiled.Execute(_scope);
             }
             catch (Exception ex)
