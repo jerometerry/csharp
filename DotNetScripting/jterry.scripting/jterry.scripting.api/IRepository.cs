@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace jterry.scripting.api
 {
@@ -8,7 +9,10 @@ namespace jterry.scripting.api
         bool Delete(int id);
         string EntityType { get; }
         IEntity Get(int id);
+     
         IEnumerable<IEntity> Get(string name);
         IEnumerable<IEntity> GetAll();
+
+        IEnumerable<IEntity> Get(Func<IEntity, bool> predicate);
     }
 }

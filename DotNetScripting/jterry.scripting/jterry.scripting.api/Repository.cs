@@ -46,5 +46,10 @@ namespace jterry.scripting.api
             var entity = Get(id);
             return entities.Remove(entity);
         }
+
+        public IEnumerable<IEntity> Get(Func<IEntity, bool> predicate)
+        {
+            return GetAll().Where(predicate);
+        }
     }
 }
