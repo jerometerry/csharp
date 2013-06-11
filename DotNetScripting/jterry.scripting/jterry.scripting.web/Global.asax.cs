@@ -15,8 +15,8 @@ namespace jterry.scripting.web
                 if (_scriptHost == null)
                 {
                     _scriptHost = new ScriptHost();
-                    IFactory factory = new Factory();
-                    _scriptHost.RegisterVariable("factory", factory);
+                    IUnitOfWork uow = new ChinookContext();
+                    _scriptHost.RegisterVariable("unitOfWork", uow);
                 }
                 return _scriptHost; 
             }

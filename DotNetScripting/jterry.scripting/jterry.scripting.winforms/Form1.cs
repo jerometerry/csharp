@@ -31,8 +31,8 @@ namespace jterry.scripting.winforms
             var dlg = new ScriptEditor();
             dlg.Script = LoadDefaultScript();
             dlg.ScriptHost = _scriptHost;
-            IFactory factory = new Factory();
-            dlg.ScriptHost.RegisterVariable("factory", factory);
+            IUnitOfWork uow = new ChinookContext();
+            dlg.ScriptHost.RegisterVariable("unitOfWork", uow);
             dlg.Show();
         }
 

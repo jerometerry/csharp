@@ -21,8 +21,8 @@ namespace jterry.scripting.api.script.app
         {
             var host = CreateScriptHost();
             var dlg = CreateScriptEditor();
-            var factory = CreateFactory();
-            RegisterScriptVariable("factory", factory);
+            var uow = CreateUnitOfWork();
+            RegisterScriptVariable("unitOfWork", uow);
             return dlg;
         }
 
@@ -40,10 +40,10 @@ namespace jterry.scripting.api.script.app
             return dlg;
         }
 
-        private static IFactory CreateFactory()
+        private static IUnitOfWork CreateUnitOfWork()
         {
-            IFactory factory = new Factory();
-            return factory;
+            IUnitOfWork uow = new ChinookContext();
+            return uow;
         }
 
         private static void RegisterScriptVariable(string name, object value)
