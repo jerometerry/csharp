@@ -12,5 +12,9 @@ namespace jterry.scripting.api
     {
         IQueryable<Customer> GetCustomers();
         IQueryable<Employee> GetEmployees();
+        IQueryable<Invoice> GetInvoices();
+        IQueryable<InvoiceLine> GetInvoiceLines();
+        IQueryable<Track> GetTracks();
+        IQueryable<Playlist> GetPlaylists();
     }
 }
