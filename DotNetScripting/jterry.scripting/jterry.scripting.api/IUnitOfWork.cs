@@ -11,5 +11,6 @@ namespace jterry.scripting.api
     public interface IUnitOfWork
     {
         IQueryable<Customer> GetCustomers();
+        IQueryable<Employee> GetEmployees();
     }
 }
