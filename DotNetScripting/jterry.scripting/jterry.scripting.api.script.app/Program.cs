@@ -20,9 +20,9 @@ namespace jterry.scripting.api.script.app
         private static Form Initialize()
         {
             var host = CreateScriptHost();
-            var dlg = CreateScriptEditor();
+            var dlg = CreateScriptEditor(host);
             var uow = CreateUnitOfWork();
-            RegisterScriptVariable("unitOfWork", uow);
+            RegisterScriptVariable(host, "unitOfWork", uow);
             return dlg;
         }
 
@@ -32,11 +32,10 @@ namespace jterry.scripting.api.script.app
             return _scriptHost;
         }
 
-        private static ScriptEditor CreateScriptEditor()
+        private static TabbedScriptEditor CreateScriptEditor(ScriptHost host)
         {
-            var dlg = new ScriptEditor();
-            dlg.Script = LoadDefaultScript();
-            dlg.ScriptHost = _scriptHost;
+            var dlg = new TabbedScriptEditor(host);
+            dlg.AddScript(Properties.Settings.Default.DefaultScript);
             return dlg;
         }
 
@@ -46,16 +45,9 @@ namespace jterry.scripting.api.script.app
             return uow;
         }
 
-        private static void RegisterScriptVariable(string name, object value)
+        private static void RegisterScriptVariable(ScriptHost host, string name, object value)
         {
-            _scriptHost.RegisterVariable(name, value);
-        }
-
-        private static string LoadDefaultScript()
-        {
-            string file = Properties.Settings.Default.DefaultScript;
-            string script = System.IO.File.ReadAllText(file);
-            return script;
+            host.RegisterVariable(name, value);
         }
     }
 }

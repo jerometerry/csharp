@@ -14,6 +14,8 @@ namespace jterry.scripting.winforms
         {
             InitializeComponent();
             _scriptHost = new ScriptHost();
+            IUnitOfWork uow = new ChinookContext();
+            _scriptHost.RegisterVariable("unitOfWork", uow);
         }
 
         private void _miScriptEditor_Click(object sender, EventArgs e)
@@ -28,19 +30,9 @@ namespace jterry.scripting.winforms
 
         private void ShowScriptEditor()
         {
-            var dlg = new ScriptEditor();
-            dlg.Script = LoadDefaultScript();
-            dlg.ScriptHost = _scriptHost;
-            IUnitOfWork uow = new ChinookContext();
-            dlg.ScriptHost.RegisterVariable("unitOfWork", uow);
+            var dlg = new TabbedScriptEditor(_scriptHost);
+            dlg.AddScript(Properties.Settings.Default.DefaultScript);
             dlg.Show();
-        }
-
-        private string LoadDefaultScript()
-        {
-            string file = Properties.Settings.Default.DefaultScript;
-            string script = System.IO.File.ReadAllText(file);
-            return script;
         }
 
         private string LoadReadme()

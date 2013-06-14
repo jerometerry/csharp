@@ -40,13 +40,12 @@ namespace jterry.scripting.web
 
         private void RunScript()
         {
-            _output.Text = null;
-            _scriptHost.Output.Clear();
-
             try
             {
+                _output.Text = null;
+                _scriptHost.ClearOutput();
                 _scriptHost.Execute(_script.Text);
-                _output.Text = _scriptHost.Output.Text;
+                _output.Text = _scriptHost.GetOutput();
             }
             catch (Exception ex)
             {

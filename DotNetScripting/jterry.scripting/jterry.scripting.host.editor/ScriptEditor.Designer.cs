@@ -192,7 +192,6 @@
             this.Controls.Add(this.menuStrip1);
             this.Name = "ScriptEditor";
             this.Text = "Script Editor";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ScriptEditor_FormClosing);
             this.Load += new System.EventHandler(this.ScriptEditor_Load);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);

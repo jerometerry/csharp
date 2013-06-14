@@ -52,9 +52,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="OutputEventArgs.cs" />
-    <Compile Include="OutputEventHandler.cs" />
-    <Compile Include="OutputRedirector.cs" />
     <Compile Include="ScriptHost.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

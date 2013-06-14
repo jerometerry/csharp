@@ -6,14 +6,21 @@ namespace jterry.scripting.host.editor
 {
     public partial class ScriptEditor : Form
     {
-        public ScriptHost ScriptHost
+        private ScriptHost _host;
+
+        public ScriptHost Host
         {
-            get;
-            set;
+            get { return _host; }
         }
 
         public ScriptEditor()
+            : this(new ScriptHost())
         {
+        }
+
+        public ScriptEditor(ScriptHost host)
+        {
+            _host = host;
             InitializeComponent();
         }
 
@@ -49,18 +56,7 @@ namespace jterry.scripting.host.editor
 
         private void ScriptEditor_Load(object sender, EventArgs e)
         {
-            InitializeScriptHost();
-        }
-
-        private void InitializeScriptHost()
-        {
-            ScriptHost.Output.StringWritten += new OutputEventHandler(output_StringWritten);
-            ScriptHost.RegisterVariable("scriptEditor", this);
-        }
-
-        private void output_StringWritten(object sender, OutputEventArgs e)
-        {
-            _output.AppendText(e.Value);
+            _host.RegisterVariable("scriptEditor", this);
         }
 
         public string Script
@@ -79,13 +75,14 @@ namespace jterry.scripting.host.editor
         {
             ClearOutput();
             string script = this.Script;
-            var res = ScriptHost.Execute(script);
+            var res = _host.Execute(script);
+            _output.Text = _host.GetOutput();
         }
 
         private void ClearOutput()
         {
             _output.Clear();
-            ScriptHost.Output.Clear();
+            _host.ClearOutput();
         }
 
         private void ClearScript()
@@ -110,11 +107,6 @@ namespace jterry.scripting.host.editor
                 var lines = File.ReadAllLines(file);
                 _scriptEditor.Lines = lines;
             }
-        }
-
-        private void ScriptEditor_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            ScriptHost.Output.StringWritten -= new OutputEventHandler(output_StringWritten);
         }
     }
 }
