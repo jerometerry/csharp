@@ -52,6 +52,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="OutputEventArgs.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="OutputEventHandler.cs" />
+    <Compile Include="OutputRedirector.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ScriptHost.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

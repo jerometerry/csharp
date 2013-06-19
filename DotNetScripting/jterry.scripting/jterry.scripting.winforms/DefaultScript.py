@@ -1,10 +1,13 @@
+#< imports
 import clr
 import System
 clr.AddReference("System.Core")
 clr.AddReference("System.Windows.Forms")
 clr.ImportExtensions(System.Linq)
 from System import String
+#> end imports
 
+#< methods
 def TestIronPython():
     CountEntities()
     TestCustomers()
@@ -85,5 +88,6 @@ def SearchTracks(composer):
     for t in tracks:
         WriteLine(String.Format("Track Id: {0} Name: {1}", t.Id, t.Name))
     WriteLine("Search complete")
+#> end methods
 
 TestIronPython()

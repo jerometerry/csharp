@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Drawing;
+using FastColoredTextBoxNS;
 
 namespace jterry.scripting.host.editor
 {
@@ -12,7 +13,7 @@ namespace jterry.scripting.host.editor
     {
         private ScriptHost _host;
 
-        public RichTextBox ScriptEditor { get; set; }
+        public FastColoredTextBox ScriptEditor { get; set; }
         public RichTextBox OutputControl { get; set; }
         public SplitContainer Splitter { get; set; }
         public TabPage TabPage { get; set; }
@@ -45,7 +46,7 @@ namespace jterry.scripting.host.editor
             tabPage.TabIndex = 0;
             tabPage.UseVisualStyleBackColor = true;
 
-            var scriptEditor = new RichTextBox();
+            var scriptEditor = new FastColoredTextBox();
             scriptEditor.Dock = DockStyle.Fill;
             scriptEditor.Font = new Font("Courier New", 12.0F, 
                 FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
@@ -56,6 +57,7 @@ namespace jterry.scripting.host.editor
             scriptEditor.Text = "";
             scriptEditor.KeyPress += new KeyPressEventHandler(this._scriptEditor_KeyPress);
             scriptEditor.KeyUp += new KeyEventHandler(this._scriptEditor_KeyUp);
+            scriptEditor.TextChanged += new EventHandler<TextChangedEventArgs>(scriptEditor_TextChanged);
 
             var output = new RichTextBox();
             output.Dock = DockStyle.Fill;
@@ -73,6 +75,14 @@ namespace jterry.scripting.host.editor
             this.TabControl = tabControl;
             this.ScriptEditor = scriptEditor;
             this.OutputControl = output;
+        }
+
+        void scriptEditor_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            //clear folding markers
+            e.ChangedRange.ClearFoldingMarkers();
+            //set markers for folding
+            e.ChangedRange.SetFoldingMarkers("#<", "#>");
         }
 
         private void _scriptEditor_KeyPress(object sender, KeyPressEventArgs e)
