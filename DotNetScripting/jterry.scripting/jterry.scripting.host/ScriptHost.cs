@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
+using System.Reflection;
 using System.Text;
 using IronPython.Hosting;
-using Microsoft.Scripting.Hosting;
 using Microsoft.Scripting;
-using System.IO;
+using Microsoft.Scripting.Hosting;
 
 namespace jterry.scripting.host
 {
@@ -22,6 +21,11 @@ namespace jterry.scripting.host
             m_scope = m_engine.CreateScope();
 
             CreateOutputBuffer();
+        }
+
+        public void LoadAssembly(Assembly assembly)
+        {
+            m_engine.Runtime.LoadAssembly(assembly);
         }
 
         public string GetOutput()

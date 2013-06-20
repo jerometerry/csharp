@@ -14,6 +14,8 @@ namespace jterry.scripting.winforms
         {
             InitializeComponent();
             _scriptHost = new ScriptHost();
+            _scriptHost.LoadAssembly(typeof(jterry.scripting.api.IUnitOfWork).Assembly);
+            _scriptHost.LoadAssembly(typeof(System.Windows.Forms.Form).Assembly);
             IUnitOfWork uow = new ChinookContext();
             _scriptHost.RegisterVariable("unitOfWork", uow);
         }
