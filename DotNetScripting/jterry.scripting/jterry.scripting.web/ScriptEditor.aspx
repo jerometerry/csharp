@@ -46,7 +46,7 @@
         
         legend { 
           padding-top: 0;
-          padding-bottom; }
+          padding-bottom: 0; }
         fieldset, td { 
           padding-top: 0;
         }
