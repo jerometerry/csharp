@@ -97,6 +97,19 @@ namespace jterry.scripting.host.editor
             }
         }
 
+        private void _miSaveScriptAs_Click(object sender, EventArgs e)
+        {
+            var script = this.SelectedScript;
+            string path = script.Path;
+            _saveScriptDlg.FileName = Path.GetFileName(path);
+
+            if (_saveScriptDlg.ShowDialog() == DialogResult.OK)
+            {
+                string file = _saveScriptDlg.FileName;
+                script.SaveScript(file);
+            }
+        }
+
         private void _miLoadScript_Click(object sender, EventArgs e)
         {
             if (_openScriptDlg.ShowDialog() == DialogResult.OK)

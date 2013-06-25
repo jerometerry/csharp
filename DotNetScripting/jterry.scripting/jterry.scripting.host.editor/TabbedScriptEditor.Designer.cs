@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TabbedScriptEditor));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -52,6 +53,8 @@
             this._tsbCloseScript = new System.Windows.Forms.ToolStripButton();
             this._btnClearScript = new System.Windows.Forms.ToolStripButton();
             this._tsbClearOutput = new System.Windows.Forms.ToolStripButton();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this._miSaveScriptAs = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -75,6 +78,7 @@
             this._miNewScript,
             this._miLoadScript,
             this._miSaveScript,
+            this._miSaveScriptAs,
             this._miCloseScript,
             this.toolStripSeparator1,
             this._miRunScript,
@@ -162,6 +166,7 @@
             this._scriptsTabControl.Location = new System.Drawing.Point(0, 0);
             this._scriptsTabControl.Name = "_scriptsTabControl";
             this._scriptsTabControl.SelectedIndex = 0;
+            this._scriptsTabControl.ShowToolTips = true;
             this._scriptsTabControl.Size = new System.Drawing.Size(1008, 681);
             this._scriptsTabControl.TabIndex = 6;
             // 
@@ -273,6 +278,13 @@
             this._tsbClearOutput.Text = "Clear Output";
             this._tsbClearOutput.Click += new System.EventHandler(this._miClearOutput_Click);
             // 
+            // _miSaveScriptAs
+            // 
+            this._miSaveScriptAs.Name = "_miSaveScriptAs";
+            this._miSaveScriptAs.Size = new System.Drawing.Size(185, 22);
+            this._miSaveScriptAs.Text = "Save Script As";
+            this._miSaveScriptAs.Click += new System.EventHandler(this._miSaveScriptAs_Click);
+            // 
             // TabbedScriptEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -323,6 +335,8 @@
         private System.Windows.Forms.ToolStripButton _tsbCloseScript;
         private System.Windows.Forms.ToolStripButton _tsbClearOutput;
         private System.Windows.Forms.ToolStripButton _btnClearScript;
+        private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.ToolStripMenuItem _miSaveScriptAs;
     }
 }
 

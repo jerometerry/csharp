@@ -190,6 +190,7 @@ namespace jterry.scripting.host.editor
             this.ClearOutput();
             this.SavedText = null;
             this.TabPage.Text = this.ScriptName;
+            this.ClearToolTip();
         }
 
         public void LoadScript(string file)
@@ -199,6 +200,7 @@ namespace jterry.scripting.host.editor
             this.Text = text;
             this.TabPage.Text = System.IO.Path.GetFileName(file);
             this.SavedText = text;
+            this.SetToolTip();
         }
 
         public void SaveScript(string file)
@@ -207,6 +209,17 @@ namespace jterry.scripting.host.editor
             this.Path = file;
             this.SavedText = this.Text;
             this.TabPage.Text = System.IO.Path.GetFileName(file);
+            this.SetToolTip();
+        }
+
+        private void SetToolTip()
+        {
+            this.TabPage.ToolTipText = System.IO.Path.GetFullPath(this.Path);
+        }
+
+        private void ClearToolTip()
+        {
+            this.TabPage.ToolTipText = string.Empty;
         }
     }
 }
