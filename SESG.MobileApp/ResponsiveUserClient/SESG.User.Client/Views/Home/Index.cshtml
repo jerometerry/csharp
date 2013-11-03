@@ -1,0 +1,27 @@
+﻿@section scripts {
+<script type="text/javascript" src="~/Scripts/sesg.users.client.js">
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //
+        $("#fetchUsersBtn").click(function () {
+            var offset = $("#offset").val();
+            var limit = $("#limit").val();
+            sesg_user_client.getUsers(offset, limit, getUsersCallback);
+        });
+    });
+
+    function getUsersCallback(data) {
+        alert("got data");
+    }
+</script>
+}
+
+<div id="body">
+    <div style="padding: 10px;">
+        <label for="offset">Offset</label><input type="text" value="0" id="offset" />
+        <label for="limit">Limit</label><input type="text" value="10" id="limit" />
+        <input type="submit" value="Fetch Users" id="fetchUsersBtn" />
+    </div>
+</div>
