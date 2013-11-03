@@ -4,16 +4,34 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-        //
+        
         $("#fetchUsersBtn").click(function () {
             var offset = $("#offset").val();
             var limit = $("#limit").val();
-            sesg_user_client.getUsers(offset, limit, getUsersCallback);
+            sesg_user_client.getUsers(offset, limit, gotUsers);
         });
     });
 
-    function getUsersCallback(data) {
-        alert("got data");
+    function gotUsers(data) {
+        $resultsBody = $("#users > tbody");
+        $resultsBody.html("");
+
+        $.each(data, function (index, value) {
+            var id = this.UserID;
+            var userName = this.UserName;
+            var company = this.Company;
+            
+            $row = $("<tr/>");
+            $id = $("<td/>").text(id);
+            $userName = $("<td/>").text(userName);
+            $company = $("<td/>").text(company);
+            $row.append($id).append($userName).append($company);
+            $resultsBody.append($row);
+        })
+    }
+
+    function getUsersError(xhr, status, error) {
+        alert(error);
     }
 </script>
 }
@@ -23,5 +41,16 @@
         <label for="offset">Offset</label><input type="text" value="0" id="offset" />
         <label for="limit">Limit</label><input type="text" value="10" id="limit" />
         <input type="submit" value="Fetch Users" id="fetchUsersBtn" />
+    </div>
+    <div id="results" style="padding: 10px;">
+        <table id="users">
+            <thead>
+                <tr>
+                    <th>Id</th><th>User Name</th><th>Company</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
     </div>
 </div>

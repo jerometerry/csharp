@@ -23,7 +23,7 @@
             alert(buildGreeting());
         },
 
-        getUsers: function(offset, limit, callback) {
+        getUsers: function(offset, limit, callback, errorCallback) {
             var url = getUsersUrl();
             var data = { offset:offset, limit:limit };
             $.ajax({
@@ -31,10 +31,14 @@
                 data: data,
                 dataType: 'json',
                 success: function (data) {
-                    callback(data);
+                    if (typeof(callback) == "function") {
+                        callback(data);
+                    }
                 },
                 error: function (xhr, status, error) {
-                    alert('Code: ' + xhr.status + ' Status: ' + status + ' details: ' + error);
+                    if (typeof (errorCallback) == "function") {
+                        errorCallback(xhr, status, error);
+                    }
                 }
             });
         }
