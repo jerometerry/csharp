@@ -4,7 +4,7 @@
     var settings = {
         name: 'Fred',
         greeting: 'Hello',
-        apiUrl: 'http://localhost/SESG.UserWebService'
+        apiUrl: 'http://jerome7/SESG.UserWebService'
     };
 
     // a private function, used only within the IIFE
@@ -32,6 +32,9 @@
                 dataType: 'json',
                 success: function (data) {
                     callback(data);
+                },
+                error: function (xhr, status, error) {
+                    alert('Code: ' + xhr.status + ' Status: ' + status + ' details: ' + error);
                 }
             });
         }
