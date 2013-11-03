@@ -7,11 +7,20 @@
     this.failureCallback = failureCallback;
 
     this.next = function () {
-        this.client.getUsers(this, this.index, this.pageSize, this.gotData, this.getUsersError);
+        this.index += this.pageSize;
+        this.fetch();
     };
 
+    this.previous = function () {
+        this.index -= this.pageSize;
+        this.fetch();
+    };
+
+    this.fetch = function () {
+        this.client.getUsers(this, this.index, this.pageSize, this.gotData, this.getUsersError);
+    }
+
     this.gotData = function (sender, data) {
-        sender.index += data.length;
         if (typeof (sender.successCallback) == 'function') {
             sender.successCallback(data);
         }

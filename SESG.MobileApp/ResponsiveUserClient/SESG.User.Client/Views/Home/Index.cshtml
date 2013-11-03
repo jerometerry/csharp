@@ -11,11 +11,14 @@
     $(document).ready(function () {
         pager = new SesgUserPager(sesg_user_client, gotUsers, getUsersError);
         
-        $("#fetchUsersBtn").click(function () {
+        $("#fetchNextUsersBtn").click(function () {
             pager.next();
         });
+        $("#fetchPreviousUsersBtn").click(function () {
+            pager.previous();
+        });
         
-        pager.next();
+        pager.fetch();
     });
 
     function gotUsers(data) {
@@ -44,7 +47,7 @@
 
 <div id="body">
     <div style="padding: 10px;">
-        <input type="submit" value="Fetch Users" id="fetchUsersBtn" />
+        <input type="submit" value="Previous" id="fetchPreviousUsersBtn" /><input type="submit" value="Next" id="fetchNextUsersBtn" />
     </div>
     <div id="results" style="padding: 10px;">
         <table id="users">
