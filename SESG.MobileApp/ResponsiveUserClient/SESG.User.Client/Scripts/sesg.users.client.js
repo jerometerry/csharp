@@ -23,7 +23,7 @@
             alert(buildGreeting());
         },
 
-        getUsers: function(offset, limit, callback, errorCallback) {
+        getUsers: function(sender, offset, limit, callback, errorCallback) {
             var url = getUsersUrl();
             var data = { offset:offset, limit:limit };
             $.ajax({
@@ -32,7 +32,7 @@
                 dataType: 'json',
                 success: function (data) {
                     if (typeof(callback) == "function") {
-                        callback(data);
+                        callback(sender, data);
                     }
                 },
                 error: function (xhr, status, error) {
