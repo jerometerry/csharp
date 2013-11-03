@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SESG.UserWebService", "UserWebService\SESG.UserWebService.csproj", "{A28A84D2-DB19-482A-B2E6-38106792FD9F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SESG.UserWebService", "UserWebService\UserWebService\SESG.UserWebService.csproj", "{A28A84D2-DB19-482A-B2E6-38106792FD9F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SESG.UserWebService.Tests", "UserWebService.Tests\SESG.UserWebService.Tests.csproj", "{F49D5EA4-7507-4EC8-ABE8-AA6CD31CF7D2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SESG.UserWebService.Tests", "UserWebService\UserWebService.Tests\SESG.UserWebService.Tests.csproj", "{F49D5EA4-7507-4EC8-ABE8-AA6CD31CF7D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SESG.UserWebService.Core", "UserWebService.Core\SESG.UserWebService.Core.csproj", "{9C9BEAEC-DB16-4DCF-9821-1C3BABB0ABC5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SESG.UserWebService.Core", "UserWebService\UserWebService.Core\SESG.UserWebService.Core.csproj", "{9C9BEAEC-DB16-4DCF-9821-1C3BABB0ABC5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SESG.UserWebService.Data", "UserWebService.Data\SESG.UserWebService.Data.csproj", "{EAE7F5D1-2F02-4380-BD28-942E6F389B71}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SESG.UserWebService.Data", "UserWebService\UserWebService.Data\SESG.UserWebService.Data.csproj", "{EAE7F5D1-2F02-4380-BD28-942E6F389B71}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SESG.UserWebService.Logic", "UserWebService.Logic\SESG.UserWebService.Logic.csproj", "{0F9A7927-98AD-4D1F-89BC-1AF1574A64D0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SESG.UserWebService.Logic", "UserWebService\UserWebService.Logic\SESG.UserWebService.Logic.csproj", "{0F9A7927-98AD-4D1F-89BC-1AF1574A64D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
