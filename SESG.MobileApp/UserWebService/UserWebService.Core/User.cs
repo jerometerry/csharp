@@ -13,7 +13,7 @@ namespace SESG.UserWebService.Core
         public virtual string CellNumber { get; set; }
         public virtual string Company { get; set; }
         public virtual string Website { get; set; }
-        public virtual int? ProfilePictureId { get; set; }
+        public virtual File ProfilePicture { get; set; }
         public virtual DateTime DateCreated { get; set; }
         public virtual DateTime? DateModified { get; set; }
     }

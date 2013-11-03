@@ -37,7 +37,7 @@
                 },
                 error: function (xhr, status, error) {
                     if (typeof (errorCallback) == "function") {
-                        errorCallback(xhr, status, error);
+                        errorCallback(sender, xhr, status, error);
                     }
                 }
             });

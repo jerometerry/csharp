@@ -26,7 +26,7 @@
         }
     };
 
-    this.getUsersError = function (xhr, status, error) {
+    this.getUsersError = function (sender, xhr, status, error) {
         if (typeof (sender.failureCallback) == 'function') {
             sender.failureCallback(xhr, status, error);
         }

@@ -26,9 +26,9 @@
         $resultsBody.html("");
 
         $.each(data, function (index, value) {
-            var id = this.UserID;
-            var userName = this.UserName;
-            var company = this.Company;
+            var id = this.id;
+            var userName = this.username;
+            var company = this.company;
             
             $row = $("<tr/>");
             $id = $("<td/>").text(id);

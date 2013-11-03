@@ -21,11 +21,26 @@ namespace SESG.UserWebService.Data
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
-            var map = modelBuilder.Entity<User>();
-            map.ToTable("Users");
-            map.HasKey(p => p.UserID)
+
+            var userMap = modelBuilder.Entity<User>();
+            userMap.ToTable("Users");
+            userMap.HasKey(p => p.UserID)
                 .Property(p => p.UserID)
                 .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
+
+            userMap.HasOptional(p => p.ProfilePicture)
+                .WithMany()
+                .Map(x => x.MapKey("ProfilePictureId"));
+
+            var fileMap = modelBuilder.Entity<File>();
+            fileMap.ToTable("Files");
+            fileMap.HasKey(p => p.FileID)
+                .Property(p => p.FileID)
+                .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
+
+            fileMap.HasOptional(p => p.CreatedBy)
+                .WithMany()
+                .Map(x => x.MapKey("CreatedBy"));
 
             base.OnModelCreating(modelBuilder);
         }
