@@ -7,7 +7,7 @@
 
 <script type="text/javascript">
     var pager = null;
-    var sesg_users_client = null;
+    var sesg_user_client = null;
     var apiUrl = 'http://jerome7/SESG.UserWebService';
 
     $(document).ready(function () {
@@ -22,7 +22,6 @@
         });
         
         pager.fetch();
-
         $("#fetchPreviousUsersBtn").css('display', 'none');
     });
 
@@ -37,7 +36,13 @@
             $("#fetchPreviousUsersBtn").css('display', 'none');
         }
 
-        $.each(data, function (index, value) {
+        var users = data.users;
+        var total = parseInt(data.total);
+        var start = parseInt(data.offset) + 1;
+        var count = parseInt(data.count);
+        var end = start + count - 1;
+
+        $.each(users, function (index, value) {
             var id = this.id;
             var userName = this.username;
             var company = this.company;
