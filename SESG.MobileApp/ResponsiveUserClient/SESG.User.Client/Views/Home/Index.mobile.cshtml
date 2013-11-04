@@ -1,4 +1,8 @@
-﻿@section scripts {
+﻿@{
+   ViewBag.Title = "SESG User List";
+}
+
+@section scripts {
 <script type="text/javascript" src="~/Scripts/sesg.users.client.js">
 </script>
 
@@ -29,12 +33,22 @@
         
     });
 
+    function disableButtons() {
+        $(".fetchNextUsersBtn,.fetchPreviousUsersBtn").button('disable');
+    }
+
+    function enableButtons() {
+        $(".fetchNextUsersBtn,.fetchPreviousUsersBtn").button('enable');
+    }
+
     function showSpinner() {
         $.mobile.showPageLoadingMsg();
+        disableButtons();
     }
 
     function hideSpinner() {
         $.mobile.hidePageLoadingMsg();
+        enableButtons();
     }
 
     function gotUsers(data) {
@@ -76,18 +90,28 @@
 </script>
 }
 
-<div id="body">
-    <div style="padding: 10px;">
+<div style="margin-bottom: 10px;">
+    <div style="float: left;">
         <input type="submit" value="Previous" class="fetchPreviousUsersBtn" data-inline="true" />
+    </div>
+    <div style="float: right;">
         <input type="submit" value="Next" class="fetchNextUsersBtn" data-inline="true" />
     </div>
-    <div id="results" style="padding: 10px;">
-        <ul data-role="listview" id="usersList" data-autodividers="true">
+    <div style="clear:both;">
 
-        </ul>
     </div>
-    <div style="padding: 10px;">
+</div>
+<div id="results" style="margin: 10px;">
+    <ul data-role="listview" id="usersList" data-autodividers="true" />
+</div>
+<div style="margin-top: 10px;">
+    <div style="float: left;">
         <input type="submit" value="Previous" class="fetchPreviousUsersBtn" data-inline="true" />
+    </div>
+    <div style="float: right;">
         <input type="submit" value="Next" class="fetchNextUsersBtn" data-inline="true" />
+    </div>
+    <div style="clear:both;">
+
     </div>
 </div>

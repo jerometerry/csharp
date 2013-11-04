@@ -14,9 +14,7 @@
     </head> 
 <body> 
 
-    <div data-role="page" data-theme="a">
-        @Html.Partial("_ViewSwitcher")
-
+    <div data-role="page" data-theme="b">
         <div data-role="header">
             <h1>@ViewBag.Title</h1>
         </div>
@@ -26,6 +24,9 @@
             @RenderBody()		
         </div>
 
+        <div data-role="footer">
+            @Html.Partial("_ViewSwitcher")
+        </div>
     </div>
 
     @RenderSection("scripts", required: false)

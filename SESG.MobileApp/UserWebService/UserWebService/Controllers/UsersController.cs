@@ -12,7 +12,11 @@ namespace SESG.UserWebService.Controllers
         public IEnumerable<dynamic> Get(int offset, int limit)
         {
             UserContext context = new UserContext("name=SESG.UserWebService.Properties.Settings.SESG_DB");
-            var users = context.Users.OrderBy(u => u.UserID).Skip(offset).Take(limit).ToList();
+            var query = context.Users;
+            var orderedQuery = query.OrderBy(u => u.UserName);
+            var filteredQuery = orderedQuery.Skip(offset).Take(limit);
+            var users = filteredQuery.ToList();
+
             return users.Select(u => new 
             { 
                 id = u.UserID, 
