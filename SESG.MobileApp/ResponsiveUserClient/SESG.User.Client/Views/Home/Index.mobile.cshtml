@@ -1,0 +1,87 @@
+﻿@section scripts {
+<script type="text/javascript" src="~/Scripts/sesg.users.client.js">
+</script>
+
+<script type="text/javascript" src="~/Scripts/sesg.users.pager.js">
+</script>
+
+<script type="text/javascript">
+    var pager = null;
+    var sesg_users_client = null;
+    var apiUrl = 'http://jerome7/SESG.UserWebService';
+
+    $(document).ready(function () {
+        sesg_user_client = new SesgUserClient(apiUrl);
+        pager = new SesgUserPager(sesg_user_client, gotUsers, getUsersError);
+        
+        $("#fetchNextUsersBtn").click(function () {
+            pager.next();
+        });
+        $("#fetchPreviousUsersBtn").click(function () {
+            pager.previous();
+        });
+        
+        pager.fetch();
+
+        $("#fetchPreviousUsersBtn").parent().hide();
+    });
+
+    function gotUsers(data) {
+        $resultsBody = $("#users > tbody");
+        $resultsBody.html("");
+
+        if (pager.index > 0) {
+            $("#fetchPreviousUsersBtn").parent().show();
+        }
+        else {
+            $("#fetchPreviousUsersBtn").parent().hide();
+        }
+
+        $.each(data, function (index, value) {
+            var id = this.id;
+            var userName = this.username;
+            var company = this.company;
+            var avatar = this.avatar;
+
+            $row = $("<tr/>");
+            $id = $("<td/>").text(id);
+            $userName = $("<td/>").text(userName);
+            $company = $("<td/>").text(company);
+            $avatar = $("<td/>");
+            if (avatar.length > 0) {
+                $img = $("<img/>").attr('src', avatar);
+                $avatar.append($img);
+            }
+
+            $row.append($id)
+                .append($userName)
+                .append($company)
+                .append($avatar);
+
+            $resultsBody.append($row);
+        })
+    }
+
+    function getUsersError(sender, xhr, status, error) {
+        alert(error);
+    }
+</script>
+}
+
+<div id="body">
+    <div style="padding: 10px;">
+        <input type="submit" value="Previous" id="fetchPreviousUsersBtn" data-inline="true" />
+        <input type="submit" value="Next" id="fetchNextUsersBtn" data-inline="true" />
+    </div>
+    <div id="results" style="padding: 10px;">
+        <table id="users">
+            <thead>
+                <tr>
+                    <th>Id</th><th>User Name</th><th>Company</th><th>Avatar</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
