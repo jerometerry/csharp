@@ -29,6 +29,7 @@
         
         $(".fetchPreviousUsersBtn").parent().hide();
         showSpinner();
+        hideButtons();
         pager.fetch();        
     });
 
@@ -36,8 +37,20 @@
         $(".fetchNextUsersBtn,.fetchPreviousUsersBtn").button('disable');
     }
 
+    function hideButtons() {
+        $(".fetchNextUsersBtn,.fetchPreviousUsersBtn").parent().hide();
+    }
+
     function enableButtons() {
-        $(".fetchNextUsersBtn,.fetchPreviousUsersBtn").button('enable');
+        $(".fetchNextUsersBtn").button('enable');
+
+        if (pager.index > 0) {
+            $(".fetchPreviousUsersBtn").button('enable');
+        }
+    }
+
+    function showButtons() {
+        $(".fetchNextUsersBtn,.fetchPreviousUsersBtn").parent().show();
     }
 
     function showSpinner() {
@@ -54,12 +67,7 @@
         $ul = $("#usersList");
         $ul.empty();
 
-        if (pager.index > 0) {
-            $(".fetchPreviousUsersBtn").parent().show();
-        }
-        else {
-            $(".fetchPreviousUsersBtn").parent().hide();
-        }
+        showButtons();
 
         var users = data.users;
         var total = parseInt(data.total);
