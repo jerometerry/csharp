@@ -43,15 +43,17 @@
             var avatar = this.avatar;
 
             $li = $("<li data-role='option' data-theme='c'  />");
+            $p = $("<p/>").text(userName);
+            $li.append($p);
             $img = $("<img/>")
                     .attr('src', avatar)
                     .attr('width', '100px');
             $li.append($img);
-            $p = $("<p/>").text(userName);
-            $li.append($p);
             
             $ul.append($li);
         })
+
+        $ul.listview('refresh');
     }
 
     function getUsersError(sender, xhr, status, error) {
