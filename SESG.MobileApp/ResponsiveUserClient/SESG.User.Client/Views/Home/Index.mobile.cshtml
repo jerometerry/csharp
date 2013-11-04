@@ -29,8 +29,7 @@
         
         $(".fetchPreviousUsersBtn").parent().hide();
         showSpinner();
-        pager.fetch();
-        
+        pager.fetch();        
     });
 
     function disableButtons() {
@@ -62,7 +61,13 @@
             $(".fetchPreviousUsersBtn").parent().hide();
         }
 
-        $.each(data, function (index, value) {
+        var users = data.users;
+        var total = parseInt(data.total);
+        var start = parseInt(data.offset) + 1;
+        var count = parseInt(data.count);
+        var end = start + count - 1;
+
+        $.each(users, function (index, value) {
             var id = this.id;
             var userName = this.username;
             var company = this.company;
@@ -80,12 +85,25 @@
         })
 
         $ul.listview('refresh');
+
+        var txt = 'Showing ' + start + ' to ' + end + ' of ' + total.toLocaleString() + ' users';
+        $("#userCount").text(txt);
+
         hideSpinner();
     }
 
     function getUsersError(sender, xhr, status, error) {
         hideSpinner();
         alert(error);
+    }
+
+    function gotUserCount(sender, data) {
+        var count = data.count;
+        var txt = 'Found ' + count + ' users';
+        $("#userCount").text(txt);
+    }
+
+    function countUsersError(sender, xhr, status, error) {
     }
 </script>
 }
@@ -101,6 +119,8 @@
 
     </div>
 </div>
+<h4 id="userCount">
+</h4>
 <div id="results" style="margin: 10px;">
     <ul data-role="listview" id="usersList" data-autodividers="true" />
 </div>
@@ -112,6 +132,5 @@
         <input type="submit" value="Next" class="fetchNextUsersBtn" data-inline="true" />
     </div>
     <div style="clear:both;">
-
     </div>
 </div>

@@ -9,15 +9,27 @@ namespace SESG.UserWebService.Controllers
 {
     public class UsersController : ApiController
     {
-        public IEnumerable<dynamic> Get(int offset, int limit)
+        private UserContext CreateDbContext()
         {
             UserContext context = new UserContext("name=SESG.UserWebService.Properties.Settings.SESG_DB");
-            var query = context.Users;
+            return context;
+        }
+
+        private IOrderedQueryable<Core.User> GetUsers(UserContext dbContext)
+        {
+            var query = dbContext.Users;
             var orderedQuery = query.OrderBy(u => u.UserName);
-            var filteredQuery = orderedQuery.Skip(offset).Take(limit);
+            return orderedQuery;
+        }
+
+        public dynamic Get(int offset, int limit)
+        {
+            UserContext context = CreateDbContext();
+            var query = GetUsers(context);
+            var filteredQuery = query.Skip(offset).Take(limit);
             var users = filteredQuery.ToList();
 
-            return users.Select(u => new 
+            IEnumerable<dynamic> jsonUsers = users.Select(u => new 
             { 
                 id = u.UserID, 
                 username = u.UserName, 
@@ -30,6 +42,24 @@ namespace SESG.UserWebService.Controllers
                 email = u.Email,
                 website = u.Website
             });
+
+            return new 
+            { 
+                users = jsonUsers,
+                count = users.Count,
+                total = query.Count(),
+                offset = offset,
+                limit = limit
+            };
+        }
+
+        [HttpGet]
+        public dynamic Count()
+        {
+            UserContext context = CreateDbContext();
+            var query = GetUsers(context);
+
+            return new { count = query.Count() };
         }
 
         private string GetAbsoluteFileUrl(Core.File file)
