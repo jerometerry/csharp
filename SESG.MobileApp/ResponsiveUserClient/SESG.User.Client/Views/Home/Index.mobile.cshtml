@@ -14,27 +14,26 @@
         sesg_user_client = new SesgUserClient(apiUrl);
         pager = new SesgUserPager(sesg_user_client, gotUsers, getUsersError);
         
-        $("#fetchNextUsersBtn").click(function () {
+        $(".fetchNextUsersBtn").click(function () {
             pager.next();
         });
-        $("#fetchPreviousUsersBtn").click(function () {
+        $(".fetchPreviousUsersBtn").click(function () {
             pager.previous();
         });
         
+        $(".fetchPreviousUsersBtn").parent().hide();
         pager.fetch();
-
-        $("#fetchPreviousUsersBtn").parent().hide();
     });
 
     function gotUsers(data) {
-        $resultsBody = $("#users > tbody");
-        $resultsBody.html("");
+        $ul = $("#usersList");
+        $ul.empty();
 
         if (pager.index > 0) {
-            $("#fetchPreviousUsersBtn").parent().show();
+            $(".fetchPreviousUsersBtn").parent().show();
         }
         else {
-            $("#fetchPreviousUsersBtn").parent().hide();
+            $(".fetchPreviousUsersBtn").parent().hide();
         }
 
         $.each(data, function (index, value) {
@@ -43,22 +42,15 @@
             var company = this.company;
             var avatar = this.avatar;
 
-            $row = $("<tr/>");
-            $id = $("<td/>").text(id);
-            $userName = $("<td/>").text(userName);
-            $company = $("<td/>").text(company);
-            $avatar = $("<td/>");
-            if (avatar.length > 0) {
-                $img = $("<img/>").attr('src', avatar);
-                $avatar.append($img);
-            }
-
-            $row.append($id)
-                .append($userName)
-                .append($company)
-                .append($avatar);
-
-            $resultsBody.append($row);
+            $li = $("<li data-role='option' data-theme='c'  />");
+            $img = $("<img/>")
+                    .attr('src', avatar)
+                    .attr('width', '100px');
+            $li.append($img);
+            $p = $("<p/>").text(userName);
+            $li.append($p);
+            
+            $ul.append($li);
         })
     }
 
@@ -70,18 +62,16 @@
 
 <div id="body">
     <div style="padding: 10px;">
-        <input type="submit" value="Previous" id="fetchPreviousUsersBtn" data-inline="true" />
-        <input type="submit" value="Next" id="fetchNextUsersBtn" data-inline="true" />
+        <input type="submit" value="Previous" class="fetchPreviousUsersBtn" data-inline="true" />
+        <input type="submit" value="Next" class="fetchNextUsersBtn" data-inline="true" />
     </div>
     <div id="results" style="padding: 10px;">
-        <table id="users">
-            <thead>
-                <tr>
-                    <th>Id</th><th>User Name</th><th>Company</th><th>Avatar</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+        <ul data-role="listview" id="usersList" data-autodividers="true">
+
+        </ul>
+    </div>
+    <div style="padding: 10px;">
+        <input type="submit" value="Previous" class="fetchPreviousUsersBtn" data-inline="true" />
+        <input type="submit" value="Next" class="fetchNextUsersBtn" data-inline="true" />
     </div>
 </div>
