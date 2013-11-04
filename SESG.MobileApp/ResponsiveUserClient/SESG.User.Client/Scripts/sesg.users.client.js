@@ -1,47 +1,26 @@
-﻿var sesg_user_client = (function ($) {
+﻿function SesgUserClient(apiUrl) {
+    this.apiUrl = apiUrl;
+    this.usersUrl = this.apiUrl + '/api/Users';
 
-    // a private variable to hold settings
-    var settings = {
-        name: 'Fred',
-        greeting: 'Hello',
-        apiUrl: 'http://jerome7/SESG.UserWebService'
+    this.getUsers = function (sender, offset, limit, callback, errorCallback) {
+        var url = this.usersUrl;
+        var data = { offset: offset, limit: limit };
+        $.ajax({
+            url: url,
+            data: data,
+            dataType: 'json',
+            success: function (data) {
+                if (typeof (callback) == "function") {
+                    callback(sender, data);
+                }
+            },
+            error: function (xhr, status, error) {
+                if (typeof (errorCallback) == "function") {
+                    errorCallback(sender, xhr, status, error);
+                }
+            }
+        });
     };
 
-    // a private function, used only within the IIFE
-    function buildGreeting() {
-        return settings.greeting + ', ' + settings.name + '!';
-    }
-
-    function getUsersUrl() {
-        return settings.apiUrl + '/api/Users'
-    }
-
-    // an object with the module's public interface
-    return {
-
-        sayHello: function () {
-            alert(buildGreeting());
-        },
-
-        getUsers: function(sender, offset, limit, callback, errorCallback) {
-            var url = getUsersUrl();
-            var data = { offset:offset, limit:limit };
-            $.ajax({
-                url: url,
-                data: data,
-                dataType: 'json',
-                success: function (data) {
-                    if (typeof(callback) == "function") {
-                        callback(sender, data);
-                    }
-                },
-                error: function (xhr, status, error) {
-                    if (typeof (errorCallback) == "function") {
-                        errorCallback(sender, xhr, status, error);
-                    }
-                }
-            });
-        }
-
-    }
-})(jQuery);
+    return this;
+}

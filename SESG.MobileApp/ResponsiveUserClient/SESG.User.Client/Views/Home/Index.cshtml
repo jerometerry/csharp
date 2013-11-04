@@ -7,8 +7,11 @@
 
 <script type="text/javascript">
     var pager = null;
+    var sesg_users_client = null;
+    var apiUrl = 'http://jerome7/SESG.UserWebService';
 
     $(document).ready(function () {
+        sesg_user_client = new SesgUserClient(apiUrl);
         pager = new SesgUserPager(sesg_user_client, gotUsers, getUsersError);
         
         $("#fetchNextUsersBtn").click(function () {
@@ -19,27 +22,47 @@
         });
         
         pager.fetch();
+
+        $("#fetchPreviousUsersBtn").css('display', 'none');
     });
 
     function gotUsers(data) {
         $resultsBody = $("#users > tbody");
         $resultsBody.html("");
 
+        if (pager.index > 0) {
+            $("#fetchPreviousUsersBtn").css('display', 'inline');
+        }
+        else {
+            $("#fetchPreviousUsersBtn").css('display', 'none');
+        }
+
         $.each(data, function (index, value) {
             var id = this.id;
             var userName = this.username;
             var company = this.company;
-            
+            var avatar = this.avatar;
+
             $row = $("<tr/>");
             $id = $("<td/>").text(id);
             $userName = $("<td/>").text(userName);
             $company = $("<td/>").text(company);
-            $row.append($id).append($userName).append($company);
+            $avatar = $("<td/>");
+            if (avatar.length > 0) {
+                $img = $("<img/>").attr('src', avatar);
+                $avatar.append($img);
+            }
+
+            $row.append($id)
+                .append($userName)
+                .append($company)
+                .append($avatar);
+
             $resultsBody.append($row);
         })
     }
 
-    function getUsersError(xhr, status, error) {
+    function getUsersError(sender, xhr, status, error) {
         alert(error);
     }
 </script>
@@ -53,7 +76,7 @@
         <table id="users">
             <thead>
                 <tr>
-                    <th>Id</th><th>User Name</th><th>Company</th>
+                    <th>Id</th><th>User Name</th><th>Company</th><th>Avatar</th>
                 </tr>
             </thead>
             <tbody>

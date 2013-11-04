@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Web;
 using System.Web.Http;
-using SESG.UserWebService.Core;
 using SESG.UserWebService.Data;
 
 namespace SESG.UserWebService.Controllers
@@ -11,20 +12,48 @@ namespace SESG.UserWebService.Controllers
         public IEnumerable<dynamic> Get(int offset, int limit)
         {
             UserContext context = new UserContext("name=SESG.UserWebService.Properties.Settings.SESG_DB");
-            var query = context.Users.OrderBy(u => u.UserID).Skip(offset).Take(limit);
-            return query.Select(u => new 
+            var users = context.Users.OrderBy(u => u.UserID).Skip(offset).Take(limit).ToList();
+            return users.Select(u => new 
             { 
                 id = u.UserID, 
                 username = u.UserName, 
                 firstName = u.FirstName, 
                 lastName = u.LastName,
                 company = u.Company,
-                profilePicture = u.ProfilePicture == null ? string.Empty : u.ProfilePicture.Path,
+                avatar = GetAbsoluteFileUrl(u.ProfilePicture),
                 phone = u.PhoneNumber,
                 cell = u.CellNumber,
                 email = u.Email,
                 website = u.Website
             });
+        }
+
+        private string GetAbsoluteFileUrl(Core.File file)
+        {
+            if (file == null)
+            {
+                return string.Empty;
+            }
+
+            string path = file.Path;
+
+            if (string.IsNullOrEmpty(path))
+            {
+                return string.Empty;
+            }
+
+            string virtualPath = "/Content";
+            if (!path.StartsWith("/"))
+            {
+                virtualPath += "/";
+            }
+
+            virtualPath += path;
+
+            string authority = this.Request.RequestUri.GetLeftPart(UriPartial.Authority);
+            string iisVirtualPath = VirtualPathUtility.ToAbsolute("~");
+            string result = authority + iisVirtualPath + virtualPath;
+            return result;
         }
     }
 }
