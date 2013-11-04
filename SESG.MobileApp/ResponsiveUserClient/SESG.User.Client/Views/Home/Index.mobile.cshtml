@@ -15,15 +15,27 @@
         pager = new SesgUserPager(sesg_user_client, gotUsers, getUsersError);
         
         $(".fetchNextUsersBtn").click(function () {
+            showSpinner();
             pager.next();
         });
         $(".fetchPreviousUsersBtn").click(function () {
+            showSpinner();
             pager.previous();
         });
         
         $(".fetchPreviousUsersBtn").parent().hide();
+        showSpinner();
         pager.fetch();
+        
     });
+
+    function showSpinner() {
+        $.mobile.showPageLoadingMsg();
+    }
+
+    function hideSpinner() {
+        $.mobile.hidePageLoadingMsg();
+    }
 
     function gotUsers(data) {
         $ul = $("#usersList");
@@ -54,9 +66,11 @@
         })
 
         $ul.listview('refresh');
+        hideSpinner();
     }
 
     function getUsersError(sender, xhr, status, error) {
+        hideSpinner();
         alert(error);
     }
 </script>

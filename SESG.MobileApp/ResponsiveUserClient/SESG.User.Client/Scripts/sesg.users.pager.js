@@ -3,6 +3,7 @@
 
     this.index = 0;
     this.pageSize = 10;
+    
     this.successCallback = successCallback;
     this.failureCallback = failureCallback;
 
