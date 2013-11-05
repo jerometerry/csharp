@@ -1,0 +1,107 @@
+﻿@{
+   ViewBag.Title = "SESG User List";
+}
+
+@section scripts {
+<script type="text/javascript" src="~/Scripts/sesg.users.client.js">
+</script>
+
+<script type="text/javascript" src="~/Scripts/sesg.users.pager.js">
+</script>
+
+<script type="text/javascript">
+    var pager = null;
+    var sesg_user_client = null;
+    var apiUrl = 'http://jerome7/SESG.Mobile.Service';
+
+    $(document).ready(function () {
+        sesg_user_client = new SesgUserClient(apiUrl);
+        pager = new SesgUserPager(sesg_user_client, gotUsers, getUsersError);
+        
+        $(".fetchNextUsersBtn").click(function () {
+            pager.next();
+        });
+        $(".fetchPreviousUsersBtn").click(function () {
+            pager.previous();
+        });
+        
+        pager.fetch();
+        $(".fetchPreviousUsersBtn").css('display', 'none');
+    });
+
+    function gotUsers(data) {
+        $resultsBody = $("#users > tbody");
+        $resultsBody.html("");
+
+        if (pager.index > 0) {
+            $(".fetchPreviousUsersBtn").css('display', 'inline');
+        }
+        else {
+            $(".fetchPreviousUsersBtn").css('display', 'none');
+        }
+
+        var users = data.users;
+        var total = parseInt(data.total);
+        var start = parseInt(data.offset) + 1;
+        var count = parseInt(data.count);
+        var end = start + count - 1;
+
+        $.each(users, function (index, value) {
+            var id = this.id;
+            var userName = this.username;
+            var company = this.company;
+            var avatar = this.avatar;
+
+            $row = $("<tr/>");
+            $avatar = $("<td/>");
+            if (avatar.length > 0) {
+                $img = $("<img/>").attr('src', avatar);
+                $avatar.append($img);
+            }
+            $userName = $("<td/>").text(userName);
+
+
+            $row.append($avatar)
+                .append($userName);
+
+            $resultsBody.append($row);
+        });
+
+        var txt = 'Showing ' + start + ' to ' + end + ' of ' + total.toLocaleString() + ' users';
+        $("#userCount").text(txt);
+    }
+
+    function getUsersError(xhr, status, error) {
+        var msg = '';
+        if (xhr) {
+            msg += ' html status: ' + xhr.status + ' ';
+        }
+        if (status) {
+            msg += ' status: ' + status + ' ';
+        }
+        if (error) {
+            msg += ' error: ' + error + ' ';
+        }
+        alert(msg);
+    }
+</script>
+}
+
+<div id="body" style="padding: 10px;">
+    <div style="padding: 10px;">
+        <input type="submit" value="Previous" class="fetchPreviousUsersBtn" />
+        <input type="submit" value="Next" class="fetchNextUsersBtn" />
+    </div>
+    <h4 id="userCount">
+    </h4>
+    <div id="results" style="padding: 10px;">
+        <table id="users">
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div style="padding: 10px;">
+        <input type="submit" value="Previous" class="fetchPreviousUsersBtn" />
+        <input type="submit" value="Next" class="fetchNextUsersBtn" />
+    </div>
+</div>

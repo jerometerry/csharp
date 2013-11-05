@@ -9,11 +9,14 @@
 </head>
 <body>
     <header>
-        @Html.Partial("_ViewSwitcher")
+        <h1>@ViewBag.Title</h1>
     </header>
     @RenderBody()
-
     @Scripts.Render("~/bundles/jquery")
     @RenderSection("scripts", required: false)
+
+    <footer>
+        @Html.Partial("_ViewSwitcher")
+    </footer>
 </body>
 </html>
