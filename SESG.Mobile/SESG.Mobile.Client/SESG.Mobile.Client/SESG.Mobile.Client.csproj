@@ -285,6 +285,7 @@
     <Content Include="Scripts\sesg.mobile.pager-1.0.0.js" />
     <Content Include="Scripts\sesg.mobile.client-1.0.0.js" />
     <Content Include="Scripts\sesg.mobile.settings-1.0.0.js" />
+    <Content Include="Scripts\sesg.mobile.signalr-1.0.0.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
