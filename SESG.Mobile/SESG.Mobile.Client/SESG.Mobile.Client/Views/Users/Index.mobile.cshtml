@@ -16,6 +16,8 @@
     var pager = null;
     var sesg_users_client = null;
 
+    var messagesUrl = '@Url.Action("Index", "Messages")';
+
     $(document).ready(function () {
         sesg_user_client = new SesgUserClient(apiUrl);
         pager = new SesgUserPager(sesg_user_client, gotUsers, getUsersError);
@@ -83,13 +85,15 @@
             var company = this.company;
             var avatar = this.avatar;
 
+
             $li = $("<li data-role='option' data-theme='c'  />");
-            $p = $("<p/>").text(userName);
-            $li.append($p);
+            
+            $a = $("<a/>").text(userName).attr('href', messagesUrl + '?' + userName);
             $img = $("<img/>")
                     .attr('src', avatar)
                     .attr('width', '100px');
-            $li.append($img);
+            $a.append($img);
+            $li.append($a);
             
             $ul.append($li);
         })

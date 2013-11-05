@@ -15,7 +15,8 @@
 <script type="text/javascript">
     var pager = null;
     var sesg_user_client = null;
-    
+
+    var messagesUrl = '@Url.Action("Index", "Messages")';
 
     $(document).ready(function () {
         sesg_user_client = new SesgUserClient(apiUrl);
@@ -61,7 +62,8 @@
                 $img = $("<img/>").attr('src', avatar);
                 $avatar.append($img);
             }
-            $userName = $("<td/>").text(userName);
+            $a = $("<a/>").attr("href", messagesUrl + '?' + userName).text(userName);
+            $userName = $("<td/>").append($a);
 
 
             $row.append($avatar)

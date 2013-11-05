@@ -25,6 +25,11 @@
         }
 
         $(document).ready(function () {
+            var username = window.location.search;
+            if (username) {
+                $('#displayname').val(username.substr(1, username.length - 1));
+            }
+
             signalrClient = new SesgSignalrClient(apiUrl, messageReceived);
 
             var signalrHubsUrl = apiUrl + '/signalr/hubs'
