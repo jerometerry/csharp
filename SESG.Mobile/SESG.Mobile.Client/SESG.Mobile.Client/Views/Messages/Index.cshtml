@@ -31,7 +31,6 @@
             $.connection.hub.url = 'http://localhost/sesg.mobile.service/signalr';
             $.connection.hub
                 .error(function (data) {
-                    alert(data);
                 })
                 .start({ jsonp: true }).done(function () {
                 $('#sendmessage').click(function () {
