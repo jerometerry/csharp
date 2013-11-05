@@ -282,9 +282,9 @@
     <Content Include="Scripts\knockout-2.2.0.debug.js" />
     <Content Include="Scripts\knockout-2.2.0.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
-    <Content Include="Scripts\sesg.users.pager.js" />
-    <Content Include="Scripts\sesg.users.client.js" />
-    <Content Include="Scripts\sesg.users.settings.js" />
+    <Content Include="Scripts\sesg.mobile.pager-1.0.0.js" />
+    <Content Include="Scripts\sesg.mobile.client-1.0.0.js" />
+    <Content Include="Scripts\sesg.mobile.settings-1.0.0.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

@@ -10,7 +10,9 @@
 <body>
     <header>
         <h1>@ViewBag.Title</h1>
+        <div><a href="@Url.Action("Index", "Home")">Home</a></div>
     </header>
+
     @RenderBody()
     @Scripts.Render("~/bundles/jquery")
     @RenderSection("scripts", required: false)
