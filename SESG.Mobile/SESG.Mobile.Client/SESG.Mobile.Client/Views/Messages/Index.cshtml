@@ -9,10 +9,7 @@
     <script src="~/Scripts/jquery.signalR-2.0.0.min.js" type="text/javascript">
     </script>
 
-    <script src="http://localhost/sesg.mobile.service/signalr/hubs" type="text/javascript">
-    </script>
-
-    <script src="~/Scripts/sesg.mobile.signalr-1.0.0.js" type="text/javascript">
+    <script src="~/Scripts/sesg.mobile.signalr-1.0.1.js" type="text/javascript">
     </script>
 
     <script type="text/javascript">
@@ -27,19 +24,26 @@
                 + '</strong>:&nbsp;&nbsp;' + encodedMsg + '</li>');
         }
 
-        function initializeSignalr() {
+        $(document).ready(function () {
             signalrClient = new SesgSignalrClient(apiUrl, messageReceived);
 
-            $('#sendmessage').click(function () {
-                // Call the Send method on the hub. 
-                signalrClient.send($('#displayname').val(), $('#message').val());
-                // Clear text box and reset focus for next comment. 
-                $('#message').val('');
-            });
-        }
+            var signalrHubsUrl = apiUrl + '/signalr/hubs'
 
-        $(document).ready(function () {
-            initializeSignalr();
+            $.getScript(signalrHubsUrl, function () {
+                signalrClient.initialize();
+            });
+
+            $('#sendmessage').click(function () {
+                if (signalrClient) {
+                    // Call the Send method on the hub. 
+                    signalrClient.send($('#displayname').val(), $('#message').val());
+                    // Clear text box and reset focus for next comment. 
+                    $('#message').val('');
+                }
+                else {
+                    $('#discussion').val("SignalR not ready!");
+                }
+            });
         });
     </script>
 }
