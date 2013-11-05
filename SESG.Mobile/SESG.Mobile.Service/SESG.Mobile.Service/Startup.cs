@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using Microsoft.Owin;
 using Owin;
+using Microsoft.AspNet.SignalR;
 
 [assembly: OwinStartup(typeof(SESG.Mobile.Service.Startup))]
 namespace SESG.Mobile.Service
@@ -12,8 +13,9 @@ namespace SESG.Mobile.Service
     {
         public void Configuration(IAppBuilder app)
         {
-            // Any connection or hub wire up and configuration should go here
-            app.MapSignalR();
+            HubConfiguration config = new HubConfiguration();
+            config.EnableJSONP = true;
+            app.MapSignalR(config);
         }
     }
 }
