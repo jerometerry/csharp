@@ -281,6 +281,7 @@
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\sesg.users.pager.js" />
     <Content Include="Scripts\sesg.users.client.js" />
+    <Content Include="Scripts\sesg.users.settings.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
