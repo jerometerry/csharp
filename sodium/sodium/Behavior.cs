@@ -90,8 +90,7 @@ namespace sodium {
         final Event<A> value(Transaction trans1)
         {
     	    final EventSink<A> o = new EventSink<A>() {
-    		    @Override
-                protected Object[] sampleNow()
+                protected override Object[] sampleNow()
                 {
                     return new Object[] { sample() };
                 }
@@ -179,8 +178,7 @@ namespace sodium {
 
             final Handler<Transaction> h = new Handler<Transaction>() {
                 bool fired = false;			
-                @Override
-                public void run(Transaction trans1) {
+                public override void run(Transaction trans1) {
                     if (fired) 
                         return;
 
@@ -216,8 +214,7 @@ namespace sodium {
 	        final EventSink<A> o = new EventSink<A>();
             TransactionHandler<Behavior<A>> h = new TransactionHandler<Behavior<A>>() {
                 private Listener currentListener;
-                @Override
-                public void run(Transaction trans2, Behavior<A> ba) {
+                public override void run(Transaction trans2, Behavior<A> ba) {
                     // Note: If any switch takes place during a transaction, then the
                     // value().listen will always cause a sample to be fetched from the
                     // one we just switched to. The caller will be fetching our output
@@ -233,8 +230,7 @@ namespace sodium {
                     }, false);
                 }
 
-                @Override
-                protected void finalize() throws Throwable {
+                protected override void finalize() throws Throwable {
                     if (currentListener != null)
                         currentListener.unlisten();
                 }
@@ -266,8 +262,7 @@ namespace sodium {
             TransactionHandler<Event<A>> h1 = new TransactionHandler<Event<A>>() {
                 private Listener currentListener = bea.sample().listen(o.node, trans1, h2, false);
 
-                @Override
-                public void run(final Transaction trans2, final Event<A> ea) {
+                public override void run(final Transaction trans2, final Event<A> ea) {
                     trans2.last(new Runnable() {
                 	    public void run() {
 	                        if (currentListener != null)
@@ -277,8 +272,7 @@ namespace sodium {
                     });
                 }
 
-                @Override
-                protected void finalize() throws Throwable {
+                protected override void finalize() throws Throwable {
                     if (currentListener != null)
                         currentListener.unlisten();
                 }
@@ -314,8 +308,7 @@ namespace sodium {
             });
         }
 
-	    @Override
-	    protected void finalize() throws Throwable {
+	    protected override void finalize() throws Throwable {
 	        if (cleanup != null)
                 cleanup.unlisten();
 	    }

@@ -43,8 +43,7 @@ namespace sodium {
 		    return true;
 	    }
 
-	    @Override
-	    public int compareTo(Node o) {
+	    public override int compareTo(Node o) {
 		    if (rank < o.rank) return -1;
 		    if (rank > o.rank) return 1;
 		    return 0;

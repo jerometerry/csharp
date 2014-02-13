@@ -27,8 +27,7 @@ namespace sodium {
 			    this.seq = nextSeq++;
 		    }
 
-		    @Override
-		    public int compareTo(Entry o) {
+		    public override int compareTo(Entry o) {
 			    int answer = rank.compareTo(o.rank);
 			    if (answer == 0) {  // Same rank: preserve chronological sequence.
 				    if (seq < o.seq) answer = -1; else

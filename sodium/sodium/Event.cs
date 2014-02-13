@@ -94,8 +94,7 @@ namespace sodium {
 	        final Event<A> ev = this;
 	        final EventSink<B> o = new EventSink<B>() {
     		    @SuppressWarnings("unchecked")
-			    @Override
-                protected Object[] sampleNow()
+                protected override Object[] sampleNow()
                 {
                     Object[] oi = ev.sampleNow();
                     if (oi != null) {
@@ -153,8 +152,7 @@ namespace sodium {
 	        final Event<A> ev = this;
 		    final EventSink<C> o = new EventSink<C>() {
     		    @SuppressWarnings("unchecked")
-			    @Override
-                protected Object[] sampleNow()
+                protected override Object[] sampleNow()
                 {
                     Object[] oi = ev.sampleNow();
                     if (oi != null) {
@@ -187,8 +185,7 @@ namespace sodium {
 	    public static <A> Event<A> merge(final Event<A> ea, final Event<A> eb)
 	    {
 	        final EventSink<A> o = new EventSink<A>() {
-    		    @Override
-                protected Object[] sampleNow()
+                protected override Object[] sampleNow()
                 {
                     Object[] oa = ea.sampleNow();
                     Object[] ob = eb.sampleNow();
@@ -262,8 +259,7 @@ namespace sodium {
 	        final Event<A> ev = this;
 	        final EventSink<A> o = new EventSink<A>() {
     		    @SuppressWarnings("unchecked")
-			    @Override
-                protected Object[] sampleNow()
+                protected override Object[] sampleNow()
                 {
                     Object[] oi = ev.sampleNow();
                     if (oi != null) {
@@ -312,8 +308,7 @@ namespace sodium {
             final Event<A> ev = this;
             final EventSink<A> o = new EventSink<A>() {
     		    @SuppressWarnings("unchecked")
-			    @Override
-                protected Object[] sampleNow()
+                protected override Object[] sampleNow()
                 {
                     Object[] oi = ev.sampleNow();
                     if (oi != null) {
@@ -410,8 +405,7 @@ namespace sodium {
             final Event<A> ev = this;
             final Listener[] la = new Listener[1];
             final EventSink<A> o = new EventSink<A>() {
-                @Override
-                protected Object[] sampleNow()
+                protected override Object[] sampleNow()
                 {
                     Object[] oi = ev.sampleNow();
                     Object[] oo = oi;
@@ -444,8 +438,7 @@ namespace sodium {
             return this;
         }
 
-	    @Override
-	    protected void finalize() throws Throwable {
+	    protected override void finalize() throws Throwable {
 		    for (Listener l : finalizers)
 			    l.unlisten();
 	    }
@@ -462,8 +455,7 @@ namespace sodium {
 	    private EventSink<A> o;
         private bool accumValid = false;
         private A accum;
-        @Override
-        public void run(Transaction trans1, A a) {
+        public override void run(Transaction trans1, A a) {
             if (accumValid)
                 accum = f.apply(accum, a);
             else {
