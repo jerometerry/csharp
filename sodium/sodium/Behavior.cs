@@ -15,7 +15,7 @@ namespace sodium {
     	    this.value = value;
         }
 
-        Behavior(Event<A> evt, A initValue)
+        protected Behavior(Event<A> evt, A initValue)
         {
     	    this.evt = evt;
     	    this.value = initValue;
