@@ -15,7 +15,7 @@ public sealed class Transaction {
     // True if we need to re-generate the priority queue.
     boolean toRegen = false;
 
-	private static class Entry implements Comparable<Entry> {
+	private static class Entry : Comparable<Entry> {
 		private Node rank;
 		private Handler<Transaction> action;
 		private static long nextSeq;

@@ -450,7 +450,7 @@ public class Event<A> {
 	}
 }
 
-class CoalesceHandler<A> implements TransactionHandler<A>
+class CoalesceHandler<A> : TransactionHandler<A>
 {
 	public CoalesceHandler(Lambda2<A,A,A> f, EventSink<A> o)
 	{
