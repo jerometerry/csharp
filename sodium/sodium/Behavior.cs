@@ -1,7 +1,7 @@
 namespace sodium {
 
 public class Behavior<A> {
-	protected Event<A> event;
+	protected Event<A> evt;
 	A value;
 	A valueUpdate;
 	private Listener cleanup;
@@ -11,17 +11,17 @@ public class Behavior<A> {
 	 */
     public Behavior(A value)
     {
-    	this.event = new Event<A>();
+    	this.evt = new Event<A>();
     	this.value = value;
     }
 
-    Behavior(final Event<A> event, A initValue)
+    Behavior(final Event<A> evt, A initValue)
     {
-    	this.event = event;
+    	this.evt = evt;
     	this.value = initValue;
     	Transaction.run(new Handler<Transaction>() {
     		public void run(Transaction trans1) {
-	    		Behavior.this.cleanup = event.listen(Node.NULL, trans1, new TransactionHandler<A>() {
+	    		Behavior.this.cleanup = evt.listen(Node.NULL, trans1, new TransactionHandler<A>() {
 	    			public void run(Transaction trans2, A a) {
 			    		if (Behavior.this.valueUpdate == null) {
 			    			trans2.last(new Runnable() {
@@ -65,16 +65,16 @@ public class Behavior<A> {
     }
 
     /**
-     * An event that gives the updates for the behavior. If this behavior was created
-     * with a hold, then updates() gives you an event equivalent to the one that was held.
+     * An evt that gives the updates for the behavior. If this behavior was created
+     * with a hold, then updates() gives you an evt equivalent to the one that was held.
      */
     public final Event<A> updates()
     {
-    	return event;
+    	return evt;
     }
 
     /**
-     * An event that is guaranteed to fire once when you listen to it, giving
+     * An evt that is guaranteed to fire once when you listen to it, giving
      * the current value of the behavior, and thereafter behaves like updates(),
      * firing for each update to the behavior's value.
      */
@@ -96,7 +96,7 @@ public class Behavior<A> {
                 return new Object[] { sample() };
             }
     	};
-        Listener l = event.listen(out.node, trans1,
+        Listener l = evt.listen(out.node, trans1,
     		new TransactionHandler<A>() {
 	        	public void run(Transaction trans2, A a) { out.send(trans2, a); }
 	        }, false);
@@ -244,7 +244,7 @@ public class Behavior<A> {
 	}
 	
 	/**
-	 * Unwrap an event inside a behavior to give a time-varying event implementation.
+	 * Unwrap an evt inside a behavior to give a time-varying evt implementation.
 	 */
 	public static <A> Event<A> switchE(final Behavior<Event<A>> bea)
 	{

@@ -7,7 +7,7 @@ public sealed class BehaviorLoop<A> : Behavior<A> {
 
     public void loop(Behavior<A> a_out)
     {
-        ((EventLoop<A>)event).loop(a_out.updates());
+        ((EventLoop<A>)evt).loop(a_out.updates());
         value = a_out.sample();
     }
 }

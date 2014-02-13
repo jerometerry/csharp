@@ -7,7 +7,7 @@ public sealed class BehaviorSink<A> : Behavior<A> {
     
     public void send(A a)
     {
-        ((EventSink<A>)event).send(a);
+        ((EventSink<A>)evt).send(a);
     }
 }
 }

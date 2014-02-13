@@ -9,20 +9,20 @@ public class Event<A> {
 		 * It's essential that we keep the listener alive while the caller holds
 		 * the Listener, so that the finalizer doesn't get triggered.
 		 */
-		private final Event<A> event;
+		private final Event<A> evt;
 		private final TransactionHandler<A> action;
 		private final Node target;
 
-		private ListenerImplementation(Event<A> event, TransactionHandler<A> action, Node target) {
-			this.event = event;
+		private ListenerImplementation(Event<A> evt, TransactionHandler<A> action, Node target) {
+			this.evt = evt;
 			this.action = action;
 			this.target = target;
 		}
 
 		public void unlisten() {
 		    synchronized (Transaction.listenersLock) {
-                event.listeners.remove(action);
-                event.node.unlinkTo(target);
+                evt.listeners.remove(action);
+                evt.node.unlinkTo(target);
             }
 		}
 
