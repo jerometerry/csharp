@@ -3,7 +3,7 @@ namespace sodium {
     using System;
     using System.Collections.Generic;
 
-    public class Event<A> {
+    public class Event<A> : IDisposable {
 	    private sealed class ListenerImplementation<A> : Listener {
 		    /**
 		     * It's essential that we keep the listener alive while the caller holds
@@ -33,8 +33,9 @@ namespace sodium {
 
 	    protected readonly List<ITransactionHandler<A>> listeners = new List<ITransactionHandler<A>>();
 	    protected readonly List<Listener> finalizers = new List<Listener>();
-	    protected Node node = new Node(0L);
+	    public Node node = new Node(0L);
 	    protected readonly List<A> firings = new List<A>();
+        private bool _disposed;
 
 	    /**
 	     * An event that never fires.
@@ -49,14 +50,14 @@ namespace sodium {
 	     * method to cause the listener to be removed. This is the observer pattern.
          */
 	    public Listener listen(IHandler<A> action) {
-            return listen_(Node.NULL, new TransactionHandler<A>(action));
+            return listen_(Node.NULL, new TmpTransHandler1<A>(action));
 	    }
 
-        private class TransactionHandler<A> : ITransactionHandler<A>
+        private class TmpTransHandler1<A> : ITransactionHandler<A>
         {
             private IHandler<A> action;
 
-            public TransactionHandler(IHandler<A> action)
+            public TmpTransHandler1(IHandler<A> action)
             {
                 this.action = action;
             }
@@ -68,10 +69,10 @@ namespace sodium {
         }
 
         public Listener listen_(Node target, ITransactionHandler<A> action) {
-		    return Transaction.apply(new ListenerApplier(this, target, action));
+		    return Transaction.apply(new ListenerApplier<A>(this, target, action));
 	    }
 
-        private class ListenerApplier : ILambda1<Transaction, Listener>
+        private class ListenerApplier<A> : ILambda1<Transaction, Listener>
         {
             private Event<A> listener;
             private Node target;
@@ -116,17 +117,17 @@ namespace sodium {
 	    public Event<B> map<B>(ILambda1<A,B> f)
 	    {
 	        Event<A> ev = this;
-	        EventSink<B> o = new TmpEvtSink<B>(ev, f);
-            Listener l = listen_(o.node, new TmpTransactionHandler<A, B>(o,f));
+	        EventSink<B> o = new TmpEventtSink7<B>(ev, f);
+            Listener l = listen_(o.node, new TmpTransHandler7<A, B>(o,f));
             return o.addCleanup(l);
 	    }
 
-        private class TmpTransactionHandler<A, B> : ITransactionHandler<A>
+        private class TmpTransHandler7<A, B> : ITransactionHandler<A>
         {
             private EventSink<B> o;
             private ILambda1<A, B> f;
 
-            public TmpTransactionHandler(EventSink<B> o, ILambda1<A, B> f)
+            public TmpTransHandler7(EventSink<B> o, ILambda1<A, B> f)
             {
                 this.o = o;
                 this.f = f;
@@ -138,12 +139,12 @@ namespace sodium {
             }
         }
 
-        private class TmpEvtSink<B> : EventSink<B>
+        private class TmpEventtSink7<B> : EventSink<B>
         {
             private Event<A> ev;
             private ILambda1<A, B> f;
 
-            public TmpEvtSink(Event<A> ev, ILambda1<A,B> f)
+            public TmpEventtSink7(Event<A> ev, ILambda1<A,B> f)
             {
                 this.ev = ev;
                 this.f = f;
@@ -171,10 +172,10 @@ namespace sodium {
          * the transaction.
          */
 	    public Behavior<A> hold(A initValue) {
-		    return Transaction.apply(new BehaviorBuilder(this, initValue));
+		    return Transaction.apply(new BehaviorBuilder<A>(this, initValue));
 	    }
 
-        private class BehaviorBuilder : ILambda1<Transaction, Behavior<A>>
+        private class BehaviorBuilder<A> : ILambda1<Transaction, Behavior<A>>
         {
             private Event<A> evt;
             private A initValue;
@@ -215,18 +216,18 @@ namespace sodium {
 	    public Event<C> snapshot<B,C>(Behavior<B> b, ILambda2<A,B,C> f)
 	    {
 	        Event<A> ev = this;
-		    EventSink<C> o = new TmpEventSink<A,B,C>(ev, f, b);
-            Listener l = listen_(o.node, new TmpTransHandler<A,B,C>(o, f, b));
+		    EventSink<C> o = new TmpEventSink1<A,B,C>(ev, f, b);
+            Listener l = listen_(o.node, new TmpTransHandler5<A,B,C>(o, f, b));
             return o.addCleanup(l);
 	    }
 
-        private class TmpEventSink<A,B,C> : EventSink<C>
+        private class TmpEventSink1<A,B,C> : EventSink<C>
         {
             private Event<A> ev;
             private ILambda2<A, B, C> f;
             private Behavior<B> b;
 
-            public TmpEventSink(Event<A> ev, ILambda2<A, B, C> f, Behavior<B> b)
+            public TmpEventSink1(Event<A> ev, ILambda2<A, B, C> f, Behavior<B> b)
             {
                 this.ev = ev;
                 this.f = f;
@@ -247,13 +248,13 @@ namespace sodium {
             }
         }
 
-        private class TmpTransHandler<A,B,C> : ITransactionHandler<A>
+        private class TmpTransHandler5<A,B,C> : ITransactionHandler<A>
         {
             private EventSink<C> o;
             private ILambda2<A, B, C> f;
             private Behavior<B> b;
 
-            public TmpTransHandler(EventSink<C> o, ILambda2<A, B, C> f, Behavior<B> b)
+            public TmpTransHandler5(EventSink<C> o, ILambda2<A, B, C> f, Behavior<B> b)
             {
                 this.o = o;
                 this.f = f;
@@ -335,7 +336,7 @@ namespace sodium {
 	    public Event<A> delay()
 	    {
 	        EventSink<A> o = new EventSink<A>();
-	        Listener l1 = listen_(o.node, new TmpTransHandler3<A>(o);
+	        Listener l1 = listen_(o.node, new TmpTransHandler3<A>(o));
 	        return o.addCleanup(l1);
 	    }
 
@@ -377,33 +378,58 @@ namespace sodium {
          */
 	    public Event<A> coalesce(ILambda2<A,A,A> f)
 	    {
-	        return Transaction.apply(new ILambda1<Transaction, Event<A>>() {
-	    	    public Event<A> apply(Transaction trans) {
-	    		    return coalesce(trans, f);
-	    	    }
-	        });
+	        return Transaction.apply(new Tmp2<A>(this, f));
 	    }
 
-	    Event<A> coalesce(Transaction trans1, ILambda2<A,A,A> f)
+        private class Tmp2<A> : ILambda1<Transaction, Event<A>>
+        {
+            private Event<A> evt;
+            private ILambda2<A, A, A> f;
+
+            public Tmp2(Event<A> evt, ILambda2<A, A, A> f)
+            {
+                this.evt = evt;
+                this.f = f;
+            }
+
+            public Event<A> apply(Transaction trans)
+            {
+                return evt.coalesce(trans, f);
+            }
+        }
+
+        Event<A> coalesce(Transaction trans1, ILambda2<A,A,A> f)
 	    {
 	        Event<A> ev = this;
-	        EventSink<A> o = new EventSink<A>() {
-                protected override Object[] sampleNow()
-                {
-                    Object[] oi = ev.sampleNow();
-                    if (oi != null) {
-					    A o = (A)oi[0];
-                        for (int i = 1; i < oi.Length; i++)
-                            o = f.apply(o, (A)oi[i]);
-                        return new Object[] { o };
-                    }
-                    else
-                        return null;
-                }
-	        };
+	        EventSink<A> o = new TmpEventSink3<A>(ev, f);
             ITransactionHandler<A> h = new CoalesceHandler<A>(f, o);
             Listener l = listen(o.node, trans1, h, false);
             return o.addCleanup(l);
+        }
+
+        private class TmpEventSink3<A> : EventSink<A>
+        {
+            private Event<A> ev;
+            private ILambda2<A, A, A> f;
+
+            public TmpEventSink3(Event<A> ev, ILambda2<A,A,A> f)
+            {
+                this.ev = ev;
+                this.f = f;
+            }
+
+            protected override Object[] sampleNow()
+            {
+                Object[] oi = ev.sampleNow();
+                if (oi != null) {
+					A o = (A)oi[0];
+                    for (int i = 1; i < oi.Length; i++)
+                        o = f.apply(o, (A)oi[i]);
+                    return new Object[] { o };
+                }
+                else
+                    return null;
+            }
         }
 
         /**
@@ -411,9 +437,15 @@ namespace sodium {
          */
         Event<A> lastFiringOnly(Transaction trans)
         {
-            return coalesce(trans, new ILambda2<A,A,A>() {
-        	    public A apply(A first, A second) { return second; }
-            });
+            return coalesce(trans, new Tmp4<A>());
+        }
+
+        private class Tmp4<a> : ILambda2<A,A,A>
+        {
+            public A apply(A first, A second)
+            {
+                return second;
+            }
         }
 
         /**
@@ -435,37 +467,62 @@ namespace sodium {
         public Event<A> filter(ILambda1<A,Boolean> f)
         {
             Event<A> ev = this;
-            EventSink<A> o = new EventSink<A>() {
-                protected override Object[] sampleNow()
-                {
-                    Object[] oi = ev.sampleNow();
-                    if (oi != null) {
-                        Object[] oo = new Object[oi.Length];
-                        int j = 0;
-                        for (int i = 0; i < oi.Length; i++)
-                            if (f.apply((A)oi[i]))
-                                oo[j++] = oi[i];
-                        if (j == 0)
-                            oo = null;
-                        else
-                        if (j < oo.Length) {
-                            Object[] oo2 = new Object[j];
-                            for (int i = 0; i < j; i++)
-                                oo2[i] = oo[i];
-                            oo = oo2;
-                        }
-                        return oo;
-                    }
-                    else
-                        return null;
-                }
-            };
-            Listener l = listen_(o.node, new ITransactionHandler<A>() {
-        	    public void run(Transaction trans2, A a) {
-	                if (f.apply(a)) o.send(trans2, a);
-	            }
-            });
+            EventSink<A> o = new TmpEventSink5<A>(ev, f);
+            Listener l = listen_(o.node, new TmpTransHandler4<A>(f, o));
             return o.addCleanup(l);
+        }
+
+        private class TmpEventSink5<A> : EventSink<A>
+        {
+            private Event<A> ev;
+            private ILambda1<A, Boolean> f;
+
+            public TmpEventSink5(Event<A> ev, ILambda1<A, Boolean> f)
+            {
+                this.ev = ev;
+                this.f = f;
+            }
+
+            protected override Object[] sampleNow()
+            {
+                Object[] oi = ev.sampleNow();
+                if (oi != null) {
+                    Object[] oo = new Object[oi.Length];
+                    int j = 0;
+                    for (int i = 0; i < oi.Length; i++)
+                        if (f.apply((A)oi[i]))
+                            oo[j++] = oi[i];
+                    if (j == 0)
+                        oo = null;
+                    else
+                    if (j < oo.Length) {
+                        Object[] oo2 = new Object[j];
+                        for (int i = 0; i < j; i++)
+                            oo2[i] = oo[i];
+                        oo = oo2;
+                    }
+                    return oo;
+                }
+                else
+                    return null;
+            }
+        }
+
+        private class TmpTransHandler4<A> : ITransactionHandler<A>
+        {
+            private ILambda1<A, Boolean> f;
+            private EventSink<A> o;
+
+            public TmpTransHandler4(ILambda1<A, Boolean> f, EventSink<A> o)
+            {
+                this.f = f;
+                this.o = o;
+            }
+
+            public void run(Transaction trans, A a)
+            {
+                if (f.apply(a)) o.send(trans, a);
+            }
         }
 
         /**
@@ -473,9 +530,15 @@ namespace sodium {
          */
         public Event<A> filterNotNull()
         {
-            return filter(new ILambda1<A,Boolean>() {
-        	    public Boolean apply(A a) { return a != null; }
-            });
+            return filter(new Tmp5<A>());
+        }
+
+        private class Tmp5<A> : ILambda1<A,Boolean>
+        {
+            public bool apply(A a)
+            {
+                return a != null;
+            }
         }
 
         /**
@@ -485,9 +548,15 @@ namespace sodium {
          */
         public Event<A> gate(Behavior<Boolean> bPred)
         {
-            return snapshot(bPred, new ILambda2<A,Boolean,A>() {
-        	    public A apply(A a, Boolean pred) { return pred ? a : null; }
-            }).filterNotNull();
+            return snapshot(bPred, new Tmp6<A>()).filterNotNull();
+        }
+
+        private class Tmp6<A> :  ILambda2<A,Boolean,A>
+        {
+            public A apply(A a, bool pred)
+            {
+                return pred ? a : default(A);
+            }
         }
 
         /**
@@ -500,14 +569,26 @@ namespace sodium {
             EventLoop<S> es = new EventLoop<S>();
             Behavior<S> s = es.hold(initState);
             Event<Tuple2<B,S>> ebs = ea.snapshot(s, f);
-            Event<B> eb = ebs.map(new ILambda1<Tuple2<B,S>,B>() {
-                public B apply(Tuple2<B,S> bs) { return bs.a; }
-            });
-            Event<S> es_out = ebs.map(new ILambda1<Tuple2<B,S>,S>() {
-                public S apply(Tuple2<B,S> bs) { return bs.b; }
-            });
+            Event<B> eb = ebs.map(new Tmp7<A,B,S>());
+            Event<S> es_out = ebs.map(new Tmp8<A,B,S>());
             es.loop(es_out);
             return eb;
+        }
+
+        private class Tmp7<A,B,S> : ILambda1<Tuple2<B,S>,B>
+        {
+            public B apply(Tuple2<B, S> bs)
+            {
+                return bs.a;
+            }
+        }
+
+        private class Tmp8<A,B,S> : ILambda1<Tuple2<B,S>,S>
+        {
+            public S apply(Tuple2<B, S> bs)
+            {
+                return bs.b;
+            }
         }
 
         /**
@@ -532,32 +613,57 @@ namespace sodium {
             // the listener.
             Event<A> ev = this;
             Listener[] la = new Listener[1];
-            EventSink<A> o = new EventSink<A>() {
-                protected override Object[] sampleNow()
-                {
-                    Object[] oi = ev.sampleNow();
-                    Object[] oo = oi;
-                    if (oo != null) {
-                        if (oo.Length > 1)
-                            oo = new Object[] { oi[0] };
-                        if (la[0] != null) {
-                            la[0].unlisten();
-                            la[0] = null;
-                        }
+            EventSink<A> o = new TmpEventSink4<A>(ev, la);
+            la[0] = ev.listen_(o.node, new TmpTransHandler8<A>(o, la));
+            return o.addCleanup(la[0]);
+        }
+
+        private class TmpEventSink4<A> : EventSink<A>
+        {
+            private Event<A> ev;
+            private Listener[] la;
+
+            public TmpEventSink4(Event<A> ev, Listener[] la)
+            {
+                this.ev = ev;
+                this.la = la;
+            }
+
+            protected override Object[] sampleNow()
+            {
+                Object[] oi = ev.sampleNow();
+                Object[] oo = oi;
+                if (oo != null) {
+                    if (oo.Length > 1)
+                        oo = new Object[] { oi[0] };
+                    if (la[0] != null) {
+                        la[0].unlisten();
+                        la[0] = null;
                     }
-                    return oo;
                 }
-            };
-            la[0] = ev.listen_(o.node, new ITransactionHandler<A>() {
-        	    public void run(Transaction trans, A a) {
-	                o.send(trans, a);
+                return oo;
+            }
+        }
+
+        private class TmpTransHandler8<A> : ITransactionHandler<A>
+        {
+            private EventSink<A> o;
+            private Listener[] la;
+
+            public TmpTransHandler8(EventSink<A> o, Listener[] la)
+            {
+                this.o = o;
+                this.la = la;
+            }
+
+            public void run(Transaction trans, A a)
+            {
+                o.send(trans, a);
 	                if (la[0] != null) {
 	                    la[0].unlisten();
 	                    la[0] = null;
 	                }
-	            }
-            });
-            return o.addCleanup(la[0]);
+            }
         }
 
         protected Event<A> addCleanup(Listener cleanup)
@@ -566,39 +672,70 @@ namespace sodium {
             return this;
         }
 
-	    protected override void finalize() {
-		    foreach (Listener l in finalizers)
-			    l.unlisten();
+	    public void Dispose() {
+            Dispose(true);
+
+            // Call SupressFinalize in case a subclass implements a finalizer.
+            GC.SuppressFinalize(this);
 	    }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            // If you need thread safety, use a lock around these  
+              // operations, as well as in your methods that use the resource. 
+              if (!_disposed) {
+                 if (disposing) {
+                    foreach (Listener l in finalizers)
+			            l.unlisten();
+                 }
+                 
+                 // Indicate that the instance has been disposed.
+                 _disposed = true;   
+              }
+        }
     }
 
     class CoalesceHandler<A> : ITransactionHandler<A>
     {
+        private ILambda2<A, A, A> f;
+        private EventSink<A> o;
+        private bool accumValid = false;
+        private A accum;
+
 	    public CoalesceHandler(ILambda2<A,A,A> f, EventSink<A> o)
 	    {
 	        this.f = f;
 	        this.o = o;
 	    }
-	    private ILambda2<A,A,A> f;
-	    private EventSink<A> o;
-        private bool accumValid = false;
-        private A accum;
+
         public void run(Transaction trans1, A a) {
             if (accumValid)
                 accum = f.apply(accum, a);
             else {
         	    CoalesceHandler<A> thiz = this;
-                trans1.prioritized(o.node, new IHandler<Transaction>() {
-            	    public void run(Transaction trans2) {
-                        o.send(trans2, thiz.accum);
-                        thiz.accumValid = false;
-                        thiz.accum = null;
-                    }
-                });
+                trans1.prioritized(o.node, new TransHandler<A>(thiz, o));
                 accum = a;
                 accumValid = true;
             }
         }
-    }
 
+        private class TransHandler<A> : IHandler<Transaction>
+        {
+            private CoalesceHandler<A> h;
+            private EventSink<A> o;
+
+            public TransHandler(CoalesceHandler<A> h, EventSink<A> o)
+            {
+                this.h = h;
+                this.o = o;
+            }
+
+            public void run(Transaction trans)
+            {
+                o.send(trans, h.accum);
+                        h.accumValid = false;
+                        h.accum = default(A);
+            }
+        }
+    }
 }
