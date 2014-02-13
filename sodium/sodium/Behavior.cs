@@ -41,7 +41,7 @@ namespace sodium {
         /**
          * @return The value including any updates that have happened in this transaction.
          */
-        final A newValue()
+        A newValue()
         {
     	    return valueUpdate == null ? value :  valueUpdate;
         }
@@ -57,7 +57,7 @@ namespace sodium {
          * b.updates().listen(..) will capture the current value and any updates without risk
          * of missing any in between.
          */
-        public final A sample()
+        public A sample()
         {
             // Since pointers in Java are atomic, we don't need to explicitly create a
             // transaction.
@@ -68,7 +68,7 @@ namespace sodium {
          * An evt that gives the updates for the behavior. If this behavior was created
          * with a hold, then updates() gives you an evt equivalent to the one that was held.
          */
-        public final Event<A> updates()
+        public Event<A> updates()
         {
     	    return evt;
         }
@@ -78,7 +78,7 @@ namespace sodium {
          * the current value of the behavior, and thereafter behaves like updates(),
          * firing for each update to the behavior's value.
          */
-        public final Event<A> value()
+        public Event<A> value()
         {
             return Transaction.apply(new Lambda1<Transaction, Event<A>>() {
         	    public Event<A> apply(Transaction trans) {
@@ -87,9 +87,9 @@ namespace sodium {
             });
         }
 
-        final Event<A> value(Transaction trans1)
+        Event<A> value(Transaction trans1)
         {
-    	    final EventSink<A> o = new EventSink<A>() {
+    	    EventSink<A> o = new EventSink<A>() {
                 protected override Object[] sampleNow()
                 {
                     return new Object[] { sample() };
@@ -107,7 +107,7 @@ namespace sodium {
         /**
          * Transform the behavior's value according to the supplied function.
          */
-	    public final <B> Behavior<B> map(Lambda1<A,B> f)
+	    public <B> Behavior<B> map(Lambda1<A,B> f)
 	    {
 		    return updates().map(f).hold(f.apply(sample()));
 	    }
@@ -115,7 +115,7 @@ namespace sodium {
 	    /**
 	     * Lift a binary function into behaviors.
 	     */
-	    public final <B,C> Behavior<C> lift(Lambda2<A,B,C> f, Behavior<B> b)
+	    public <B,C> Behavior<C> lift(Lambda2<A,B,C> f, Behavior<B> b)
 	    {
 		    Lambda1<A, Lambda1<B,C>> ffa = new Lambda1<A, Lambda1<B,C>>() {
 			    public Lambda1<B,C> apply(A aa) {
@@ -133,7 +133,7 @@ namespace sodium {
 	    /**
 	     * Lift a binary function into behaviors.
 	     */
-	    public static final <A,B,C> Behavior<C> lift(Lambda2<A,B,C> f, Behavior<A> a, Behavior<B> b)
+	    public static <A,B,C> Behavior<C> lift(Lambda2<A,B,C> f, Behavior<A> a, Behavior<B> b)
 	    {
 		    return a.lift(f, b);
 	    }
@@ -141,7 +141,7 @@ namespace sodium {
 	    /**
 	     * Lift a ternary function into behaviors.
 	     */
-	    public final <B,C,D> Behavior<D> lift(Lambda3<A,B,C,D> f, Behavior<B> b, Behavior<C> c)
+	    public <B,C,D> Behavior<D> lift(Lambda3<A,B,C,D> f, Behavior<B> b, Behavior<C> c)
 	    {
 		    Lambda1<A, Lambda1<B, Lambda1<C,D>>> ffa = new Lambda1<A, Lambda1<B, Lambda1<C,D>>>() {
 			    public Lambda1<B, Lambda1<C,D>> apply(A aa) {
@@ -163,7 +163,7 @@ namespace sodium {
 	    /**
 	     * Lift a ternary function into behaviors.
 	     */
-	    public static final <A,B,C,D> Behavior<D> lift(Lambda3<A,B,C,D> f, Behavior<A> a, Behavior<B> b, Behavior<C> c)
+	    public static <A,B,C,D> Behavior<D> lift(Lambda3<A,B,C,D> f, Behavior<A> a, Behavior<B> b, Behavior<C> c)
 	    {
 		    return a.lift(f, b, c);
 	    }
@@ -174,9 +174,9 @@ namespace sodium {
 	     */
 	    public static <A,B> Behavior<B> apply(Behavior<Lambda1<A,B>> bf, Behavior<A> ba)
 	    {
-		    final EventSink<B> o = new EventSink<B>();
+		    EventSink<B> o = new EventSink<B>();
 
-            final Handler<Transaction> h = new Handler<Transaction>() {
+            Handler<Transaction> h = new Handler<Transaction>() {
                 bool fired = false;			
                 public override void run(Transaction trans1) {
                     if (fired) 
@@ -211,7 +211,7 @@ namespace sodium {
 	    public static <A> Behavior<A> switchB(Behavior<Behavior<A>> bba)
 	    {
 	        A za = bba.sample().sample();
-	        final EventSink<A> o = new EventSink<A>();
+	        EventSink<A> o = new EventSink<A>();
             TransactionHandler<Behavior<A>> h = new TransactionHandler<Behavior<A>>() {
                 private Listener currentListener;
                 public override void run(Transaction trans2, Behavior<A> ba) {
@@ -253,8 +253,8 @@ namespace sodium {
 
 	    private static <A> Event<A> switchE(Transaction trans1, Behavior<Event<A>> bea)
 	    {
-            final EventSink<A> o = new EventSink<A>();
-            final TransactionHandler<A> h2 = new TransactionHandler<A>() {
+            EventSink<A> o = new EventSink<A>();
+            TransactionHandler<A> h2 = new TransactionHandler<A>() {
         	    public void run(Transaction trans2, A a) {
 	                o.send(trans2, a);
 	            }
@@ -285,13 +285,13 @@ namespace sodium {
          * Transform a behavior with a generalized state loop (a mealy machine). The function
          * is passed the input and the old state and returns the new state and output value.
          */
-        public final <B,S> Behavior<B> collect(S initState, Lambda2<A, S, Tuple2<B, S>> f)
+        public <B,S> Behavior<B> collect(S initState, Lambda2<A, S, Tuple2<B, S>> f)
         {
-            final Event<A> ea = updates().coalesce(new Lambda2<A,A,A>() {
+            Event<A> ea = updates().coalesce(new Lambda2<A,A,A>() {
         	    public A apply(A fst, A snd) { return snd; }
             });
-            final A za = sample();
-            final Tuple2<B, S> zbs = f.apply(za, initState);
+            A za = sample();
+            Tuple2<B, S> zbs = f.apply(za, initState);
             EventLoop<Tuple2<B,S>> ebs = new EventLoop<Tuple2<B,S>>();
             Behavior<Tuple2<B,S>> bbs = ebs.hold(zbs);
             Behavior<S> bs = bbs.map(new Lambda1<Tuple2<B,S>,S>() {

@@ -50,7 +50,7 @@ namespace sodium {
 	     * Listen for firings of this event. The returned Listener has an unlisten()
 	     * method to cause the listener to be removed. This is the observer pattern.
          */
-	    public final Listener listen(final Handler<A> action) {
+	    public Listener listen(Handler<A> action) {
 		    return listen_(Node.NULL, new TransactionHandler<A>() {
 			    public void run(Transaction trans2, A a) {
 				    action.run(a);
@@ -58,7 +58,7 @@ namespace sodium {
 		    });
 	    }
 
-	    final Listener listen_(Node target, TransactionHandler<A> action) {
+	    Listener listen_(Node target, TransactionHandler<A> action) {
 		    return Transaction.apply(new Lambda1<Transaction, Listener>() {
 			    public Listener apply(Transaction trans1) {
 				    return listen(target, trans1, action, false);
@@ -66,7 +66,7 @@ namespace sodium {
 		    });
 	    }
 
-	    final Listener listen(Node target, Transaction trans, TransactionHandler<A> action, bool suppressEarlierFirings) {
+	    Listener listen(Node target, Transaction trans, TransactionHandler<A> action, bool suppressEarlierFirings) {
             synchronized (Transaction.listenersLock) {
                 if (node.linkTo(target))
                     trans.toRegen = true;
@@ -89,10 +89,10 @@ namespace sodium {
         /**
          * Transform the event's value according to the supplied function.
          */
-	    public final <B> Event<B> map(Lambda1<A,B> f)
+	    public <B> Event<B> map(Lambda1<A,B> f)
 	    {
-	        final Event<A> ev = this;
-	        final EventSink<B> o = new EventSink<B>() {
+	        Event<A> ev = this;
+	        EventSink<B> o = new EventSink<B>() {
                 protected override Object[] sampleNow()
                 {
                     Object[] oi = ev.sampleNow();
@@ -121,7 +121,7 @@ namespace sodium {
          * That is, state updates caused by event firings get processed at the end of
          * the transaction.
          */
-	    public final Behavior<A> hold(A initValue) {
+	    public Behavior<A> hold(A initValue) {
 		    return Transaction.apply(new Lambda1<Transaction, Behavior<A>>() {
 			    public Behavior<A> apply(Transaction trans) {
 			        return new Behavior<A>(lastFiringOnly(trans), initValue);
@@ -132,7 +132,7 @@ namespace sodium {
 	    /**
 	     * Variant of snapshot that throws away the event's value and captures the behavior's.
 	     */
-	    public final <B> Event<B> snapshot(Behavior<B> beh)
+	    public <B> Event<B> snapshot(Behavior<B> beh)
 	    {
 	        return snapshot(beh, new Lambda2<A,B,B>() {
 	    	    public B apply(A a, B b) {
@@ -146,10 +146,10 @@ namespace sodium {
          * of the behavior that's sampled is the value as at the start of the transaction
          * before any state changes of the current transaction are applied through 'hold's.
          */
-	    public final <B,C> Event<C> snapshot(Behavior<B> b, Lambda2<A,B,C> f)
+	    public <B,C> Event<C> snapshot(Behavior<B> b, Lambda2<A,B,C> f)
 	    {
-	        final Event<A> ev = this;
-		    final EventSink<C> o = new EventSink<C>() {
+	        Event<A> ev = this;
+		    EventSink<C> o = new EventSink<C>() {
                 protected override Object[] sampleNow()
                 {
                     Object[] oi = ev.sampleNow();
@@ -182,7 +182,7 @@ namespace sodium {
          */
 	    public static <A> Event<A> merge(Event<A> ea, Event<A> eb)
 	    {
-	        final EventSink<A> o = new EventSink<A>() {
+	        EventSink<A> o = new EventSink<A>() {
                 protected override Object[] sampleNow()
                 {
                     Object[] oa = ea.sampleNow();
@@ -214,9 +214,9 @@ namespace sodium {
 	    /**
 	     * Push each event occurrence onto a new transaction.
 	     */
-	    public final Event<A> delay()
+	    public Event<A> delay()
 	    {
-	        final EventSink<A> o = new EventSink<A>();
+	        EventSink<A> o = new EventSink<A>();
 	        Listener l1 = listen_(o.node, new TransactionHandler<A>() {
 	            public void run(Transaction trans, A a) {
 	                trans.post(new Runnable() {
@@ -243,7 +243,7 @@ namespace sodium {
          * make any assumptions about the ordering, and the combining function would
          * ideally be commutative.
          */
-	    public final Event<A> coalesce(Lambda2<A,A,A> f)
+	    public Event<A> coalesce(Lambda2<A,A,A> f)
 	    {
 	        return Transaction.apply(new Lambda1<Transaction, Event<A>>() {
 	    	    public Event<A> apply(Transaction trans) {
@@ -252,10 +252,10 @@ namespace sodium {
 	        });
 	    }
 
-	    final Event<A> coalesce(Transaction trans1, Lambda2<A,A,A> f)
+	    Event<A> coalesce(Transaction trans1, Lambda2<A,A,A> f)
 	    {
-	        final Event<A> ev = this;
-	        final EventSink<A> o = new EventSink<A>() {
+	        Event<A> ev = this;
+	        EventSink<A> o = new EventSink<A>() {
                 protected override Object[] sampleNow()
                 {
                     Object[] oi = ev.sampleNow();
@@ -277,7 +277,7 @@ namespace sodium {
         /**
          * Clean up the output by discarding any firing other than the last one. 
          */
-        final Event<A> lastFiringOnly(Transaction trans)
+        Event<A> lastFiringOnly(Transaction trans)
         {
             return coalesce(trans, new Lambda2<A,A,A>() {
         	    public A apply(A first, A second) { return second; }
@@ -300,10 +300,10 @@ namespace sodium {
         /**
          * Only keep event occurrences for which the predicate returns true.
          */
-        public final Event<A> filter(Lambda1<A,Boolean> f)
+        public Event<A> filter(Lambda1<A,Boolean> f)
         {
-            final Event<A> ev = this;
-            final EventSink<A> o = new EventSink<A>() {
+            Event<A> ev = this;
+            EventSink<A> o = new EventSink<A>() {
                 protected override Object[] sampleNow()
                 {
                     Object[] oi = ev.sampleNow();
@@ -339,7 +339,7 @@ namespace sodium {
         /**
          * Filter out any event occurrences whose value is a Java null pointer.
          */
-        public final Event<A> filterNotNull()
+        public Event<A> filterNotNull()
         {
             return filter(new Lambda1<A,Boolean>() {
         	    public Boolean apply(A a) { return a != null; }
@@ -351,7 +351,7 @@ namespace sodium {
          * Note that the behavior's value is as it was at the start of the transaction,
          * that is, no state changes from the current transaction are taken into account.
          */
-        public final Event<A> gate(Behavior<Boolean> bPred)
+        public Event<A> gate(Behavior<Boolean> bPred)
         {
             return snapshot(bPred, new Lambda2<A,Boolean,A>() {
         	    public A apply(A a, Boolean pred) { return pred ? a : null; }
@@ -362,9 +362,9 @@ namespace sodium {
          * Transform an event with a generalized state loop (a mealy machine). The function
          * is passed the input and the old state and returns the new state and output value.
          */
-        public final <B,S> Event<B> collect(S initState, Lambda2<A, S, Tuple2<B, S>> f)
+        public <B,S> Event<B> collect(S initState, Lambda2<A, S, Tuple2<B, S>> f)
         {
-            final Event<A> ea = this;
+            Event<A> ea = this;
             EventLoop<S> es = new EventLoop<S>();
             Behavior<S> s = es.hold(initState);
             Event<Tuple2<B,S>> ebs = ea.snapshot(s, f);
@@ -381,9 +381,9 @@ namespace sodium {
         /**
          * Accumulate on input event, outputting the new state each time.
          */
-        public final <S> Behavior<S> accum(S initState, Lambda2<A, S, S> f)
+        public <S> Behavior<S> accum(S initState, Lambda2<A, S, S> f)
         {
-            final Event<A> ea = this;
+            Event<A> ea = this;
             EventLoop<S> es = new EventLoop<S>();
             Behavior<S> s = es.hold(initState);
             Event<S> es_out = ea.snapshot(s, f);
@@ -394,13 +394,13 @@ namespace sodium {
         /**
          * Throw away all event occurrences except for the first one.
          */
-        public final Event<A> once()
+        public Event<A> once()
         {
             // This is a bit long-winded but it's efficient because it deregisters
             // the listener.
-            final Event<A> ev = this;
-            final Listener[] la = new Listener[1];
-            final EventSink<A> o = new EventSink<A>() {
+            Event<A> ev = this;
+            Listener[] la = new Listener[1];
+            EventSink<A> o = new EventSink<A>() {
                 protected override Object[] sampleNow()
                 {
                     Object[] oi = ev.sampleNow();
@@ -455,7 +455,7 @@ namespace sodium {
             if (accumValid)
                 accum = f.apply(accum, a);
             else {
-        	    final CoalesceHandler<A> thiz = this;
+        	    CoalesceHandler<A> thiz = this;
                 trans1.prioritized(o.node, new Handler<Transaction>() {
             	    public void run(Transaction trans2) {
                         o.send(trans2, thiz.accum);
