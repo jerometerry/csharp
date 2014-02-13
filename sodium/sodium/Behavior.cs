@@ -89,18 +89,18 @@ public class Behavior<A> {
 
     final Event<A> value(Transaction trans1)
     {
-    	final EventSink<A> out = new EventSink<A>() {
+    	final EventSink<A> o = new EventSink<A>() {
     		@Override
             protected Object[] sampleNow()
             {
                 return new Object[] { sample() };
             }
     	};
-        Listener l = evt.listen(out.node, trans1,
+        Listener l = evt.listen(o.node, trans1,
     		new TransactionHandler<A>() {
-	        	public void run(Transaction trans2, A a) { out.send(trans2, a); }
+	        	public void run(Transaction trans2, A a) { o.send(trans2, a); }
 	        }, false);
-        return out.addCleanup(l)
+        return o.addCleanup(l)
             .lastFiringOnly(trans1);  // Needed in case of an initial value and an update
     	                              // in the same transaction.
     }
@@ -175,7 +175,7 @@ public class Behavior<A> {
 	 */
 	public static <A,B> Behavior<B> apply(final Behavior<Lambda1<A,B>> bf, final Behavior<A> ba)
 	{
-		final EventSink<B> out = new EventSink<B>();
+		final EventSink<B> o = new EventSink<B>();
 
         final Handler<Transaction> h = new Handler<Transaction>() {
             boolean fired = false;			
@@ -185,26 +185,26 @@ public class Behavior<A> {
                     return;
 
                 fired = true;
-                trans1.prioritized(out.node, new Handler<Transaction>() {
+                trans1.prioritized(o.node, new Handler<Transaction>() {
                 	public void run(Transaction trans2) {
-                        out.send(trans2, bf.newValue().apply(ba.newValue()));
+                        o.send(trans2, bf.newValue().apply(ba.newValue()));
                         fired = false;
                     }
             	});
             }
         };
 
-        Listener l1 = bf.updates().listen_(out.node, new TransactionHandler<Lambda1<A,B>>() {
+        Listener l1 = bf.updates().listen_(o.node, new TransactionHandler<Lambda1<A,B>>() {
         	public void run(Transaction trans1, Lambda1<A,B> f) {
                 h.run(trans1);
             }
         });
-        Listener l2 = ba.updates().listen_(out.node, new TransactionHandler<A>() {
+        Listener l2 = ba.updates().listen_(o.node, new TransactionHandler<A>() {
         	public void run(Transaction trans1, A a) {
 	            h.run(trans1);
 	        }
         });
-        return out.addCleanup(l1).addCleanup(l2).hold(bf.sample().apply(ba.sample()));
+        return o.addCleanup(l1).addCleanup(l2).hold(bf.sample().apply(ba.sample()));
 	}
 
 	/**
@@ -213,7 +213,7 @@ public class Behavior<A> {
 	public static <A> Behavior<A> switchB(final Behavior<Behavior<A>> bba)
 	{
 	    A za = bba.sample().sample();
-	    final EventSink<A> out = new EventSink<A>();
+	    final EventSink<A> o = new EventSink<A>();
         TransactionHandler<Behavior<A>> h = new TransactionHandler<Behavior<A>>() {
             private Listener currentListener;
             @Override
@@ -226,9 +226,9 @@ public class Behavior<A> {
                 // that might have happened during this transaction will be suppressed.
                 if (currentListener != null)
                     currentListener.unlisten();
-                currentListener = ba.value(trans2).listen(out.node, trans2, new TransactionHandler<A>() {
+                currentListener = ba.value(trans2).listen(o.node, trans2, new TransactionHandler<A>() {
                 	public void run(Transaction trans3, A a) {
-	                    out.send(trans3, a);
+	                    o.send(trans3, a);
 	                }
                 }, false);
             }
@@ -239,8 +239,8 @@ public class Behavior<A> {
                     currentListener.unlisten();
             }
         };
-        Listener l1 = bba.value().listen_(out.node, h);
-        return out.addCleanup(l1).hold(za);
+        Listener l1 = bba.value().listen_(o.node, h);
+        return o.addCleanup(l1).hold(za);
 	}
 	
 	/**
@@ -257,14 +257,14 @@ public class Behavior<A> {
 
 	private static <A> Event<A> switchE(final Transaction trans1, final Behavior<Event<A>> bea)
 	{
-        final EventSink<A> out = new EventSink<A>();
+        final EventSink<A> o = new EventSink<A>();
         final TransactionHandler<A> h2 = new TransactionHandler<A>() {
         	public void run(Transaction trans2, A a) {
-	            out.send(trans2, a);
+	            o.send(trans2, a);
 	        }
         };
         TransactionHandler<Event<A>> h1 = new TransactionHandler<Event<A>>() {
-            private Listener currentListener = bea.sample().listen(out.node, trans1, h2, false);
+            private Listener currentListener = bea.sample().listen(o.node, trans1, h2, false);
 
             @Override
             public void run(final Transaction trans2, final Event<A> ea) {
@@ -272,7 +272,7 @@ public class Behavior<A> {
                 	public void run() {
 	                    if (currentListener != null)
 	                        currentListener.unlisten();
-	                    currentListener = ea.listen(out.node, trans2, h2, true);
+	                    currentListener = ea.listen(o.node, trans2, h2, true);
 	                }
                 });
             }
@@ -283,8 +283,8 @@ public class Behavior<A> {
                     currentListener.unlisten();
             }
         };
-        Listener l1 = bea.updates().listen(out.node, trans1, h1, false);
-        return out.addCleanup(l1);
+        Listener l1 = bea.updates().listen(o.node, trans1, h1, false);
+        return o.addCleanup(l1);
 	}
 
     /**
