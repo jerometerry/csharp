@@ -1,6 +1,5 @@
 namespace sodium {
 
-    //import java.util.List;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -15,12 +14,11 @@ namespace sodium {
         // TO DO: Copy & paste from EventSink. Can we improve this?
         private void send(Transaction trans, A a) {
             if (!firings.Any())
-                trans.last(new Runnable() {
-            	    public void run() { firings.Clear(); }
+                trans.last(new Runnable(() => firings.Clear()) {
                 });
             firings.Add(a);
 
-		    List<ITransactionHandler<A>> listeners = (List<ITransactionHandler<A>>)this.listeners.clone();
+            List<ITransactionHandler<A>> listeners = new List<ITransactionHandler<A>>(this.listeners);
     	    foreach (ITransactionHandler<A> action in listeners) {
     		    try {
                     action.run(trans, a);
@@ -37,11 +35,23 @@ namespace sodium {
                 throw new ApplicationException("EventLoop looped more than once");
             this.ea_out = ea_out;
             EventLoop<A> me = this;
-            addCleanup(ea_out.listen_(this.node, new ITransactionHandler<A>() {
-                public void run(Transaction trans, A a) {
-                    me.send(trans, a);
-                }
-            }));
+            ITransactionHandler<A> action = new TransactionHandler(me);
+            addCleanup(ea_out.listen_(this.node, action));
+        }
+
+        private class TransactionHandler : ITransactionHandler<A>
+        {
+            private EventLoop<A> me;
+
+            public TransactionHandler(EventLoop<A> me)
+            {
+                this.me = me;
+            }
+
+            public void run(Transaction trans, A a)
+            {
+                me.send(trans, a);
+            }
         }
     }
 

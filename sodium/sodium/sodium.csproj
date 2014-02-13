@@ -49,9 +49,12 @@
     <Compile Include="ILambda1.cs" />
     <Compile Include="ILambda2.cs" />
     <Compile Include="ILambda3.cs" />
+    <Compile Include="IRunnable.cs" />
     <Compile Include="Listener.cs" />
     <Compile Include="Node.cs" />
+    <Compile Include="PriorityQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Runnable.cs" />
     <Compile Include="Transaction.cs" />
     <Compile Include="ITransactionHandler.cs" />
     <Compile Include="Tuple2.cs" />

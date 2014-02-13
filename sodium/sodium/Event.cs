@@ -35,7 +35,7 @@ namespace sodium {
 
 	    protected readonly List<ITransactionHandler<A>> listeners = new List<ITransactionHandler<A>>();
 	    protected readonly List<Listener> finalizers = new List<Listener>();
-	    Node node = new Node(0L);
+	    protected Node node = new Node(0L);
 	    protected readonly List<A> firings = new List<A>();
 
 	    /**
@@ -58,7 +58,7 @@ namespace sodium {
 		    });
 	    }
 
-	    Listener listen_(Node target, ITransactionHandler<A> action) {
+	    public Listener listen_(Node target, ITransactionHandler<A> action) {
 		    return Transaction.apply(new ILambda1<Transaction, Listener>() {
 			    public Listener apply(Transaction trans1) {
 				    return listen(target, trans1, action, false);
@@ -428,7 +428,7 @@ namespace sodium {
             return o.addCleanup(la[0]);
         }
 
-        Event<A> addCleanup(Listener cleanup)
+        protected Event<A> addCleanup(Listener cleanup)
         {
             finalizers.Add(cleanup);
             return this;
