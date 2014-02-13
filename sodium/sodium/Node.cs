@@ -12,7 +12,7 @@ namespace sodium {
 	    }
 
 	    private long rank;
-	    private Set<Node> listeners = new HashSet<Node>();
+	    private ISet<Node> listeners = new HashSet<Node>();
 
 	    /**
 	     * @return true if any changes were made. 
@@ -33,8 +33,8 @@ namespace sodium {
 		    listeners.Remove(target);
 	    }
 
-	    private bool ensureBiggerThan(long limit, Set<Node> visited) {
-		    if (rank > limit || visited.contains(this))
+	    private bool ensureBiggerThan(long limit, ISet<Node> visited) {
+		    if (rank > limit || visited.Contains(this))
 			    return false;
 
 		    visited.Add(this);
