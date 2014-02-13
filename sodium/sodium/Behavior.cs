@@ -107,7 +107,7 @@ namespace sodium {
         /**
          * Transform the behavior's value according to the supplied function.
          */
-	    public <B> Behavior<B> map(ILambda1<A,B> f)
+	    public Behavior<B> map<B>(ILambda1<A,B> f)
 	    {
 		    return updates().map(f).hold(f.apply(sample()));
 	    }
@@ -115,7 +115,7 @@ namespace sodium {
 	    /**
 	     * Lift a binary function into behaviors.
 	     */
-	    public <B,C> Behavior<C> lift(ILambda2<A,B,C> f, Behavior<B> b)
+	    public Behavior<C> lift<B,C>(ILambda2<A,B,C> f, Behavior<B> b)
 	    {
 		    ILambda1<A, ILambda1<B,C>> ffa = new ILambda1<A, ILambda1<B,C>>() {
 			    public ILambda1<B,C> apply(A aa) {
@@ -133,7 +133,7 @@ namespace sodium {
 	    /**
 	     * Lift a binary function into behaviors.
 	     */
-	    public static <A,B,C> Behavior<C> lift(ILambda2<A,B,C> f, Behavior<A> a, Behavior<B> b)
+	    public static Behavior<C> lift<A,B,C>(ILambda2<A,B,C> f, Behavior<A> a, Behavior<B> b)
 	    {
 		    return a.lift(f, b);
 	    }
@@ -141,7 +141,7 @@ namespace sodium {
 	    /**
 	     * Lift a ternary function into behaviors.
 	     */
-	    public <B,C,D> Behavior<D> lift(ILambda3<A,B,C,D> f, Behavior<B> b, Behavior<C> c)
+	    public Behavior<D> lift<B,C,D>(ILambda3<A,B,C,D> f, Behavior<B> b, Behavior<C> c)
 	    {
 		    ILambda1<A, ILambda1<B, ILambda1<C,D>>> ffa = new ILambda1<A, ILambda1<B, ILambda1<C,D>>>() {
 			    public ILambda1<B, ILambda1<C,D>> apply(A aa) {
@@ -163,7 +163,7 @@ namespace sodium {
 	    /**
 	     * Lift a ternary function into behaviors.
 	     */
-	    public static <A,B,C,D> Behavior<D> lift(ILambda3<A,B,C,D> f, Behavior<A> a, Behavior<B> b, Behavior<C> c)
+	    public static Behavior<D> lift<A,B,C,D>(ILambda3<A,B,C,D> f, Behavior<A> a, Behavior<B> b, Behavior<C> c)
 	    {
 		    return a.lift(f, b, c);
 	    }
@@ -172,7 +172,7 @@ namespace sodium {
 	     * Apply a value inside a behavior to a function inside a behavior. This is the
 	     * primitive for all function lifting.
 	     */
-	    public static <A,B> Behavior<B> apply(Behavior<ILambda1<A,B>> bf, Behavior<A> ba)
+	    public static Behavior<B> apply<A,B>(Behavior<ILambda1<A,B>> bf, Behavior<A> ba)
 	    {
 		    EventSink<B> o = new EventSink<B>();
 
@@ -208,7 +208,7 @@ namespace sodium {
 	    /**
 	     * Unwrap a behavior inside another behavior to give a time-varying behavior implementation.
 	     */
-	    public static <A> Behavior<A> switchB(Behavior<Behavior<A>> bba)
+	    public static Behavior<A> switchB<A>(Behavior<Behavior<A>> bba)
 	    {
 	        A za = bba.sample().sample();
 	        EventSink<A> o = new EventSink<A>();
@@ -242,7 +242,7 @@ namespace sodium {
 	    /**
 	     * Unwrap an evt inside a behavior to give a time-varying evt implementation.
 	     */
-	    public static <A> Event<A> switchE(Behavior<Event<A>> bea)
+	    public static Event<A> switchE<A>(Behavior<Event<A>> bea)
 	    {
             return Transaction.apply(new ILambda1<Transaction, Event<A>>() {
         	    public Event<A> apply(Transaction trans) {
@@ -251,7 +251,7 @@ namespace sodium {
             });
         }
 
-	    private static <A> Event<A> switchE(Transaction trans1, Behavior<Event<A>> bea)
+	    private static Event<A> switchE<A>(Transaction trans1, Behavior<Event<A>> bea)
 	    {
             EventSink<A> o = new EventSink<A>();
             ITransactionHandler<A> h2 = new ITransactionHandler<A>() {
@@ -285,7 +285,7 @@ namespace sodium {
          * Transform a behavior with a generalized state loop (a mealy machine). The function
          * is passed the input and the old state and returns the new state and output value.
          */
-        public <B,S> Behavior<B> collect(S initState, ILambda2<A, S, Tuple2<B, S>> f)
+        public Behavior<B> collect<B,S>(S initState, ILambda2<A, S, Tuple2<B, S>> f)
         {
             Event<A> ea = updates().coalesce(new ILambda2<A,A,A>() {
         	    public A apply(A fst, A snd) { return snd; }

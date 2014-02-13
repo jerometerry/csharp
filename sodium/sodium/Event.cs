@@ -89,7 +89,7 @@ namespace sodium {
         /**
          * Transform the event's value according to the supplied function.
          */
-	    public <B> Event<B> map(ILambda1<A,B> f)
+	    public Event<B> map<B>(ILambda1<A,B> f)
 	    {
 	        Event<A> ev = this;
 	        EventSink<B> o = new EventSink<B>() {
@@ -132,7 +132,7 @@ namespace sodium {
 	    /**
 	     * Variant of snapshot that throws away the event's value and captures the behavior's.
 	     */
-	    public <B> Event<B> snapshot(Behavior<B> beh)
+	    public Event<B> snapshot<B>(Behavior<B> beh)
 	    {
 	        return snapshot(beh, new ILambda2<A,B,B>() {
 	    	    public B apply(A a, B b) {
@@ -146,7 +146,7 @@ namespace sodium {
          * of the behavior that's sampled is the value as at the start of the transaction
          * before any state changes of the current transaction are applied through 'hold's.
          */
-	    public <B,C> Event<C> snapshot(Behavior<B> b, ILambda2<A,B,C> f)
+	    public Event<C> snapshot<B,C>(Behavior<B> b, ILambda2<A,B,C> f)
 	    {
 	        Event<A> ev = this;
 		    EventSink<C> o = new EventSink<C>() {
@@ -180,7 +180,7 @@ namespace sodium {
          * their ordering is retained. In many common cases the ordering will
          * be undefined.
          */
-	    public static <A> Event<A> merge(Event<A> ea, Event<A> eb)
+	    public static Event<A> merge<A>(Event<A> ea, Event<A> eb)
 	    {
 	        EventSink<A> o = new EventSink<A>() {
                 protected override Object[] sampleNow()
@@ -292,7 +292,7 @@ namespace sodium {
          * within the same transaction), they are combined using the same logic as
          * 'coalesce'.
          */
-        public static <A> Event<A> mergeWith(ILambda2<A,A,A> f, Event<A> ea, Event<A> eb)
+        public static Event<A> mergeWith<A>(ILambda2<A,A,A> f, Event<A> ea, Event<A> eb)
         {
             return merge(ea, eb).coalesce(f);
         }
@@ -362,7 +362,7 @@ namespace sodium {
          * Transform an event with a generalized state loop (a mealy machine). The function
          * is passed the input and the old state and returns the new state and output value.
          */
-        public <B,S> Event<B> collect(S initState, ILambda2<A, S, Tuple2<B, S>> f)
+        public Event<B> collect<B,S>(S initState, ILambda2<A, S, Tuple2<B, S>> f)
         {
             Event<A> ea = this;
             EventLoop<S> es = new EventLoop<S>();
@@ -381,7 +381,7 @@ namespace sodium {
         /**
          * Accumulate on input event, outputting the new state each time.
          */
-        public <S> Behavior<S> accum(S initState, ILambda2<A, S, S> f)
+        public Behavior<S> accum<S>(S initState, ILambda2<A, S, S> f)
         {
             Event<A> ea = this;
             EventLoop<S> es = new EventLoop<S>();
@@ -451,7 +451,7 @@ namespace sodium {
 	    private EventSink<A> o;
         private bool accumValid = false;
         private A accum;
-        public override void run(Transaction trans1, A a) {
+        public void run(Transaction trans1, A a) {
             if (accumValid)
                 accum = f.apply(accum, a);
             else {

@@ -16,9 +16,7 @@ namespace sodium {
 
         void send(Transaction trans, A a) {
             if (!firings.Any())
-                trans.last(new Runnable() {
-            	    public void run() { firings.Clear(); }
-                });
+                trans.last(new Runnable(() => firings.Clear()));
             firings.Add(a);
         
             List<ITransactionHandler<A>> listeners = new List<ITransactionHandler<A>>(this.listeners);
