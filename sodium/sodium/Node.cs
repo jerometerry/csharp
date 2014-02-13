@@ -1,12 +1,13 @@
 namespace sodium {
 
+    using System.Collections.Generic;
     //import java.util.HashSet;
     //import java.util.Set;
 
     public class Node : Comparable<Node> {
-        public final static Node NULL = new Node(Long.MAX_VALUE);
+        public readonly static Node NULL = new Node(long.MaxValue);
 
-	    Node(long rank) {
+	    public Node(long rank) {
 		    this.rank = rank;
 	    }
 

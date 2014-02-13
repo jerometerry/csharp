@@ -1,11 +1,12 @@
 namespace sodium {
 
     using System;
+    using System.Collections.Generic;
     //import java.util.ArrayList;
     //import java.util.List;
 
     public class Event<A> {
-	    private static final class ListenerImplementation<A> : Listener {
+	    private sealed class ListenerImplementation<A> : Listener {
 		    /**
 		     * It's essential that we keep the listener alive while the caller holds
 		     * the Listener, so that the finalizer doesn't get triggered.
@@ -32,10 +33,10 @@ namespace sodium {
 		    }
 	    }
 
-	    protected final List<TransactionHandler<A>> listeners = new List<TransactionHandler<A>>();
-	    protected final List<Listener> finalizers = new List<Listener>();
+	    protected readonly List<TransactionHandler<A>> listeners = new List<TransactionHandler<A>>();
+	    protected readonly List<Listener> finalizers = new List<Listener>();
 	    Node node = new Node(0L);
-	    protected final List<A> firings = new List<A>();
+	    protected readonly List<A> firings = new List<A>();
 
 	    /**
 	     * An event that never fires.
@@ -65,7 +66,6 @@ namespace sodium {
 		    });
 	    }
 
-	    @SuppressWarnings("unchecked")
 	    final Listener listen(Node target, Transaction trans, TransactionHandler<A> action, bool suppressEarlierFirings) {
             synchronized (Transaction.listenersLock) {
                 if (node.linkTo(target))
@@ -93,7 +93,6 @@ namespace sodium {
 	    {
 	        final Event<A> ev = this;
 	        final EventSink<B> o = new EventSink<B>() {
-    		    @SuppressWarnings("unchecked")
                 protected override Object[] sampleNow()
                 {
                     Object[] oi = ev.sampleNow();
@@ -151,7 +150,6 @@ namespace sodium {
 	    {
 	        final Event<A> ev = this;
 		    final EventSink<C> o = new EventSink<C>() {
-    		    @SuppressWarnings("unchecked")
                 protected override Object[] sampleNow()
                 {
                     Object[] oi = ev.sampleNow();
@@ -258,7 +256,6 @@ namespace sodium {
 	    {
 	        final Event<A> ev = this;
 	        final EventSink<A> o = new EventSink<A>() {
-    		    @SuppressWarnings("unchecked")
                 protected override Object[] sampleNow()
                 {
                     Object[] oi = ev.sampleNow();
@@ -307,7 +304,6 @@ namespace sodium {
         {
             final Event<A> ev = this;
             final EventSink<A> o = new EventSink<A>() {
-    		    @SuppressWarnings("unchecked")
                 protected override Object[] sampleNow()
                 {
                     Object[] oi = ev.sampleNow();

@@ -17,7 +17,6 @@ namespace sodium {
                 });
             firings.add(a);
 
-            @SuppressWarnings("unchecked")
 		    List<TransactionHandler<A>> listeners = (List<TransactionHandler<A>>)this.listeners.clone();
     	    for (TransactionHandler<A> action : listeners) {
     		    try {
