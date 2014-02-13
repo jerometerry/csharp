@@ -45,10 +45,10 @@
     <Compile Include="Event.cs" />
     <Compile Include="EventLoop.cs" />
     <Compile Include="EventSink.cs" />
-    <Compile Include="Handler.cs" />
-    <Compile Include="Lambda1.cs" />
-    <Compile Include="Lambda2.cs" />
-    <Compile Include="Lambda3.cs" />
+    <Compile Include="IHandler.cs" />
+    <Compile Include="ILambda1.cs" />
+    <Compile Include="ILambda2.cs" />
+    <Compile Include="ILambda3.cs" />
     <Compile Include="Listener.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

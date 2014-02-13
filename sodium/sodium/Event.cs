@@ -59,7 +59,7 @@ namespace sodium {
 	    }
 
 	    Listener listen_(Node target, ITransactionHandler<A> action) {
-		    return Transaction.apply(new Lambda1<Transaction, Listener>() {
+		    return Transaction.apply(new ILambda1<Transaction, Listener>() {
 			    public Listener apply(Transaction trans1) {
 				    return listen(target, trans1, action, false);
 			    }
@@ -89,7 +89,7 @@ namespace sodium {
         /**
          * Transform the event's value according to the supplied function.
          */
-	    public <B> Event<B> map(Lambda1<A,B> f)
+	    public <B> Event<B> map(ILambda1<A,B> f)
 	    {
 	        Event<A> ev = this;
 	        EventSink<B> o = new EventSink<B>() {
@@ -122,7 +122,7 @@ namespace sodium {
          * the transaction.
          */
 	    public Behavior<A> hold(A initValue) {
-		    return Transaction.apply(new Lambda1<Transaction, Behavior<A>>() {
+		    return Transaction.apply(new ILambda1<Transaction, Behavior<A>>() {
 			    public Behavior<A> apply(Transaction trans) {
 			        return new Behavior<A>(lastFiringOnly(trans), initValue);
 			    }
@@ -134,7 +134,7 @@ namespace sodium {
 	     */
 	    public <B> Event<B> snapshot(Behavior<B> beh)
 	    {
-	        return snapshot(beh, new Lambda2<A,B,B>() {
+	        return snapshot(beh, new ILambda2<A,B,B>() {
 	    	    public B apply(A a, B b) {
 	    		    return b;
 	    	    }
@@ -146,7 +146,7 @@ namespace sodium {
          * of the behavior that's sampled is the value as at the start of the transaction
          * before any state changes of the current transaction are applied through 'hold's.
          */
-	    public <B,C> Event<C> snapshot(Behavior<B> b, Lambda2<A,B,C> f)
+	    public <B,C> Event<C> snapshot(Behavior<B> b, ILambda2<A,B,C> f)
 	    {
 	        Event<A> ev = this;
 		    EventSink<C> o = new EventSink<C>() {
@@ -243,16 +243,16 @@ namespace sodium {
          * make any assumptions about the ordering, and the combining function would
          * ideally be commutative.
          */
-	    public Event<A> coalesce(Lambda2<A,A,A> f)
+	    public Event<A> coalesce(ILambda2<A,A,A> f)
 	    {
-	        return Transaction.apply(new Lambda1<Transaction, Event<A>>() {
+	        return Transaction.apply(new ILambda1<Transaction, Event<A>>() {
 	    	    public Event<A> apply(Transaction trans) {
 	    		    return coalesce(trans, f);
 	    	    }
 	        });
 	    }
 
-	    Event<A> coalesce(Transaction trans1, Lambda2<A,A,A> f)
+	    Event<A> coalesce(Transaction trans1, ILambda2<A,A,A> f)
 	    {
 	        Event<A> ev = this;
 	        EventSink<A> o = new EventSink<A>() {
@@ -279,7 +279,7 @@ namespace sodium {
          */
         Event<A> lastFiringOnly(Transaction trans)
         {
-            return coalesce(trans, new Lambda2<A,A,A>() {
+            return coalesce(trans, new ILambda2<A,A,A>() {
         	    public A apply(A first, A second) { return second; }
             });
         }
@@ -292,7 +292,7 @@ namespace sodium {
          * within the same transaction), they are combined using the same logic as
          * 'coalesce'.
          */
-        public static <A> Event<A> mergeWith(Lambda2<A,A,A> f, Event<A> ea, Event<A> eb)
+        public static <A> Event<A> mergeWith(ILambda2<A,A,A> f, Event<A> ea, Event<A> eb)
         {
             return merge(ea, eb).coalesce(f);
         }
@@ -300,7 +300,7 @@ namespace sodium {
         /**
          * Only keep event occurrences for which the predicate returns true.
          */
-        public Event<A> filter(Lambda1<A,Boolean> f)
+        public Event<A> filter(ILambda1<A,Boolean> f)
         {
             Event<A> ev = this;
             EventSink<A> o = new EventSink<A>() {
@@ -341,7 +341,7 @@ namespace sodium {
          */
         public Event<A> filterNotNull()
         {
-            return filter(new Lambda1<A,Boolean>() {
+            return filter(new ILambda1<A,Boolean>() {
         	    public Boolean apply(A a) { return a != null; }
             });
         }
@@ -353,7 +353,7 @@ namespace sodium {
          */
         public Event<A> gate(Behavior<Boolean> bPred)
         {
-            return snapshot(bPred, new Lambda2<A,Boolean,A>() {
+            return snapshot(bPred, new ILambda2<A,Boolean,A>() {
         	    public A apply(A a, Boolean pred) { return pred ? a : null; }
             }).filterNotNull();
         }
@@ -362,16 +362,16 @@ namespace sodium {
          * Transform an event with a generalized state loop (a mealy machine). The function
          * is passed the input and the old state and returns the new state and output value.
          */
-        public <B,S> Event<B> collect(S initState, Lambda2<A, S, Tuple2<B, S>> f)
+        public <B,S> Event<B> collect(S initState, ILambda2<A, S, Tuple2<B, S>> f)
         {
             Event<A> ea = this;
             EventLoop<S> es = new EventLoop<S>();
             Behavior<S> s = es.hold(initState);
             Event<Tuple2<B,S>> ebs = ea.snapshot(s, f);
-            Event<B> eb = ebs.map(new Lambda1<Tuple2<B,S>,B>() {
+            Event<B> eb = ebs.map(new ILambda1<Tuple2<B,S>,B>() {
                 public B apply(Tuple2<B,S> bs) { return bs.a; }
             });
-            Event<S> es_out = ebs.map(new Lambda1<Tuple2<B,S>,S>() {
+            Event<S> es_out = ebs.map(new ILambda1<Tuple2<B,S>,S>() {
                 public S apply(Tuple2<B,S> bs) { return bs.b; }
             });
             es.loop(es_out);
@@ -381,7 +381,7 @@ namespace sodium {
         /**
          * Accumulate on input event, outputting the new state each time.
          */
-        public <S> Behavior<S> accum(S initState, Lambda2<A, S, S> f)
+        public <S> Behavior<S> accum(S initState, ILambda2<A, S, S> f)
         {
             Event<A> ea = this;
             EventLoop<S> es = new EventLoop<S>();
@@ -442,12 +442,12 @@ namespace sodium {
 
     class CoalesceHandler<A> : ITransactionHandler<A>
     {
-	    public CoalesceHandler(Lambda2<A,A,A> f, EventSink<A> o)
+	    public CoalesceHandler(ILambda2<A,A,A> f, EventSink<A> o)
 	    {
 	        this.f = f;
 	        this.o = o;
 	    }
-	    private Lambda2<A,A,A> f;
+	    private ILambda2<A,A,A> f;
 	    private EventSink<A> o;
         private bool accumValid = false;
         private A accum;

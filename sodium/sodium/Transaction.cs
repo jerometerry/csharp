@@ -17,7 +17,7 @@ namespace sodium {
         // True if we need to re-generate the priority queue.
         bool toRegen = false;
 
-	    private class Entry : Comparable<Entry> {
+	    private class Entry : IComparable<Entry> {
 		    private Node rank;
 		    public IHandler<Transaction> action;
 		    private static long nextSeq;
@@ -29,8 +29,8 @@ namespace sodium {
 			    this.seq = nextSeq++;
 		    }
 
-		    public override int compareTo(Entry o) {
-			    int answer = rank.compareTo(o.rank);
+		    public int CompareTo(Entry o) {
+			    int answer = rank.CompareTo(o.rank);
 			    if (answer == 0) {  // Same rank: preserve chronological sequence.
 				    if (seq < o.seq) answer = -1; else
 				    if (seq > o.seq) answer = 1;
@@ -93,7 +93,7 @@ namespace sodium {
             }
 	    }
 
-	    static <A> A apply(Lambda1<Transaction, A> code) {
+	    static <A> A apply(ILambda1<Transaction, A> code) {
             lock (transactionLock) {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then

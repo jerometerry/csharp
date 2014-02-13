@@ -80,7 +80,7 @@ namespace sodium {
          */
         public Event<A> value()
         {
-            return Transaction.apply(new Lambda1<Transaction, Event<A>>() {
+            return Transaction.apply(new ILambda1<Transaction, Event<A>>() {
         	    public Event<A> apply(Transaction trans) {
         		    return value(trans);
         	    }
@@ -107,7 +107,7 @@ namespace sodium {
         /**
          * Transform the behavior's value according to the supplied function.
          */
-	    public <B> Behavior<B> map(Lambda1<A,B> f)
+	    public <B> Behavior<B> map(ILambda1<A,B> f)
 	    {
 		    return updates().map(f).hold(f.apply(sample()));
 	    }
@@ -115,25 +115,25 @@ namespace sodium {
 	    /**
 	     * Lift a binary function into behaviors.
 	     */
-	    public <B,C> Behavior<C> lift(Lambda2<A,B,C> f, Behavior<B> b)
+	    public <B,C> Behavior<C> lift(ILambda2<A,B,C> f, Behavior<B> b)
 	    {
-		    Lambda1<A, Lambda1<B,C>> ffa = new Lambda1<A, Lambda1<B,C>>() {
-			    public Lambda1<B,C> apply(A aa) {
-				    return new Lambda1<B,C>() {
+		    ILambda1<A, ILambda1<B,C>> ffa = new ILambda1<A, ILambda1<B,C>>() {
+			    public ILambda1<B,C> apply(A aa) {
+				    return new ILambda1<B,C>() {
 					    public C apply(B bb) {
 						    return f.apply(aa,bb);
 					    }
 				    };
 			    }
 		    };
-		    Behavior<Lambda1<B,C>> bf = map(ffa);
+		    Behavior<ILambda1<B,C>> bf = map(ffa);
 		    return apply(bf, b);
 	    }
 
 	    /**
 	     * Lift a binary function into behaviors.
 	     */
-	    public static <A,B,C> Behavior<C> lift(Lambda2<A,B,C> f, Behavior<A> a, Behavior<B> b)
+	    public static <A,B,C> Behavior<C> lift(ILambda2<A,B,C> f, Behavior<A> a, Behavior<B> b)
 	    {
 		    return a.lift(f, b);
 	    }
@@ -141,13 +141,13 @@ namespace sodium {
 	    /**
 	     * Lift a ternary function into behaviors.
 	     */
-	    public <B,C,D> Behavior<D> lift(Lambda3<A,B,C,D> f, Behavior<B> b, Behavior<C> c)
+	    public <B,C,D> Behavior<D> lift(ILambda3<A,B,C,D> f, Behavior<B> b, Behavior<C> c)
 	    {
-		    Lambda1<A, Lambda1<B, Lambda1<C,D>>> ffa = new Lambda1<A, Lambda1<B, Lambda1<C,D>>>() {
-			    public Lambda1<B, Lambda1<C,D>> apply(A aa) {
-				    return new Lambda1<B, Lambda1<C,D>>() {
-					    public Lambda1<C,D> apply(B bb) {
-						    return new Lambda1<C,D>() {
+		    ILambda1<A, ILambda1<B, ILambda1<C,D>>> ffa = new ILambda1<A, ILambda1<B, ILambda1<C,D>>>() {
+			    public ILambda1<B, ILambda1<C,D>> apply(A aa) {
+				    return new ILambda1<B, ILambda1<C,D>>() {
+					    public ILambda1<C,D> apply(B bb) {
+						    return new ILambda1<C,D>() {
 							    public D apply(C cc) {
 								    return f.apply(aa,bb,cc);
 							    }
@@ -156,14 +156,14 @@ namespace sodium {
 				    };
 			    }
 		    };
-		    Behavior<Lambda1<B, Lambda1<C, D>>> bf = map(ffa);
+		    Behavior<ILambda1<B, ILambda1<C, D>>> bf = map(ffa);
 		    return apply(apply(bf, b), c);
 	    }
 
 	    /**
 	     * Lift a ternary function into behaviors.
 	     */
-	    public static <A,B,C,D> Behavior<D> lift(Lambda3<A,B,C,D> f, Behavior<A> a, Behavior<B> b, Behavior<C> c)
+	    public static <A,B,C,D> Behavior<D> lift(ILambda3<A,B,C,D> f, Behavior<A> a, Behavior<B> b, Behavior<C> c)
 	    {
 		    return a.lift(f, b, c);
 	    }
@@ -172,7 +172,7 @@ namespace sodium {
 	     * Apply a value inside a behavior to a function inside a behavior. This is the
 	     * primitive for all function lifting.
 	     */
-	    public static <A,B> Behavior<B> apply(Behavior<Lambda1<A,B>> bf, Behavior<A> ba)
+	    public static <A,B> Behavior<B> apply(Behavior<ILambda1<A,B>> bf, Behavior<A> ba)
 	    {
 		    EventSink<B> o = new EventSink<B>();
 
@@ -192,8 +192,8 @@ namespace sodium {
                 }
             };
 
-            Listener l1 = bf.updates().listen_(o.node, new ITransactionHandler<Lambda1<A,B>>() {
-        	    public void run(Transaction trans1, Lambda1<A,B> f) {
+            Listener l1 = bf.updates().listen_(o.node, new ITransactionHandler<ILambda1<A,B>>() {
+        	    public void run(Transaction trans1, ILambda1<A,B> f) {
                     h.run(trans1);
                 }
             });
@@ -244,7 +244,7 @@ namespace sodium {
 	     */
 	    public static <A> Event<A> switchE(Behavior<Event<A>> bea)
 	    {
-            return Transaction.apply(new Lambda1<Transaction, Event<A>>() {
+            return Transaction.apply(new ILambda1<Transaction, Event<A>>() {
         	    public Event<A> apply(Transaction trans) {
                     return switchE(trans, bea);
         	    }
@@ -285,23 +285,23 @@ namespace sodium {
          * Transform a behavior with a generalized state loop (a mealy machine). The function
          * is passed the input and the old state and returns the new state and output value.
          */
-        public <B,S> Behavior<B> collect(S initState, Lambda2<A, S, Tuple2<B, S>> f)
+        public <B,S> Behavior<B> collect(S initState, ILambda2<A, S, Tuple2<B, S>> f)
         {
-            Event<A> ea = updates().coalesce(new Lambda2<A,A,A>() {
+            Event<A> ea = updates().coalesce(new ILambda2<A,A,A>() {
         	    public A apply(A fst, A snd) { return snd; }
             });
             A za = sample();
             Tuple2<B, S> zbs = f.apply(za, initState);
             EventLoop<Tuple2<B,S>> ebs = new EventLoop<Tuple2<B,S>>();
             Behavior<Tuple2<B,S>> bbs = ebs.hold(zbs);
-            Behavior<S> bs = bbs.map(new Lambda1<Tuple2<B,S>,S>() {
+            Behavior<S> bs = bbs.map(new ILambda1<Tuple2<B,S>,S>() {
                 public S apply(Tuple2<B,S> x) {
                     return x.b;
                 }
             });
             Event<Tuple2<B,S>> ebs_out = ea.snapshot(bs, f);
             ebs.loop(ebs_out);
-            return bbs.map(new Lambda1<Tuple2<B,S>,B>() {
+            return bbs.map(new ILambda1<Tuple2<B,S>,B>() {
                 public B apply(Tuple2<B,S> x) {
                     return x.a;
                 }

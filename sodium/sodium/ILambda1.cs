@@ -1,7 +1,7 @@
 namespace sodium
 {
 
-    public interface Lambda1<A, B>
+    public interface ILambda1<A, B>
     {
         B apply(A a);
     }
