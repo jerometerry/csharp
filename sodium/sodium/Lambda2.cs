@@ -1,6 +1,9 @@
-package sodium;
+namespace sodium
+{
 
-public interface Lambda2<A,B,C> {
-    C apply(A a, B b);
+    public interface Lambda2<A, B, C>
+    {
+        C apply(A a, B b);
+    }
+
 }
-

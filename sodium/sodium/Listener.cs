@@ -1,4 +1,4 @@
-package sodium;
+namespace sodium {
 
 public class Listener {
     public Listener() {}
@@ -20,3 +20,4 @@ public class Listener {
     }
 }
 
+}

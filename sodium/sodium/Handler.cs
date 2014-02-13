@@ -1,6 +1,9 @@
-package sodium;
+namespace sodium
+{
 
-public interface Handler<A> {
-    void run(A a);
+    public interface Handler<A>
+    {
+        void run(A a);
+    }
+
 }
-

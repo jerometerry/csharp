@@ -1,4 +1,4 @@
-package sodium;
+namespace sodium {
 
 import java.util.ArrayList;
 import java.util.List;
@@ -480,3 +480,4 @@ class CoalesceHandler<A> implements TransactionHandler<A>
     }
 }
 
+}

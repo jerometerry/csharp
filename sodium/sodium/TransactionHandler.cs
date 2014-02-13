@@ -1,6 +1,9 @@
-package sodium;
+namespace sodium
+{
 
-public interface TransactionHandler<A> {
-    void run(Transaction trans, A a);
+    public interface TransactionHandler<A>
+    {
+        void run(Transaction trans, A a);
+    }
+
 }
-

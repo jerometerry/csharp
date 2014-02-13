@@ -1,4 +1,4 @@
-package sodium;
+namespace sodium {
 
 import java.util.HashSet;
 import java.util.Set;
@@ -49,4 +49,5 @@ public class Node implements Comparable<Node> {
 		if (rank > o.rank) return 1;
 		return 0;
 	}
+}
 }

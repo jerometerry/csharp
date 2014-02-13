@@ -1,4 +1,4 @@
-package sodium;
+namespace sodium {
 
 public final class BehaviorSink<A> extends Behavior<A> {
     public BehaviorSink(A initValue) {
@@ -9,4 +9,5 @@ public final class BehaviorSink<A> extends Behavior<A> {
     {
         ((EventSink<A>)event).send(a);
     }
+}
 }

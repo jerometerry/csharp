@@ -1,4 +1,4 @@
-package sodium;
+namespace sodium {
 
 public final class Tuple2<A,B> {
     public Tuple2(A a, B b) {
@@ -9,3 +9,4 @@ public final class Tuple2<A,B> {
     public B b;
 }
 
+}

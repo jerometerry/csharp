@@ -1,4 +1,4 @@
-package sodium;
+namespace sodium {
 
 public class Behavior<A> {
 	protected Event<A> event;
@@ -319,4 +319,5 @@ public class Behavior<A> {
 	    if (cleanup != null)
             cleanup.unlisten();
 	}
+}
 }

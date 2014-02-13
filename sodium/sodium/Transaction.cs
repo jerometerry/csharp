@@ -1,4 +1,4 @@
-package sodium;
+namespace sodium {
 
 import java.util.ArrayList;
 import java.util.List;
@@ -162,4 +162,5 @@ public final class Transaction {
             postQ.clear();
 		}
 	}
+}
 }

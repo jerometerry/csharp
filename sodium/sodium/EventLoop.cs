@@ -1,4 +1,4 @@
-package sodium;
+namespace sodium {
 
 import java.util.List;
 
@@ -43,3 +43,4 @@ public class EventLoop<A> extends Event<A> {
     }
 }
 
+}

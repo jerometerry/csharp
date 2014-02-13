@@ -1,4 +1,4 @@
-package sodium;
+namespace sodium {
 
 public final class BehaviorLoop<A> extends Behavior<A> {
     public BehaviorLoop() {
@@ -12,3 +12,4 @@ public final class BehaviorLoop<A> extends Behavior<A> {
     }
 }
 
+}
