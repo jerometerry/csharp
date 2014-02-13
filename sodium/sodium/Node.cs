@@ -16,7 +16,7 @@ namespace sodium {
 	    /**
 	     * @return true if any changes were made. 
 	     */
-	    bool linkTo(Node target) {
+	    public bool linkTo(Node target) {
 		    if (target == NULL)
 			    return false;
 

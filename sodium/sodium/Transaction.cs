@@ -10,7 +10,7 @@ namespace sodium {
         public static readonly Object listenersLock = new Object();
 
         // True if we need to re-generate the priority queue.
-        bool toRegen = false;
+        public bool toRegen = false;
 
 	    private class Entry : IComparable<Entry> {
 		    private Node rank;
@@ -40,7 +40,7 @@ namespace sodium {
 	    private List<IRunnable> lastQ = new List<IRunnable>(); 
 	    private List<IRunnable> postQ;
 
-	    Transaction() {
+	    public Transaction() {
 	    }
 
 	    private static Transaction currentTransaction;

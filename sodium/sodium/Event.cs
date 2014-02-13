@@ -2,8 +2,6 @@ namespace sodium {
 
     using System;
     using System.Collections.Generic;
-    //import java.util.ArrayList;
-    //import java.util.List;
 
     public class Event<A> {
 	    private sealed class ListenerImplementation<A> : Listener {
@@ -53,6 +51,21 @@ namespace sodium {
 	    public Listener listen(IHandler<A> action) {
             return listen_(Node.NULL, new TransactionHandler<A>(action));
 	    }
+
+        private class TransactionHandler<A> : ITransactionHandler<A>
+        {
+            private IHandler<A> action;
+
+            public TransactionHandler(IHandler<A> action)
+            {
+                this.action = action;
+            }
+
+            public void run(Transaction trans, A a)
+            {
+                action.run(a);
+            }
+        }
 
         public Listener listen_(Node target, ITransactionHandler<A> action) {
 		    return Transaction.apply(new ListenerApplier(this, target, action));
@@ -183,12 +196,16 @@ namespace sodium {
 	     */
 	    public Event<B> snapshot<B>(Behavior<B> beh)
 	    {
-	        return snapshot(beh, new ILambda2<A,B,B>() {
-	    	    public B apply(A a, B b) {
-	    		    return b;
-	    	    }
-	        });
+	        return snapshot(beh, new SnapshotBehavior<A,B>());
 	    }
+
+        private class SnapshotBehavior<A,B> : ILambda2<A,B,B>
+        {
+            public B apply(A a, B b)
+            {
+                return b;
+            }
+        }
 
 	    /**
 	     * Sample the behavior at the time of the event firing. Note that the 'current value'
@@ -198,27 +215,56 @@ namespace sodium {
 	    public Event<C> snapshot<B,C>(Behavior<B> b, ILambda2<A,B,C> f)
 	    {
 	        Event<A> ev = this;
-		    EventSink<C> o = new EventSink<C>() {
-                protected override Object[] sampleNow()
-                {
-                    Object[] oi = ev.sampleNow();
-                    if (oi != null) {
-                        Object[] oo = new Object[oi.Length];
-                        for (int i = 0; i < oo.Length; i++)
-                            oo[i] = f.apply((A)oi[i], b.sample());
-                        return oo;
-                    }
-                    else
-                        return null;
-                }
-		    };
-            Listener l = listen_(o.node, new ITransactionHandler<A>() {
-        	    public void run(Transaction trans2, A a) {
-	                o.send(trans2, f.apply(a, b.sample()));
-	            }
-            });
+		    EventSink<C> o = new TmpEventSink<A,B,C>(ev, f, b);
+            Listener l = listen_(o.node, new TmpTransHandler<A,B,C>(o, f, b));
             return o.addCleanup(l);
 	    }
+
+        private class TmpEventSink<A,B,C> : EventSink<C>
+        {
+            private Event<A> ev;
+            private ILambda2<A, B, C> f;
+            private Behavior<B> b;
+
+            public TmpEventSink(Event<A> ev, ILambda2<A, B, C> f, Behavior<B> b)
+            {
+                this.ev = ev;
+                this.f = f;
+                this.b = b;
+            }
+
+            protected override Object[] sampleNow()
+            {
+                Object[] oi = ev.sampleNow();
+                if (oi != null) {
+                    Object[] oo = new Object[oi.Length];
+                    for (int i = 0; i < oo.Length; i++)
+                        oo[i] = f.apply((A)oi[i], b.sample());
+                    return oo;
+                }
+                else
+                    return null;
+            }
+        }
+
+        private class TmpTransHandler<A,B,C> : ITransactionHandler<A>
+        {
+            private EventSink<C> o;
+            private ILambda2<A, B, C> f;
+            private Behavior<B> b;
+
+            public TmpTransHandler(EventSink<C> o, ILambda2<A, B, C> f, Behavior<B> b)
+            {
+                this.o = o;
+                this.f = f;
+                this.b = b;
+            }
+
+            public void run(Transaction trans, A a)
+            {
+                o.send(trans, f.apply(a, b.sample()));
+            }
+        }
 
         /**
          * Merge two streams of events of the same type.
@@ -231,57 +277,94 @@ namespace sodium {
          */
 	    public static Event<A> merge<A>(Event<A> ea, Event<A> eb)
 	    {
-	        EventSink<A> o = new EventSink<A>() {
-                protected override Object[] sampleNow()
-                {
-                    Object[] oa = ea.sampleNow();
-                    Object[] ob = eb.sampleNow();
-                    if (oa != null && ob != null) {
-                        Object[] oo = new Object[oa.Length + ob.Length];
-                        int j = 0;
-                        for (int i = 0; i < oa.Length; i++) oo[j++] = oa[i];
-                        for (int i = 0; i < ob.Length; i++) oo[j++] = ob[i];
-                        return oo;
-                    }
-                    else
-                    if (oa != null)
-                        return oa;
-                    else
-                        return ob;
-                }
-	        };
-            ITransactionHandler<A> h = new ITransactionHandler<A>() {
-        	    public void run(Transaction trans, A a) {
-	                o.send(trans, a);
-	            }
-            };
+	        EventSink<A> o = new TmpEventSink2<A>(ea, eb);
+            ITransactionHandler<A> h = new TmpTransHandler2<A>(o);
             Listener l1 = ea.listen_(o.node, h);
             Listener l2 = eb.listen_(o.node, h);
             return o.addCleanup(l1).addCleanup(l2);
 	    }
 
-	    /**
+        private class TmpEventSink2<A> : EventSink<A>
+        {
+            private Event<A> ea; 
+            private Event<A> eb;
+
+            public TmpEventSink2(Event<A> ea, Event<A> eb)
+            {
+                this.ea = ea;
+                this.eb = eb;
+            }
+
+            protected override Object[] sampleNow()
+            {
+                Object[] oa = ea.sampleNow();
+                Object[] ob = eb.sampleNow();
+                if (oa != null && ob != null) {
+                    Object[] oo = new Object[oa.Length + ob.Length];
+                    int j = 0;
+                    for (int i = 0; i < oa.Length; i++) oo[j++] = oa[i];
+                    for (int i = 0; i < ob.Length; i++) oo[j++] = ob[i];
+                    return oo;
+                }
+                else
+                if (oa != null)
+                    return oa;
+                else
+                    return ob;
+            }
+        }
+
+        private class TmpTransHandler2<A> : ITransactionHandler<A>
+        {
+            private EventSink<A> o; 
+
+            public TmpTransHandler2(EventSink<A> o)
+            {
+                this.o = o;
+            }
+
+            public void run(Transaction trans, A a)
+            {
+                o.send(trans, a);
+            }
+        }
+
+        /**
 	     * Push each event occurrence onto a new transaction.
 	     */
 	    public Event<A> delay()
 	    {
 	        EventSink<A> o = new EventSink<A>();
-	        Listener l1 = listen_(o.node, new ITransactionHandler<A>() {
-	            public void run(Transaction trans, A a) {
-	                trans.post(new Runnable() {
-                        public void run() {
-                            Transaction trans = new Transaction();
-                            try {
-                                o.send(trans, a);
-                            } finally {
-                                trans.close();
-                            }
-                        }
-	                });
-	            }
-	        });
+	        Listener l1 = listen_(o.node, new TmpTransHandler3<A>(o);
 	        return o.addCleanup(l1);
 	    }
+
+        private class TmpTransHandler3<A> : ITransactionHandler<A>
+        {
+            private EventSink<A> o;
+
+            public TmpTransHandler3(EventSink<A> o)
+            {
+                this.o = o;
+            }
+
+            public void run(Transaction trans, A a)
+            {
+                trans.post(new Runnable(() =>
+                {
+                    Transaction trans2 = new Transaction();
+                    try
+                    {
+                        o.send(trans2, a);
+                    }
+                    finally
+                    {
+                        trans2.close();
+                    }
+                }));
+            }
+
+        }
 
         /**
          * If there's more than one firing in a single transaction, combine them into
