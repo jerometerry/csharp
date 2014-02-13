@@ -6,6 +6,7 @@ namespace sodium {
     //import java.util.Set;
     //import java.util.HashSet;
     using System;
+    using System.Collections.Generic;
 
     public sealed class Transaction {
         // Coarse-grained lock that's held during the whole transaction.

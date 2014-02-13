@@ -230,7 +230,7 @@ namespace sodium {
                     }, false);
                 }
 
-                protected override void finalize() throws Throwable {
+                protected override void finalize() {
                     if (currentListener != null)
                         currentListener.unlisten();
                 }
@@ -272,7 +272,7 @@ namespace sodium {
                     });
                 }
 
-                protected override void finalize() throws Throwable {
+                protected override void finalize() {
                     if (currentListener != null)
                         currentListener.unlisten();
                 }
@@ -308,7 +308,7 @@ namespace sodium {
             });
         }
 
-	    protected override void finalize() throws Throwable {
+	    protected override void finalize() {
 	        if (cleanup != null)
                 cleanup.unlisten();
 	    }

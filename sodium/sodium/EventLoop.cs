@@ -1,6 +1,7 @@
 namespace sodium {
 
     //import java.util.List;
+    using System.Collections.Generic;
 
     public class EventLoop<A> : Event<A> {
         private Event<A> ea_out;

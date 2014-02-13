@@ -1,6 +1,7 @@
 namespace sodium {
 
     //import java.util.List;
+    using System.Collections.Generic;
 
     public class EventSink<A> : Event<A> {
         public EventSink() {}

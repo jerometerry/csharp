@@ -28,7 +28,7 @@ namespace sodium {
                 }
 		    }
 
-		    protected void finalize() throws Throwable {
+		    protected void finalize() {
 			    unlisten();
 		    }
 	    }
@@ -434,7 +434,7 @@ namespace sodium {
             return this;
         }
 
-	    protected override void finalize() throws Throwable {
+	    protected override void finalize() {
 		    foreach (Listener l in finalizers)
 			    l.unlisten();
 	    }
