@@ -1,6 +1,6 @@
 namespace sodium {
 
-public final class BehaviorLoop<A> extends Behavior<A> {
+public sealed class BehaviorLoop<A> extends Behavior<A> {
     public BehaviorLoop() {
     	super(new EventLoop<A>(), null);
     }

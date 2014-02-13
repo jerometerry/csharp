@@ -1,6 +1,6 @@
 namespace sodium {
 
-public final class BehaviorSink<A> extends Behavior<A> {
+public sealed class BehaviorSink<A> extends Behavior<A> {
     public BehaviorSink(A initValue) {
     	super(new EventSink<A>(), initValue);
     }

@@ -1,12 +1,12 @@
 namespace sodium {
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Set;
-import java.util.HashSet;
+//import java.util.ArrayList;
+//import java.util.List;
+//import java.util.PriorityQueue;
+//import java.util.Set;
+//import java.util.HashSet;
 
-public final class Transaction {
+public sealed class Transaction {
     // Coarse-grained lock that's held during the whole transaction.
     static final Object transactionLock = new Object();
     // Fine-grained lock that protects listeners and nodes.
