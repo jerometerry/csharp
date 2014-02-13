@@ -1,10 +1,5 @@
 namespace sodium {
-
-    //import java.util.ArrayList;
-    //import java.util.List;
-    //import java.util.PriorityQueue;
-    //import java.util.Set;
-    //import java.util.HashSet;
+    
     using System;
     using System.Collections.Generic;
 
@@ -93,7 +88,7 @@ namespace sodium {
             }
 	    }
 
-	    static <A> A apply(ILambda1<Transaction, A> code) {
+        static A apply<A>(ILambda1<Transaction, A> code) {
             lock (transactionLock) {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
