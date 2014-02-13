@@ -57,6 +57,7 @@
     <Compile Include="Runnable.cs" />
     <Compile Include="Transaction.cs" />
     <Compile Include="ITransactionHandler.cs" />
+    <Compile Include="TransactionHandler.cs" />
     <Compile Include="Tuple2.cs" />
     <Compile Include="Unit.cs" />
   </ItemGroup>

@@ -4,7 +4,12 @@
 
     public class Runnable : IRunnable
     {
-        private readonly Action action;
+        protected readonly Action action;
+
+        public Runnable()
+        {
+            
+        }
 
         public Runnable(Action action)
         {

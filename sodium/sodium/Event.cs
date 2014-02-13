@@ -15,7 +15,7 @@ namespace sodium {
 		    private readonly ITransactionHandler<A> action;
 		    private readonly Node target;
 
-		    private ListenerImplementation(Event<A> evt, ITransactionHandler<A> action, Node target) {
+		    public ListenerImplementation(Event<A> evt, ITransactionHandler<A> action, Node target) {
 			    this.evt = evt;
 			    this.action = action;
 			    this.target = target;
@@ -44,27 +44,38 @@ namespace sodium {
 	    public Event() {
 	    }
 
-	    protected Object[] sampleNow() { return null; }
+	    protected virtual Object[] sampleNow() { return null; }
 
 	    /**
 	     * Listen for firings of this event. The returned Listener has an unlisten()
 	     * method to cause the listener to be removed. This is the observer pattern.
          */
 	    public Listener listen(IHandler<A> action) {
-		    return listen_(Node.NULL, new ITransactionHandler<A>() {
-			    public void run(Transaction trans2, A a) {
-				    action.run(a);
-			    }
-		    });
+            return listen_(Node.NULL, new TransactionHandler<A>(action));
 	    }
 
-	    public Listener listen_(Node target, ITransactionHandler<A> action) {
-		    return Transaction.apply(new ILambda1<Transaction, Listener>() {
-			    public Listener apply(Transaction trans1) {
-				    return listen(target, trans1, action, false);
-			    }
-		    });
+        public Listener listen_(Node target, ITransactionHandler<A> action) {
+		    return Transaction.apply(new ListenerApplier(this, target, action));
 	    }
+
+        private class ListenerApplier : ILambda1<Transaction, Listener>
+        {
+            private Event<A> listener;
+            private Node target;
+            private ITransactionHandler<A> action;
+
+            public ListenerApplier(Event<A> listener, Node target, ITransactionHandler<A> action)
+            {
+                this.listener = listener;
+                this.target = target;
+                this.action = action;
+            }
+
+            public Listener apply(Transaction trans)
+            {
+                return listener.listen(target, trans, action, false);
+            }
+        }
 
 	    Listener listen(Node target, Transaction trans, ITransactionHandler<A> action, bool suppressEarlierFirings) {
             lock (Transaction.listenersLock) {
@@ -92,27 +103,52 @@ namespace sodium {
 	    public Event<B> map<B>(ILambda1<A,B> f)
 	    {
 	        Event<A> ev = this;
-	        EventSink<B> o = new EventSink<B>() {
-                protected override Object[] sampleNow()
-                {
-                    Object[] oi = ev.sampleNow();
-                    if (oi != null) {
-                        Object[] oo = new Object[oi.Length];
-                        for (int i = 0; i < oo.Length; i++)
-                            oo[i] = f.apply((A)oi[i]);
-                        return oo;
-                    }
-                    else
-                        return null;
-                }
-	        };
-            Listener l = listen_(o.node, new ITransactionHandler<A>() {
-        	    public void run(Transaction trans2, A a) {
-	                o.send(trans2, f.apply(a));
-	            }
-            });
+	        EventSink<B> o = new TmpEvtSink<B>(ev, f);
+            Listener l = listen_(o.node, new TmpTransactionHandler<A, B>(o,f));
             return o.addCleanup(l);
 	    }
+
+        private class TmpTransactionHandler<A, B> : ITransactionHandler<A>
+        {
+            private EventSink<B> o;
+            private ILambda1<A, B> f;
+
+            public TmpTransactionHandler(EventSink<B> o, ILambda1<A, B> f)
+            {
+                this.o = o;
+                this.f = f;
+            }
+
+            public void run(Transaction trans, A a)
+            {
+                o.send(trans, f.apply(a));
+            }
+        }
+
+        private class TmpEvtSink<B> : EventSink<B>
+        {
+            private Event<A> ev;
+            private ILambda1<A, B> f;
+
+            public TmpEvtSink(Event<A> ev, ILambda1<A,B> f)
+            {
+                this.ev = ev;
+                this.f = f;
+            }
+
+            protected override Object[] sampleNow()
+            {
+                Object[] oi = ev.sampleNow();
+                if (oi != null) {
+                    Object[] oo = new Object[oi.Length];
+                    for (int i = 0; i < oo.Length; i++)
+                        oo[i] = f.apply((A)oi[i]);
+                    return oo;
+                }
+                else
+                    return null;
+            }
+        }
 
 	    /**
 	     * Create a behavior with the specified initial value, that gets updated
@@ -122,14 +158,27 @@ namespace sodium {
          * the transaction.
          */
 	    public Behavior<A> hold(A initValue) {
-		    return Transaction.apply(new ILambda1<Transaction, Behavior<A>>() {
-			    public Behavior<A> apply(Transaction trans) {
-			        return new Behavior<A>(lastFiringOnly(trans), initValue);
-			    }
-		    });
+		    return Transaction.apply(new BehaviorBuilder(this, initValue));
 	    }
 
-	    /**
+        private class BehaviorBuilder : ILambda1<Transaction, Behavior<A>>
+        {
+            private Event<A> evt;
+            private A initValue;
+
+            public BehaviorBuilder(Event<A> evt, A initValue)
+            {
+                this.evt = evt;
+                this.initValue = initValue;
+            }
+
+            public Behavior<A> apply(Transaction trans)
+            {
+                return new Behavior<A>(evt.lastFiringOnly(trans), initValue);
+            }
+        }
+
+        /**
 	     * Variant of snapshot that throws away the event's value and captures the behavior's.
 	     */
 	    public Event<B> snapshot<B>(Behavior<B> beh)

@@ -70,7 +70,7 @@ namespace sodium {
             }
 	    }
 
-	    static void run(IHandler<Transaction> code) {
+	    public static void run(IHandler<Transaction> code) {
             lock (transactionLock) {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
@@ -88,7 +88,7 @@ namespace sodium {
             }
 	    }
 
-        static A apply<A>(ILambda1<Transaction, A> code) {
+        public static A apply<A>(ILambda1<Transaction, A> code) {
             lock (transactionLock) {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
