@@ -112,7 +112,7 @@ namespace sodium {
 
 	    public void prioritized(Node rank, Handler<Transaction> action) {
 	        Entry e = new Entry(rank, action);
-		    prioritizedQ.add(e);
+		    prioritizedQ.Add(e);
 		    entries.Add(e);
 	    }
 
@@ -140,9 +140,9 @@ namespace sodium {
 	    {
 	        if (toRegen) {
 	            toRegen = false;
-	            prioritizedQ.clear();
+	            prioritizedQ.Clear();
 	            foreach (Entry e in entries)
-	                prioritizedQ.add(e);
+	                prioritizedQ.Add(e);
 	        }
 	    }
 
@@ -150,7 +150,7 @@ namespace sodium {
 	        while (true) {
 	            checkRegen();
 		        if (prioritizedQ.isEmpty()) break;
-		        Entry e = prioritizedQ.remove();
+		        Entry e = prioritizedQ.Remove();
 		        entries.Remove(e);
 			    e.action.run(this);
 		    }

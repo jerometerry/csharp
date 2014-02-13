@@ -16,7 +16,7 @@ namespace sodium {
         private void send(Transaction trans, A a) {
             if (!firings.Any())
                 trans.last(new Runnable() {
-            	    public void run() { firings.clear(); }
+            	    public void run() { firings.Clear(); }
                 });
             firings.Add(a);
 

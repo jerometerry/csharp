@@ -430,7 +430,7 @@ namespace sodium {
 
         Event<A> addCleanup(Listener cleanup)
         {
-            finalizers.add(cleanup);
+            finalizers.Add(cleanup);
             return this;
         }
 

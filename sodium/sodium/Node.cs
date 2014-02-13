@@ -22,7 +22,7 @@ namespace sodium {
 			    return false;
 
 		    bool changed = target.ensureBiggerThan(rank, new HashSet<Node>());
-		    listeners.add(target);
+		    listeners.Add(target);
 		    return changed;
 	    }
 
@@ -30,14 +30,14 @@ namespace sodium {
 		    if (target == NULL)
 			    return;
 
-		    listeners.remove(target);
+		    listeners.Remove(target);
 	    }
 
 	    private bool ensureBiggerThan(long limit, Set<Node> visited) {
 		    if (rank > limit || visited.contains(this))
 			    return false;
 
-		    visited.add(this);
+		    visited.Add(this);
 		    rank = limit + 1;
 		    foreach (Node l in listeners)
 			    l.ensureBiggerThan(rank, visited);
