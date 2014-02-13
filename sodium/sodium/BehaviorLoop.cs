@@ -7,7 +7,7 @@ namespace sodium {
         public void loop(Behavior<A> a_out)
         {
             ((EventLoop<A>)evt).loop(a_out.updates());
-            value = a_out.sample();
+            _value = a_out.sample();
         }
     }
 

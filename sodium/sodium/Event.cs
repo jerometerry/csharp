@@ -91,7 +91,7 @@ namespace sodium {
             }
         }
 
-	    Listener listen(Node target, Transaction trans, ITransactionHandler<A> action, bool suppressEarlierFirings) {
+	    public Listener listen(Node target, Transaction trans, ITransactionHandler<A> action, bool suppressEarlierFirings) {
             lock (Transaction.listenersLock) {
                 if (node.linkTo(target))
                     trans.toRegen = true;
@@ -435,7 +435,7 @@ namespace sodium {
         /**
          * Clean up the output by discarding any firing other than the last one. 
          */
-        Event<A> lastFiringOnly(Transaction trans)
+        public Event<A> lastFiringOnly(Transaction trans)
         {
             return coalesce(trans, new Tmp4<A>());
         }
@@ -666,7 +666,7 @@ namespace sodium {
             }
         }
 
-        protected Event<A> addCleanup(Listener cleanup)
+        public Event<A> addCleanup(Listener cleanup)
         {
             finalizers.Add(cleanup);
             return this;
