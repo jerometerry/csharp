@@ -31,10 +31,10 @@ public class Event<A> {
 		}
 	}
 
-	protected final ArrayList<TransactionHandler<A>> listeners = new ArrayList<TransactionHandler<A>>();
-	protected final List<Listener> finalizers = new ArrayList<Listener>();
+	protected final List<TransactionHandler<A>> listeners = new List<TransactionHandler<A>>();
+	protected final List<Listener> finalizers = new List<Listener>();
 	Node node = new Node(0L);
-	protected final List<A> firings = new ArrayList<A>();
+	protected final List<A> firings = new List<A>();
 
 	/**
 	 * An event that never fires.

@@ -41,7 +41,7 @@ public sealed class Transaction {
 
 	private PriorityQueue<Entry> prioritizedQ = new PriorityQueue<Entry>();
 	private Set<Entry> entries = new HashSet<Entry>();
-	private List<Runnable> lastQ = new ArrayList<Runnable>(); 
+	private List<Runnable> lastQ = new List<Runnable>(); 
 	private List<Runnable> postQ;
 
 	Transaction() {
@@ -127,7 +127,7 @@ public sealed class Transaction {
      */
 	public void post(Runnable action) {
 	    if (postQ == null)
-	        postQ = new ArrayList<Runnable>();
+	        postQ = new List<Runnable>();
 	    postQ.add(action);
 	}
 
