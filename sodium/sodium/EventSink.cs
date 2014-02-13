@@ -21,8 +21,9 @@ namespace sodium {
                 });
             firings.Add(a);
         
-		    List<TransactionHandler<A>> listeners = (List<TransactionHandler<A>>)this.listeners.clone();
-    	    foreach (TransactionHandler<A> action in listeners) {
+            List<ITransactionHandler<A>> listeners = new List<ITransactionHandler<A>>(this.listeners);
+
+    	    foreach (ITransactionHandler<A> action in listeners) {
     		    try {
                     action.run(trans, a);
     		    }

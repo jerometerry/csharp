@@ -21,7 +21,7 @@ namespace sodium {
     	    this.value = initValue;
     	    Transaction.run(new Handler<Transaction>() {
     		    public void run(Transaction trans1) {
-	    		    Behavior.this.cleanup = evt.listen(Node.NULL, trans1, new TransactionHandler<A>() {
+	    		    Behavior.this.cleanup = evt.listen(Node.NULL, trans1, new ITransactionHandler<A>() {
 	    			    public void run(Transaction trans2, A a) {
 			    		    if (Behavior.this.valueUpdate == null) {
 			    			    trans2.last(new Runnable() {
@@ -96,7 +96,7 @@ namespace sodium {
                 }
     	    };
             Listener l = evt.listen(o.node, trans1,
-    		    new TransactionHandler<A>() {
+    		    new ITransactionHandler<A>() {
 	        	    public void run(Transaction trans2, A a) { o.send(trans2, a); }
 	            }, false);
             return o.addCleanup(l)
@@ -192,12 +192,12 @@ namespace sodium {
                 }
             };
 
-            Listener l1 = bf.updates().listen_(o.node, new TransactionHandler<Lambda1<A,B>>() {
+            Listener l1 = bf.updates().listen_(o.node, new ITransactionHandler<Lambda1<A,B>>() {
         	    public void run(Transaction trans1, Lambda1<A,B> f) {
                     h.run(trans1);
                 }
             });
-            Listener l2 = ba.updates().listen_(o.node, new TransactionHandler<A>() {
+            Listener l2 = ba.updates().listen_(o.node, new ITransactionHandler<A>() {
         	    public void run(Transaction trans1, A a) {
 	                h.run(trans1);
 	            }
@@ -212,7 +212,7 @@ namespace sodium {
 	    {
 	        A za = bba.sample().sample();
 	        EventSink<A> o = new EventSink<A>();
-            TransactionHandler<Behavior<A>> h = new TransactionHandler<Behavior<A>>() {
+            ITransactionHandler<Behavior<A>> h = new ITransactionHandler<Behavior<A>>() {
                 private Listener currentListener;
                 public override void run(Transaction trans2, Behavior<A> ba) {
                     // Note: If any switch takes place during a transaction, then the
@@ -223,7 +223,7 @@ namespace sodium {
                     // that might have happened during this transaction will be suppressed.
                     if (currentListener != null)
                         currentListener.unlisten();
-                    currentListener = ba.value(trans2).listen(o.node, trans2, new TransactionHandler<A>() {
+                    currentListener = ba.value(trans2).listen(o.node, trans2, new ITransactionHandler<A>() {
                 	    public void run(Transaction trans3, A a) {
 	                        o.send(trans3, a);
 	                    }
@@ -254,12 +254,12 @@ namespace sodium {
 	    private static <A> Event<A> switchE(Transaction trans1, Behavior<Event<A>> bea)
 	    {
             EventSink<A> o = new EventSink<A>();
-            TransactionHandler<A> h2 = new TransactionHandler<A>() {
+            ITransactionHandler<A> h2 = new ITransactionHandler<A>() {
         	    public void run(Transaction trans2, A a) {
 	                o.send(trans2, a);
 	            }
             };
-            TransactionHandler<Event<A>> h1 = new TransactionHandler<Event<A>>() {
+            ITransactionHandler<Event<A>> h1 = new ITransactionHandler<Event<A>>() {
                 private Listener currentListener = bea.sample().listen(o.node, trans1, h2, false);
 
                 public override void run(Transaction trans2, Event<A> ea) {

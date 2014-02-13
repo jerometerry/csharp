@@ -12,10 +12,10 @@ namespace sodium {
 		     * the Listener, so that the finalizer doesn't get triggered.
 		     */
 		    private readonly Event<A> evt;
-		    private readonly TransactionHandler<A> action;
+		    private readonly ITransactionHandler<A> action;
 		    private readonly Node target;
 
-		    private ListenerImplementation(Event<A> evt, TransactionHandler<A> action, Node target) {
+		    private ListenerImplementation(Event<A> evt, ITransactionHandler<A> action, Node target) {
 			    this.evt = evt;
 			    this.action = action;
 			    this.target = target;
@@ -33,7 +33,7 @@ namespace sodium {
 		    }
 	    }
 
-	    protected readonly List<TransactionHandler<A>> listeners = new List<TransactionHandler<A>>();
+	    protected readonly List<ITransactionHandler<A>> listeners = new List<ITransactionHandler<A>>();
 	    protected readonly List<Listener> finalizers = new List<Listener>();
 	    Node node = new Node(0L);
 	    protected readonly List<A> firings = new List<A>();
@@ -51,14 +51,14 @@ namespace sodium {
 	     * method to cause the listener to be removed. This is the observer pattern.
          */
 	    public Listener listen(Handler<A> action) {
-		    return listen_(Node.NULL, new TransactionHandler<A>() {
+		    return listen_(Node.NULL, new ITransactionHandler<A>() {
 			    public void run(Transaction trans2, A a) {
 				    action.run(a);
 			    }
 		    });
 	    }
 
-	    Listener listen_(Node target, TransactionHandler<A> action) {
+	    Listener listen_(Node target, ITransactionHandler<A> action) {
 		    return Transaction.apply(new Lambda1<Transaction, Listener>() {
 			    public Listener apply(Transaction trans1) {
 				    return listen(target, trans1, action, false);
@@ -66,7 +66,7 @@ namespace sodium {
 		    });
 	    }
 
-	    Listener listen(Node target, Transaction trans, TransactionHandler<A> action, bool suppressEarlierFirings) {
+	    Listener listen(Node target, Transaction trans, ITransactionHandler<A> action, bool suppressEarlierFirings) {
             lock (Transaction.listenersLock) {
                 if (node.linkTo(target))
                     trans.toRegen = true;
@@ -106,7 +106,7 @@ namespace sodium {
                         return null;
                 }
 	        };
-            Listener l = listen_(o.node, new TransactionHandler<A>() {
+            Listener l = listen_(o.node, new ITransactionHandler<A>() {
         	    public void run(Transaction trans2, A a) {
 	                o.send(trans2, f.apply(a));
 	            }
@@ -163,7 +163,7 @@ namespace sodium {
                         return null;
                 }
 		    };
-            Listener l = listen_(o.node, new TransactionHandler<A>() {
+            Listener l = listen_(o.node, new ITransactionHandler<A>() {
         	    public void run(Transaction trans2, A a) {
 	                o.send(trans2, f.apply(a, b.sample()));
 	            }
@@ -201,7 +201,7 @@ namespace sodium {
                         return ob;
                 }
 	        };
-            TransactionHandler<A> h = new TransactionHandler<A>() {
+            ITransactionHandler<A> h = new ITransactionHandler<A>() {
         	    public void run(Transaction trans, A a) {
 	                o.send(trans, a);
 	            }
@@ -217,7 +217,7 @@ namespace sodium {
 	    public Event<A> delay()
 	    {
 	        EventSink<A> o = new EventSink<A>();
-	        Listener l1 = listen_(o.node, new TransactionHandler<A>() {
+	        Listener l1 = listen_(o.node, new ITransactionHandler<A>() {
 	            public void run(Transaction trans, A a) {
 	                trans.post(new Runnable() {
                         public void run() {
@@ -269,7 +269,7 @@ namespace sodium {
                         return null;
                 }
 	        };
-            TransactionHandler<A> h = new CoalesceHandler<A>(f, o);
+            ITransactionHandler<A> h = new CoalesceHandler<A>(f, o);
             Listener l = listen(o.node, trans1, h, false);
             return o.addCleanup(l);
         }
@@ -328,7 +328,7 @@ namespace sodium {
                         return null;
                 }
             };
-            Listener l = listen_(o.node, new TransactionHandler<A>() {
+            Listener l = listen_(o.node, new ITransactionHandler<A>() {
         	    public void run(Transaction trans2, A a) {
 	                if (f.apply(a)) o.send(trans2, a);
 	            }
@@ -416,7 +416,7 @@ namespace sodium {
                     return oo;
                 }
             };
-            la[0] = ev.listen_(o.node, new TransactionHandler<A>() {
+            la[0] = ev.listen_(o.node, new ITransactionHandler<A>() {
         	    public void run(Transaction trans, A a) {
 	                o.send(trans, a);
 	                if (la[0] != null) {
@@ -440,7 +440,7 @@ namespace sodium {
 	    }
     }
 
-    class CoalesceHandler<A> : TransactionHandler<A>
+    class CoalesceHandler<A> : ITransactionHandler<A>
     {
 	    public CoalesceHandler(Lambda2<A,A,A> f, EventSink<A> o)
 	    {

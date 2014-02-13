@@ -25,7 +25,7 @@ namespace sodium {
 		    return changed;
 	    }
 
-	    void unlinkTo(Node target) {
+	    public void unlinkTo(Node target) {
 		    if (target == NULL)
 			    return;
 

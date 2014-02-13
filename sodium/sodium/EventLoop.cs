@@ -20,8 +20,8 @@ namespace sodium {
                 });
             firings.Add(a);
 
-		    List<TransactionHandler<A>> listeners = (List<TransactionHandler<A>>)this.listeners.clone();
-    	    foreach (TransactionHandler<A> action in listeners) {
+		    List<ITransactionHandler<A>> listeners = (List<ITransactionHandler<A>>)this.listeners.clone();
+    	    foreach (ITransactionHandler<A> action in listeners) {
     		    try {
                     action.run(trans, a);
     		    }
@@ -37,7 +37,7 @@ namespace sodium {
                 throw new ApplicationException("EventLoop looped more than once");
             this.ea_out = ea_out;
             EventLoop<A> me = this;
-            addCleanup(ea_out.listen_(this.node, new TransactionHandler<A>() {
+            addCleanup(ea_out.listen_(this.node, new ITransactionHandler<A>() {
                 public void run(Transaction trans, A a) {
                     me.send(trans, a);
                 }
