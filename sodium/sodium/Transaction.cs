@@ -41,7 +41,7 @@ namespace sodium {
 	    }
 
 	    private PriorityQueue<Entry> prioritizedQ = new PriorityQueue<Entry>();
-	    private Set<Entry> entries = new HashSet<Entry>();
+	    private ISet<Entry> entries = new HashSet<Entry>();
 	    private List<Runnable> lastQ = new List<Runnable>(); 
 	    private List<Runnable> postQ;
 
@@ -113,7 +113,7 @@ namespace sodium {
 	    public void prioritized(Node rank, Handler<Transaction> action) {
 	        Entry e = new Entry(rank, action);
 		    prioritizedQ.add(e);
-		    entries.add(e);
+		    entries.Add(e);
 	    }
 
 	    /**
@@ -151,7 +151,7 @@ namespace sodium {
 	            checkRegen();
 		        if (prioritizedQ.isEmpty()) break;
 		        Entry e = prioritizedQ.remove();
-		        entries.remove(e);
+		        entries.Remove(e);
 			    e.action.run(this);
 		    }
 		    foreach (Runnable action in lastQ)
