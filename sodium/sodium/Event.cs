@@ -10,9 +10,9 @@ namespace sodium {
 		     * It's essential that we keep the listener alive while the caller holds
 		     * the Listener, so that the finalizer doesn't get triggered.
 		     */
-		    private final Event<A> evt;
-		    private final TransactionHandler<A> action;
-		    private final Node target;
+		    private readonly Event<A> evt;
+		    private readonly TransactionHandler<A> action;
+		    private readonly Node target;
 
 		    private ListenerImplementation(Event<A> evt, TransactionHandler<A> action, Node target) {
 			    this.evt = evt;

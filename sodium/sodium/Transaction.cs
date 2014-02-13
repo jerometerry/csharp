@@ -5,12 +5,13 @@ namespace sodium {
     //import java.util.PriorityQueue;
     //import java.util.Set;
     //import java.util.HashSet;
+    using System;
 
     public sealed class Transaction {
         // Coarse-grained lock that's held during the whole transaction.
-        static final Object transactionLock = new Object();
+        static readonly Object transactionLock = new Object();
         // Fine-grained lock that protects listeners and nodes.
-        static final Object listenersLock = new Object();
+        static readonly Object listenersLock = new Object();
 
         // True if we need to re-generate the priority queue.
         bool toRegen = false;
