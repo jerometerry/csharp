@@ -2,7 +2,7 @@ namespace sodium {
 
 //import java.util.List;
 
-public class EventSink<A> extends Event<A> {
+public class EventSink<A> : Event<A> {
     public EventSink() {}
 
 	public void send(final A a) {

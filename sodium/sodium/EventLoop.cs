@@ -2,7 +2,7 @@ namespace sodium {
 
 //import java.util.List;
 
-public class EventLoop<A> extends Event<A> {
+public class EventLoop<A> : Event<A> {
     private Event<A> ea_out;
 
     public EventLoop()
