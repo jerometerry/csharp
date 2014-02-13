@@ -58,7 +58,7 @@ namespace sodium {
 		    });
 	    }
 
-	    final Listener listen_(final Node target, final TransactionHandler<A> action) {
+	    final Listener listen_(Node target, TransactionHandler<A> action) {
 		    return Transaction.apply(new Lambda1<Transaction, Listener>() {
 			    public Listener apply(Transaction trans1) {
 				    return listen(target, trans1, action, false);
@@ -89,7 +89,7 @@ namespace sodium {
         /**
          * Transform the event's value according to the supplied function.
          */
-	    public final <B> Event<B> map(final Lambda1<A,B> f)
+	    public final <B> Event<B> map(Lambda1<A,B> f)
 	    {
 	        final Event<A> ev = this;
 	        final EventSink<B> o = new EventSink<B>() {
@@ -121,7 +121,7 @@ namespace sodium {
          * That is, state updates caused by event firings get processed at the end of
          * the transaction.
          */
-	    public final Behavior<A> hold(final A initValue) {
+	    public final Behavior<A> hold(A initValue) {
 		    return Transaction.apply(new Lambda1<Transaction, Behavior<A>>() {
 			    public Behavior<A> apply(Transaction trans) {
 			        return new Behavior<A>(lastFiringOnly(trans), initValue);
@@ -146,7 +146,7 @@ namespace sodium {
          * of the behavior that's sampled is the value as at the start of the transaction
          * before any state changes of the current transaction are applied through 'hold's.
          */
-	    public final <B,C> Event<C> snapshot(final Behavior<B> b, final Lambda2<A,B,C> f)
+	    public final <B,C> Event<C> snapshot(Behavior<B> b, Lambda2<A,B,C> f)
 	    {
 	        final Event<A> ev = this;
 		    final EventSink<C> o = new EventSink<C>() {
@@ -180,7 +180,7 @@ namespace sodium {
          * their ordering is retained. In many common cases the ordering will
          * be undefined.
          */
-	    public static <A> Event<A> merge(final Event<A> ea, final Event<A> eb)
+	    public static <A> Event<A> merge(Event<A> ea, Event<A> eb)
 	    {
 	        final EventSink<A> o = new EventSink<A>() {
                 protected override Object[] sampleNow()
@@ -218,7 +218,7 @@ namespace sodium {
 	    {
 	        final EventSink<A> o = new EventSink<A>();
 	        Listener l1 = listen_(o.node, new TransactionHandler<A>() {
-	            public void run(Transaction trans, final A a) {
+	            public void run(Transaction trans, A a) {
 	                trans.post(new Runnable() {
                         public void run() {
                             Transaction trans = new Transaction();
@@ -243,7 +243,7 @@ namespace sodium {
          * make any assumptions about the ordering, and the combining function would
          * ideally be commutative.
          */
-	    public final Event<A> coalesce(final Lambda2<A,A,A> f)
+	    public final Event<A> coalesce(Lambda2<A,A,A> f)
 	    {
 	        return Transaction.apply(new Lambda1<Transaction, Event<A>>() {
 	    	    public Event<A> apply(Transaction trans) {
@@ -252,7 +252,7 @@ namespace sodium {
 	        });
 	    }
 
-	    final Event<A> coalesce(Transaction trans1, final Lambda2<A,A,A> f)
+	    final Event<A> coalesce(Transaction trans1, Lambda2<A,A,A> f)
 	    {
 	        final Event<A> ev = this;
 	        final EventSink<A> o = new EventSink<A>() {
@@ -300,7 +300,7 @@ namespace sodium {
         /**
          * Only keep event occurrences for which the predicate returns true.
          */
-        public final Event<A> filter(final Lambda1<A,Boolean> f)
+        public final Event<A> filter(Lambda1<A,Boolean> f)
         {
             final Event<A> ev = this;
             final EventSink<A> o = new EventSink<A>() {
@@ -362,7 +362,7 @@ namespace sodium {
          * Transform an event with a generalized state loop (a mealy machine). The function
          * is passed the input and the old state and returns the new state and output value.
          */
-        public final <B,S> Event<B> collect(final S initState, final Lambda2<A, S, Tuple2<B, S>> f)
+        public final <B,S> Event<B> collect(S initState, Lambda2<A, S, Tuple2<B, S>> f)
         {
             final Event<A> ea = this;
             EventLoop<S> es = new EventLoop<S>();
@@ -381,7 +381,7 @@ namespace sodium {
         /**
          * Accumulate on input event, outputting the new state each time.
          */
-        public final <S> Behavior<S> accum(final S initState, final Lambda2<A, S, S> f)
+        public final <S> Behavior<S> accum(S initState, Lambda2<A, S, S> f)
         {
             final Event<A> ea = this;
             EventLoop<S> es = new EventLoop<S>();

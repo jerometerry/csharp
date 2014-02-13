@@ -6,7 +6,7 @@ namespace sodium {
     public class EventSink<A> : Event<A> {
         public EventSink() {}
 
-	    public void send(final A a) {
+	    public void send(A a) {
 		    Transaction.run(new Handler<Transaction>() {
 			    public void run(Transaction trans) { send(trans, a); }
 		    });

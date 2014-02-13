@@ -15,7 +15,7 @@ namespace sodium {
     	    this.value = value;
         }
 
-        Behavior(final Event<A> evt, A initValue)
+        Behavior(Event<A> evt, A initValue)
         {
     	    this.evt = evt;
     	    this.value = initValue;
@@ -115,10 +115,10 @@ namespace sodium {
 	    /**
 	     * Lift a binary function into behaviors.
 	     */
-	    public final <B,C> Behavior<C> lift(final Lambda2<A,B,C> f, Behavior<B> b)
+	    public final <B,C> Behavior<C> lift(Lambda2<A,B,C> f, Behavior<B> b)
 	    {
 		    Lambda1<A, Lambda1<B,C>> ffa = new Lambda1<A, Lambda1<B,C>>() {
-			    public Lambda1<B,C> apply(final A aa) {
+			    public Lambda1<B,C> apply(A aa) {
 				    return new Lambda1<B,C>() {
 					    public C apply(B bb) {
 						    return f.apply(aa,bb);
@@ -141,12 +141,12 @@ namespace sodium {
 	    /**
 	     * Lift a ternary function into behaviors.
 	     */
-	    public final <B,C,D> Behavior<D> lift(final Lambda3<A,B,C,D> f, Behavior<B> b, Behavior<C> c)
+	    public final <B,C,D> Behavior<D> lift(Lambda3<A,B,C,D> f, Behavior<B> b, Behavior<C> c)
 	    {
 		    Lambda1<A, Lambda1<B, Lambda1<C,D>>> ffa = new Lambda1<A, Lambda1<B, Lambda1<C,D>>>() {
-			    public Lambda1<B, Lambda1<C,D>> apply(final A aa) {
+			    public Lambda1<B, Lambda1<C,D>> apply(A aa) {
 				    return new Lambda1<B, Lambda1<C,D>>() {
-					    public Lambda1<C,D> apply(final B bb) {
+					    public Lambda1<C,D> apply(B bb) {
 						    return new Lambda1<C,D>() {
 							    public D apply(C cc) {
 								    return f.apply(aa,bb,cc);
@@ -172,7 +172,7 @@ namespace sodium {
 	     * Apply a value inside a behavior to a function inside a behavior. This is the
 	     * primitive for all function lifting.
 	     */
-	    public static <A,B> Behavior<B> apply(final Behavior<Lambda1<A,B>> bf, final Behavior<A> ba)
+	    public static <A,B> Behavior<B> apply(Behavior<Lambda1<A,B>> bf, Behavior<A> ba)
 	    {
 		    final EventSink<B> o = new EventSink<B>();
 
@@ -208,7 +208,7 @@ namespace sodium {
 	    /**
 	     * Unwrap a behavior inside another behavior to give a time-varying behavior implementation.
 	     */
-	    public static <A> Behavior<A> switchB(final Behavior<Behavior<A>> bba)
+	    public static <A> Behavior<A> switchB(Behavior<Behavior<A>> bba)
 	    {
 	        A za = bba.sample().sample();
 	        final EventSink<A> o = new EventSink<A>();
@@ -242,16 +242,16 @@ namespace sodium {
 	    /**
 	     * Unwrap an evt inside a behavior to give a time-varying evt implementation.
 	     */
-	    public static <A> Event<A> switchE(final Behavior<Event<A>> bea)
+	    public static <A> Event<A> switchE(Behavior<Event<A>> bea)
 	    {
             return Transaction.apply(new Lambda1<Transaction, Event<A>>() {
-        	    public Event<A> apply(final Transaction trans) {
+        	    public Event<A> apply(Transaction trans) {
                     return switchE(trans, bea);
         	    }
             });
         }
 
-	    private static <A> Event<A> switchE(final Transaction trans1, final Behavior<Event<A>> bea)
+	    private static <A> Event<A> switchE(Transaction trans1, Behavior<Event<A>> bea)
 	    {
             final EventSink<A> o = new EventSink<A>();
             final TransactionHandler<A> h2 = new TransactionHandler<A>() {
@@ -262,7 +262,7 @@ namespace sodium {
             TransactionHandler<Event<A>> h1 = new TransactionHandler<Event<A>>() {
                 private Listener currentListener = bea.sample().listen(o.node, trans1, h2, false);
 
-                public override void run(final Transaction trans2, final Event<A> ea) {
+                public override void run(Transaction trans2, Event<A> ea) {
                     trans2.last(new Runnable() {
                 	    public void run() {
 	                        if (currentListener != null)
@@ -285,7 +285,7 @@ namespace sodium {
          * Transform a behavior with a generalized state loop (a mealy machine). The function
          * is passed the input and the old state and returns the new state and output value.
          */
-        public final <B,S> Behavior<B> collect(final S initState, final Lambda2<A, S, Tuple2<B, S>> f)
+        public final <B,S> Behavior<B> collect(S initState, Lambda2<A, S, Tuple2<B, S>> f)
         {
             final Event<A> ea = updates().coalesce(new Lambda2<A,A,A>() {
         	    public A apply(A fst, A snd) { return snd; }
