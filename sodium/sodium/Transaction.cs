@@ -19,11 +19,11 @@ namespace sodium {
 
 	    private class Entry : Comparable<Entry> {
 		    private Node rank;
-		    public Handler<Transaction> action;
+		    public IHandler<Transaction> action;
 		    private static long nextSeq;
 		    private long seq;
 
-		    public Entry(Node rank, Handler<Transaction> action) {
+		    public Entry(Node rank, IHandler<Transaction> action) {
 			    this.rank = rank;
 			    this.action = action;
 			    this.seq = nextSeq++;
@@ -75,7 +75,7 @@ namespace sodium {
             }
 	    }
 
-	    static void run(Handler<Transaction> code) {
+	    static void run(IHandler<Transaction> code) {
             lock (transactionLock) {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
@@ -110,7 +110,7 @@ namespace sodium {
             }
 	    }
 
-	    public void prioritized(Node rank, Handler<Transaction> action) {
+	    public void prioritized(Node rank, IHandler<Transaction> action) {
 	        Entry e = new Entry(rank, action);
 		    prioritizedQ.Add(e);
 		    entries.Add(e);

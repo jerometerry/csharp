@@ -50,7 +50,7 @@ namespace sodium {
 	     * Listen for firings of this event. The returned Listener has an unlisten()
 	     * method to cause the listener to be removed. This is the observer pattern.
          */
-	    public Listener listen(Handler<A> action) {
+	    public Listener listen(IHandler<A> action) {
 		    return listen_(Node.NULL, new ITransactionHandler<A>() {
 			    public void run(Transaction trans2, A a) {
 				    action.run(a);
@@ -456,7 +456,7 @@ namespace sodium {
                 accum = f.apply(accum, a);
             else {
         	    CoalesceHandler<A> thiz = this;
-                trans1.prioritized(o.node, new Handler<Transaction>() {
+                trans1.prioritized(o.node, new IHandler<Transaction>() {
             	    public void run(Transaction trans2) {
                         o.send(trans2, thiz.accum);
                         thiz.accumValid = false;

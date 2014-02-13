@@ -19,7 +19,7 @@ namespace sodium {
         {
     	    this.evt = evt;
     	    this.value = initValue;
-    	    Transaction.run(new Handler<Transaction>() {
+    	    Transaction.run(new IHandler<Transaction>() {
     		    public void run(Transaction trans1) {
 	    		    Behavior.this.cleanup = evt.listen(Node.NULL, trans1, new ITransactionHandler<A>() {
 	    			    public void run(Transaction trans2, A a) {
@@ -176,14 +176,14 @@ namespace sodium {
 	    {
 		    EventSink<B> o = new EventSink<B>();
 
-            Handler<Transaction> h = new Handler<Transaction>() {
+            IHandler<Transaction> h = new IHandler<Transaction>() {
                 bool fired = false;			
                 public override void run(Transaction trans1) {
                     if (fired) 
                         return;
 
                     fired = true;
-                    trans1.prioritized(o.node, new Handler<Transaction>() {
+                    trans1.prioritized(o.node, new IHandler<Transaction>() {
                 	    public void run(Transaction trans2) {
                             o.send(trans2, bf.newValue().apply(ba.newValue()));
                             fired = false;

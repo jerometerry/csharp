@@ -9,7 +9,7 @@ namespace sodium {
         public EventSink() {}
 
 	    public void send(A a) {
-		    Transaction.run(new Handler<Transaction>() {
+		    Transaction.run(new IHandler<Transaction>() {
 			    public void run(Transaction trans) { send(trans, a); }
 		    });
 	    }
