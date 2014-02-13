@@ -22,7 +22,7 @@ namespace sodium {
 		    }
 
 		    public void unlisten() {
-		        synchronized (Transaction.listenersLock) {
+		        lock (Transaction.listenersLock) {
                     evt.listeners.remove(action);
                     evt.node.unlinkTo(target);
                 }
@@ -67,7 +67,7 @@ namespace sodium {
 	    }
 
 	    Listener listen(Node target, Transaction trans, TransactionHandler<A> action, bool suppressEarlierFirings) {
-            synchronized (Transaction.listenersLock) {
+            lock (Transaction.listenersLock) {
                 if (node.linkTo(target))
                     trans.toRegen = true;
                 listeners.add(action);

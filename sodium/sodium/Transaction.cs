@@ -10,9 +10,9 @@ namespace sodium {
 
     public sealed class Transaction {
         // Coarse-grained lock that's held during the whole transaction.
-        static readonly Object transactionLock = new Object();
+        private static readonly Object transactionLock = new Object();
         // Fine-grained lock that protects listeners and nodes.
-        static readonly Object listenersLock = new Object();
+        public static readonly Object listenersLock = new Object();
 
         // True if we need to re-generate the priority queue.
         bool toRegen = false;
@@ -58,7 +58,7 @@ namespace sodium {
 	     * reactive operations atomically.
 	     */
 	    public static void run(Runnable code) {
-            synchronized (transactionLock) {
+            lock (transactionLock) {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
                 // keep using that same transaction.
@@ -76,7 +76,7 @@ namespace sodium {
 	    }
 
 	    static void run(Handler<Transaction> code) {
-            synchronized (transactionLock) {
+            lock (transactionLock) {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
                 // keep using that same transaction.
@@ -94,7 +94,7 @@ namespace sodium {
 	    }
 
 	    static <A> A apply(Lambda1<Transaction, A> code) {
-            synchronized (transactionLock) {
+            lock (transactionLock) {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
                 // keep using that same transaction.
