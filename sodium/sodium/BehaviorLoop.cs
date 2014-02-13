@@ -1,8 +1,7 @@
 namespace sodium {
 
     public sealed class BehaviorLoop<A> : Behavior<A> {
-        public BehaviorLoop() {
-    	    super(new EventLoop<A>(), null);
+        public BehaviorLoop() : base(new EventLoop<A>(), null){
         }
 
         public void loop(Behavior<A> a_out)
