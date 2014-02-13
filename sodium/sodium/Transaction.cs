@@ -140,7 +140,7 @@ namespace sodium {
 	        if (toRegen) {
 	            toRegen = false;
 	            prioritizedQ.clear();
-	            for (Entry e : entries)
+	            foreach (Entry e in entries)
 	                prioritizedQ.add(e);
 	        }
 	    }
@@ -153,11 +153,11 @@ namespace sodium {
 		        entries.remove(e);
 			    e.action.run(this);
 		    }
-		    for (Runnable action : lastQ)
+		    foreach (Runnable action in lastQ)
 			    action.run();
 		    lastQ.clear();
 		    if (postQ != null) {
-                for (Runnable action : postQ)
+                foreach (Runnable action in postQ)
                     action.run();
                 postQ.clear();
 		    }

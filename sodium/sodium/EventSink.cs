@@ -19,7 +19,7 @@ namespace sodium {
             firings.add(a);
         
 		    List<TransactionHandler<A>> listeners = (List<TransactionHandler<A>>)this.listeners.clone();
-    	    for (TransactionHandler<A> action : listeners) {
+    	    foreach (TransactionHandler<A> action in listeners) {
     		    try {
                     action.run(trans, a);
     		    }

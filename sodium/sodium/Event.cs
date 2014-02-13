@@ -80,7 +80,7 @@ namespace sodium {
 		    if (!suppressEarlierFirings) {
                 // Anything sent already in this transaction must be sent now so that
                 // there's no order dependency between send and listen.
-                for (A a : firings)
+                foreach (A a in firings)
                     action.run(trans, a);
             }
 		    return new ListenerImplementation<A>(this, action, target);
@@ -435,7 +435,7 @@ namespace sodium {
         }
 
 	    protected override void finalize() throws Throwable {
-		    for (Listener l : finalizers)
+		    foreach (Listener l in finalizers)
 			    l.unlisten();
 	    }
     }

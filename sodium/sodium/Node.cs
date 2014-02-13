@@ -39,7 +39,7 @@ namespace sodium {
 
 		    visited.add(this);
 		    rank = limit + 1;
-		    for (Node l : listeners)
+		    foreach (Node l in listeners)
 			    l.ensureBiggerThan(rank, visited);
 		    return true;
 	    }
