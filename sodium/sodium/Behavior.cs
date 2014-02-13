@@ -178,7 +178,7 @@ namespace sodium {
 		    final EventSink<B> o = new EventSink<B>();
 
             final Handler<Transaction> h = new Handler<Transaction>() {
-                boolean fired = false;			
+                bool fired = false;			
                 @Override
                 public void run(Transaction trans1) {
                     if (fired) 

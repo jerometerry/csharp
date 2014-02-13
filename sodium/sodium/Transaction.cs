@@ -13,7 +13,7 @@ namespace sodium {
         static final Object listenersLock = new Object();
 
         // True if we need to re-generate the priority queue.
-        boolean toRegen = false;
+        bool toRegen = false;
 
 	    private static class Entry : Comparable<Entry> {
 		    private Node rank;

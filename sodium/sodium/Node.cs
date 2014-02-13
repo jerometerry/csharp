@@ -16,11 +16,11 @@ namespace sodium {
 	    /**
 	     * @return true if any changes were made. 
 	     */
-	    boolean linkTo(Node target) {
+	    bool linkTo(Node target) {
 		    if (target == NULL)
 			    return false;
 
-		    boolean changed = target.ensureBiggerThan(rank, new HashSet<Node>());
+		    bool changed = target.ensureBiggerThan(rank, new HashSet<Node>());
 		    listeners.add(target);
 		    return changed;
 	    }
@@ -32,7 +32,7 @@ namespace sodium {
 		    listeners.remove(target);
 	    }
 
-	    private boolean ensureBiggerThan(long limit, Set<Node> visited) {
+	    private bool ensureBiggerThan(long limit, Set<Node> visited) {
 		    if (rank > limit || visited.contains(this))
 			    return false;
 

@@ -1,5 +1,6 @@
 namespace sodium {
 
+    using System;
     //import java.util.ArrayList;
     //import java.util.List;
 
@@ -65,7 +66,7 @@ namespace sodium {
 	    }
 
 	    @SuppressWarnings("unchecked")
-	    final Listener listen(Node target, Transaction trans, TransactionHandler<A> action, boolean suppressEarlierFirings) {
+	    final Listener listen(Node target, Transaction trans, TransactionHandler<A> action, bool suppressEarlierFirings) {
             synchronized (Transaction.listenersLock) {
                 if (node.linkTo(target))
                     trans.toRegen = true;
@@ -459,7 +460,7 @@ namespace sodium {
 	    }
 	    private Lambda2<A,A,A> f;
 	    private EventSink<A> o;
-        private boolean accumValid = false;
+        private bool accumValid = false;
         private A accum;
         @Override
         public void run(Transaction trans1, A a) {
