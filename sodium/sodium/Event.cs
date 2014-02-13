@@ -23,7 +23,7 @@ namespace sodium {
 
 		    public void unlisten() {
 		        lock (Transaction.listenersLock) {
-                    evt.listeners.remove(action);
+                    evt.listeners.Remove(action);
                     evt.node.unlinkTo(target);
                 }
 		    }
@@ -70,11 +70,11 @@ namespace sodium {
             lock (Transaction.listenersLock) {
                 if (node.linkTo(target))
                     trans.toRegen = true;
-                listeners.add(action);
+                listeners.Add(action);
             }
 		    Object[] aNow = sampleNow();
 		    if (aNow != null) {    // In cases like value(), we start with an initial value.
-		        for (int i = 0; i < aNow.length; i++)
+		        for (int i = 0; i < aNow.Length; i++)
                     action.run(trans, (A)aNow[i]);  // <-- unchecked warning is here
             }
 		    if (!suppressEarlierFirings) {
@@ -97,8 +97,8 @@ namespace sodium {
                 {
                     Object[] oi = ev.sampleNow();
                     if (oi != null) {
-                        Object[] oo = new Object[oi.length];
-                        for (int i = 0; i < oo.length; i++)
+                        Object[] oo = new Object[oi.Length];
+                        for (int i = 0; i < oo.Length; i++)
                             oo[i] = f.apply((A)oi[i]);
                         return oo;
                     }
@@ -154,8 +154,8 @@ namespace sodium {
                 {
                     Object[] oi = ev.sampleNow();
                     if (oi != null) {
-                        Object[] oo = new Object[oi.length];
-                        for (int i = 0; i < oo.length; i++)
+                        Object[] oo = new Object[oi.Length];
+                        for (int i = 0; i < oo.Length; i++)
                             oo[i] = f.apply((A)oi[i], b.sample());
                         return oo;
                     }
@@ -188,10 +188,10 @@ namespace sodium {
                     Object[] oa = ea.sampleNow();
                     Object[] ob = eb.sampleNow();
                     if (oa != null && ob != null) {
-                        Object[] oo = new Object[oa.length + ob.length];
+                        Object[] oo = new Object[oa.Length + ob.Length];
                         int j = 0;
-                        for (int i = 0; i < oa.length; i++) oo[j++] = oa[i];
-                        for (int i = 0; i < ob.length; i++) oo[j++] = ob[i];
+                        for (int i = 0; i < oa.Length; i++) oo[j++] = oa[i];
+                        for (int i = 0; i < ob.Length; i++) oo[j++] = ob[i];
                         return oo;
                     }
                     else
@@ -261,7 +261,7 @@ namespace sodium {
                     Object[] oi = ev.sampleNow();
                     if (oi != null) {
 					    A o = (A)oi[0];
-                        for (int i = 1; i < oi.length; i++)
+                        for (int i = 1; i < oi.Length; i++)
                             o = f.apply(o, (A)oi[i]);
                         return new Object[] { o };
                     }
@@ -308,15 +308,15 @@ namespace sodium {
                 {
                     Object[] oi = ev.sampleNow();
                     if (oi != null) {
-                        Object[] oo = new Object[oi.length];
+                        Object[] oo = new Object[oi.Length];
                         int j = 0;
-                        for (int i = 0; i < oi.length; i++)
+                        for (int i = 0; i < oi.Length; i++)
                             if (f.apply((A)oi[i]))
                                 oo[j++] = oi[i];
                         if (j == 0)
                             oo = null;
                         else
-                        if (j < oo.length) {
+                        if (j < oo.Length) {
                             Object[] oo2 = new Object[j];
                             for (int i = 0; i < j; i++)
                                 oo2[i] = oo[i];
@@ -406,7 +406,7 @@ namespace sodium {
                     Object[] oi = ev.sampleNow();
                     Object[] oo = oi;
                     if (oo != null) {
-                        if (oo.length > 1)
+                        if (oo.Length > 1)
                             oo = new Object[] { oi[0] };
                         if (la[0] != null) {
                             la[0].unlisten();
