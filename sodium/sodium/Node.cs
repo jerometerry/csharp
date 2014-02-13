@@ -1,10 +1,9 @@
 namespace sodium {
 
+    using System;
     using System.Collections.Generic;
-    //import java.util.HashSet;
-    //import java.util.Set;
 
-    public class Node : Comparable<Node> {
+    public class Node : IComparable<Node> {
         public readonly static Node NULL = new Node(long.MaxValue);
 
 	    public Node(long rank) {
@@ -44,7 +43,7 @@ namespace sodium {
 		    return true;
 	    }
 
-	    public override int compareTo(Node o) {
+	    public int CompareTo(Node o) {
 		    if (rank < o.rank) return -1;
 		    if (rank > o.rank) return 1;
 		    return 0;
