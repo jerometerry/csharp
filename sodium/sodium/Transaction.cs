@@ -17,9 +17,9 @@ namespace sodium {
         // True if we need to re-generate the priority queue.
         bool toRegen = false;
 
-	    private static class Entry : Comparable<Entry> {
+	    private class Entry : Comparable<Entry> {
 		    private Node rank;
-		    private Handler<Transaction> action;
+		    public Handler<Transaction> action;
 		    private static long nextSeq;
 		    private long seq;
 
@@ -120,7 +120,7 @@ namespace sodium {
          * Add an action to run after all prioritized() actions.
          */
 	    public void last(Runnable action) {
-	        lastQ.add(action);
+	        lastQ.Add(action);
 	    }
 
 	    /**
@@ -129,7 +129,7 @@ namespace sodium {
 	    public void post(Runnable action) {
 	        if (postQ == null)
 	            postQ = new List<Runnable>();
-	        postQ.add(action);
+	        postQ.Add(action);
 	    }
 
 	    /**
@@ -156,11 +156,11 @@ namespace sodium {
 		    }
 		    foreach (Runnable action in lastQ)
 			    action.run();
-		    lastQ.clear();
+		    lastQ.Clear();
 		    if (postQ != null) {
                 foreach (Runnable action in postQ)
                     action.run();
-                postQ.clear();
+                postQ.Clear();
 		    }
 	    }
     }
