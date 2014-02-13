@@ -1,8 +1,8 @@
 namespace sodium {
 
-public class Unit {
-    public static final Unit unit = new Unit();
-    Unit() {}
-};
+    public class Unit {
+        public static final Unit unit = new Unit();
+        Unit() {}
+    };
 
 }
