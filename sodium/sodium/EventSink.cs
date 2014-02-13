@@ -1,7 +1,9 @@
 namespace sodium {
 
     //import java.util.List;
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     public class EventSink<A> : Event<A> {
         public EventSink() {}
@@ -13,19 +15,19 @@ namespace sodium {
 	    }
 
         void send(Transaction trans, A a) {
-            if (firings.isEmpty())
+            if (!firings.Any())
                 trans.last(new Runnable() {
             	    public void run() { firings.clear(); }
                 });
-            firings.add(a);
+            firings.Add(a);
         
 		    List<TransactionHandler<A>> listeners = (List<TransactionHandler<A>>)this.listeners.clone();
     	    foreach (TransactionHandler<A> action in listeners) {
     		    try {
                     action.run(trans, a);
     		    }
-    		    catch (Throwable t) {
-    		        t.printStackTrace();
+    		    catch (Exception t) {
+    		        Console.WriteLine("{0}", t);
     		    }
     	    }
         }
