@@ -4,10 +4,10 @@ namespace sodium
     {
         public bool Fired = false;
         private readonly EventSink<TB> _o;
-        private readonly Behavior<ILambda1<TA, TB>> _bf;
+        private readonly Behavior<ISingleParameterFunction<TA, TB>> _bf;
         private readonly Behavior<TA> _ba;
 
-        public BehaviorPrioritizedInvoker(EventSink<TB> o, Behavior<ILambda1<TA, TB>> bf, Behavior<TA> ba)
+        public BehaviorPrioritizedInvoker(EventSink<TB> o, Behavior<ISingleParameterFunction<TA, TB>> bf, Behavior<TA> ba)
         {
             _o = o;
             _bf = bf;

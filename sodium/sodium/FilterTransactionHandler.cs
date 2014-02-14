@@ -4,10 +4,10 @@
 
     public class FilterTransactionHandler<TA> : ITransactionHandler<TA>
     {
-        private readonly ILambda1<TA, Boolean> _f;
+        private readonly ISingleParameterFunction<TA, Boolean> _f;
         private readonly EventSink<TA> _o;
 
-        public FilterTransactionHandler(ILambda1<TA, Boolean> f, EventSink<TA> o)
+        public FilterTransactionHandler(ISingleParameterFunction<TA, Boolean> f, EventSink<TA> o)
         {
             _f = f;
             _o = o;

@@ -2,12 +2,12 @@
 {
     public class CoalesceHandler<TA> : ITransactionHandler<TA>
     {
-        private readonly ILambda2<TA, TA, TA> _f;
+        private readonly ITwoParameterFunction<TA, TA, TA> _f;
         private readonly EventSink<TA> _o;
         public bool AccumValid = false;
         public TA Accum;
 
-        public CoalesceHandler(ILambda2<TA, TA, TA> f, EventSink<TA> o)
+        public CoalesceHandler(ITwoParameterFunction<TA, TA, TA> f, EventSink<TA> o)
         {
             _f = f;
             _o = o;

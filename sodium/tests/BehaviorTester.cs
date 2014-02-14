@@ -7,15 +7,17 @@ namespace sodium.tests
     using System.Collections.Generic;
 
     [TestFixture]
-    public class BehaviorTester  {
-	    [TearDown]
-	    public void tearDown() {
-		    GC.Collect();
-		    Thread.Sleep(100);
-	    }
-	
+    public class BehaviorTester
+    {
+        [TearDown]
+        public void TearDown()
+        {
+            GC.Collect();
+            Thread.Sleep(100);
+        }
+
         [Test]
-	    public void testHold()
+        public void TestHold()
         {
             var e = new EventSink<Int32>();
             var b = e.Hold(0);
@@ -26,16 +28,16 @@ namespace sodium.tests
             l.Unlisten();
             AssertArraysEqual(Arrays<Int32>.asList(2, 9), o);
         }
-        
+
         [Test]
-	    public void testSnapshot()
+        public void TestSnapshot()
         {
             var b = new BehaviorSink<Int32>(0);
             var trigger = new EventSink<Int64>();
             var o = new List<String>();
 
             var l = trigger
-                .Snapshot(b, new Lambda2<long,int,string>((x,y) => string.Format("{0} {1}", x, y)))
+                .Snapshot(b, new TwoParameterFunction<long, int, string>((x, y) => string.Format("{0} {1}", x, y)))
                 .Listen(new Handler<string>(o.Add));
 
             trigger.Send(100L);
@@ -81,16 +83,16 @@ namespace sodium.tests
         }
         */
 
-	    /**
-	     * This is used for tests where value() produces a single initial value on listen,
-	     * and then we double that up by causing that single initial event to be repeated.
-	     * This needs testing separately, because the code must be done carefully to achieve
-	     * this.
-	     */
-	    private static Event<Int32> doubleUp(Event<Int32> ev)
-	    {
-	        return Event<Int32>.Merge(ev, ev);
-	    }
+        /**
+         * This is used for tests where value() produces a single initial value on listen,
+         * and then we double that up by causing that single initial event to be repeated.
+         * This needs testing separately, because the code must be done carefully to achieve
+         * this.
+         */
+        private static Event<Int32> doubleUp(Event<Int32> ev)
+        {
+            return Event<Int32>.Merge(ev, ev);
+        }
 
         /*
         [Test]

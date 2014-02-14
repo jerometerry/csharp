@@ -3,9 +3,9 @@ namespace sodium
     public class MapTransactionHandler<TA, TB> : ITransactionHandler<TA>
     {
         private readonly EventSink<TB> _o;
-        private readonly ILambda1<TA, TB> _f;
+        private readonly ISingleParameterFunction<TA, TB> _f;
 
-        public MapTransactionHandler(EventSink<TB> o, ILambda1<TA, TB> f)
+        public MapTransactionHandler(EventSink<TB> o, ISingleParameterFunction<TA, TB> f)
         {
             _o = o;
             _f = f;

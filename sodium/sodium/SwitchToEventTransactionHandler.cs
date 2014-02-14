@@ -18,11 +18,11 @@ namespace sodium
         public void Run(Transaction trans, Event<TA> a)
         {
             trans.Last(new Runnable(() =>
-                                        {
-                                            if (_currentListener != null)
-                                                _currentListener.Unlisten();
-                                            _currentListener = a.Listen(_o.Node, trans, _h2, true);
-                                        }));
+            {
+                if (_currentListener != null)
+                    _currentListener.Unlisten();
+                _currentListener = a.Listen(_o.Node, trans, _h2, true);
+            }));
         }
 
         public void Dispose()

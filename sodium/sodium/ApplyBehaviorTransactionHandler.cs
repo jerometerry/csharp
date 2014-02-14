@@ -1,6 +1,6 @@
 namespace sodium
 {
-    public class ApplyBehaviorTransactionHandler<TA, TB> : ITransactionHandler<ILambda1<TA, TB>>
+    public class ApplyBehaviorTransactionHandler<TA, TB> : ITransactionHandler<ISingleParameterFunction<TA, TB>>
     {
         private readonly IHandler<Transaction> _h;
 
@@ -9,7 +9,7 @@ namespace sodium
             _h = h;
         }
 
-        public void Run(Transaction trans, ILambda1<TA, TB> a)
+        public void Run(Transaction trans, ISingleParameterFunction<TA, TB> a)
         {
             _h.Run(trans);
         }

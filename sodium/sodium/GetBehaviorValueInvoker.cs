@@ -1,6 +1,6 @@
 namespace sodium
 {
-    public class GetBehaviorValueInvoker<TA> : ILambda1<Transaction, Event<TA>>
+    public class GetBehaviorValueInvoker<TA> : ISingleParameterFunction<Transaction, Event<TA>>
     {
         private readonly Behavior<TA> _b;
 

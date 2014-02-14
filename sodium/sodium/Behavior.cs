@@ -142,7 +142,7 @@ namespace sodium
         /**
          * Transform the behavior's value according to the supplied function.
          */
-        public Behavior<TB> Map<TB>(ILambda1<TA, TB> f)
+        public Behavior<TB> Map<TB>(ISingleParameterFunction<TA, TB> f)
         {
             return Updates().Map(f).Hold(f.Apply(Sample()));
         }
@@ -150,7 +150,7 @@ namespace sodium
         /**
          * Lift a binary function into behaviors.
          */
-        public Behavior<TC> Lift<TB, TC>(ILambda2<TA, TB, TC> f, Behavior<TB> b)
+        public Behavior<TC> Lift<TB, TC>(ITwoParameterFunction<TA, TB, TC> f, Behavior<TB> b)
         {
             var ffa = new BehaviorLifter2<TA, TB, TC>(f);
 		    var bf = Map(ffa);
@@ -160,7 +160,7 @@ namespace sodium
         /**
 	     * Lift a binary function into behaviors.
 	     */
-        public static Behavior<TC> Lift<TB, TC>(ILambda2<TA, TB, TC> f, Behavior<TA> a, Behavior<TB> b)
+        public static Behavior<TC> Lift<TB, TC>(ITwoParameterFunction<TA, TB, TC> f, Behavior<TA> a, Behavior<TB> b)
         {
             return a.Lift(f, b);
         }
@@ -168,9 +168,9 @@ namespace sodium
         /**
          * Lift a ternary function into behaviors.
          */
-        public Behavior<TD> Lift<TB, TC, TD>(ILambda3<TA, TB, TC, TD> f, Behavior<TB> b, Behavior<TC> c)
+        public Behavior<TD> Lift<TB, TC, TD>(IThreeParameterFunction<TA, TB, TC, TD> f, Behavior<TB> b, Behavior<TC> c)
         {
-            ILambda1<TA, ILambda1<TB, ILambda1<TC, TD>>> ffa = new BehaviorLifter3<TA, TB, TC, TD>(f);
+            ISingleParameterFunction<TA, ISingleParameterFunction<TB, ISingleParameterFunction<TC, TD>>> ffa = new BehaviorLifter3<TA, TB, TC, TD>(f);
 		    var bf = Map(ffa);
             var r1 = Behavior<TB>.Apply(bf, b);
             var res = Behavior<TC>.Apply(r1, c);
@@ -180,7 +180,7 @@ namespace sodium
         /**
 	     * Lift a ternary function into behaviors.
 	     */
-        public static Behavior<TD> Lift<TB, TC, TD>(ILambda3<TA, TB, TC, TD> f, Behavior<TA> a, Behavior<TB> b, Behavior<TC> c)
+        public static Behavior<TD> Lift<TB, TC, TD>(IThreeParameterFunction<TA, TB, TC, TD> f, Behavior<TA> a, Behavior<TB> b, Behavior<TC> c)
         {
             return a.Lift(f, b, c);
         }
@@ -189,7 +189,7 @@ namespace sodium
          * Apply a value inside a behavior to a function inside a behavior. This is the
          * primitive for all function lifting.
          */
-        public static Behavior<TB> Apply<TB>(Behavior<ILambda1<TA, TB>> bf, Behavior<TA> ba)
+        public static Behavior<TB> Apply<TB>(Behavior<ISingleParameterFunction<TA, TB>> bf, Behavior<TA> ba)
         {
             var o = new EventSink<TB>();
             var h = new BehaviorPrioritizedInvoker<TA, TB>(o, bf, ba);
@@ -231,17 +231,17 @@ namespace sodium
          * Transform a behavior with a generalized state loop (a mealy machine). The function
          * is passed the input and the old state and returns the new state and output value.
          */
-        public Behavior<TB> Collect<TB, TS>(TS initState, ILambda2<TA, TS, Tuple2<TB, TS>> f)
+        public Behavior<TB> Collect<TB, TS>(TS initState, ITwoParameterFunction<TA, TS, Tuple2<TB, TS>> f)
         {
-            var ea = Updates().Coalesce(new Lambda2<TA, TA, TA>((a, b) => b));
+            var ea = Updates().Coalesce(new TwoParameterFunction<TA, TA, TA>((a, b) => b));
             var za = Sample();
             var zbs = f.Apply(za, initState);
             var ebs = new EventLoop<Tuple2<TB, TS>>();
             var bbs = ebs.Hold(zbs);
-            var bs = bbs.Map(new Lambda1<Tuple2<TB, TS>, TS>((x) => x.Y));
+            var bs = bbs.Map(new SingleParameterFunction<Tuple2<TB, TS>, TS>((x) => x.Y));
             var ebsOut = ea.Snapshot(bs, f);
             ebs.Loop(ebsOut);
-            return bbs.Map(new Lambda1<Tuple2<TB, TS>, TB>((x) => x.X));
+            return bbs.Map(new SingleParameterFunction<Tuple2<TB, TS>, TB>((x) => x.X));
         }
 
         public void Dispose()

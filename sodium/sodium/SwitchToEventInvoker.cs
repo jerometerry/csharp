@@ -1,6 +1,6 @@
 namespace sodium
 {
-    public class SwitchToEventInvoker<TA> : ILambda1<Transaction, Event<TA>>
+    public class SwitchToEventInvoker<TA> : ISingleParameterFunction<Transaction, Event<TA>>
     {
         private readonly Behavior<Event<TA>> _bea;
 

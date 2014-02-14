@@ -7,45 +7,17 @@ namespace sodium
     {
         // Coarse-grained lock that's held during the whole transaction.
         private static readonly Object TransactionLock = new Object();
+
         // Fine-grained lock that protects listeners and nodes.
         public static readonly Object ListenersLock = new Object();
 
-        // True if we need to re-generate the priority queue.
-        public bool ToRegen = false;
+        public bool NeedToRegeneratePriorityQueue = false;
 
         private readonly IPriorityQueue<Entry> _prioritizedQ = new PriorityQueue<Entry>();
         private readonly ISet<Entry> _entries = new HashSet<Entry>();
         private readonly List<IRunnable> _lastQ = new List<IRunnable>();
         private List<IRunnable> _postQ;
         private static Transaction _currentTransaction;
-
-        private class Entry : IComparable<Entry>
-        {
-            private readonly Node _rank;
-            public readonly IHandler<Transaction> Action;
-            private static long _nextSeq;
-            private readonly long _seq;
-
-            public Entry(Node rank, IHandler<Transaction> action)
-            {
-                _rank = rank;
-                Action = action;
-                _seq = _nextSeq++;
-            }
-
-            public int CompareTo(Entry o)
-            {
-                int answer = _rank.CompareTo(o._rank);
-                if (answer == 0)
-                {  // Same rank: preserve chronological sequence.
-                    if (_seq < o._seq) answer = -1;
-                    else
-                        if (_seq > o._seq) answer = 1;
-                }
-                return answer;
-            }
-
-        }
 
         /**
          * Run the specified code inside a single transaction.
@@ -100,7 +72,7 @@ namespace sodium
             }
         }
 
-        public static TA Apply<TA>(ILambda1<Transaction, TA> code)
+        public static TA Apply<TA>(ISingleParameterFunction<Transaction, TA> code)
         {
             lock (TransactionLock)
             {
@@ -151,22 +123,27 @@ namespace sodium
          * If the priority queue has entries in it when we modify any of the nodes'
          * ranks, then we need to re-generate it to make sure it's up-to-date.
          */
-        private void CheckRegen()
+        private void CheckRegeneratePriorityQueue()
         {
-            if (ToRegen)
+            if (NeedToRegeneratePriorityQueue)
             {
-                ToRegen = false;
-                _prioritizedQ.Clear();
-                foreach (var e in _entries)
-                    _prioritizedQ.Add(e);
+                RegeneratePriorityQueue();
+                NeedToRegeneratePriorityQueue = false;
             }
+        }
+
+        private void RegeneratePriorityQueue()
+        {
+            _prioritizedQ.Clear();
+            foreach (var e in _entries)
+                _prioritizedQ.Add(e);
         }
 
         public void Close()
         {
             while (true)
             {
-                CheckRegen();
+                CheckRegeneratePriorityQueue();
                 if (_prioritizedQ.IsEmpty()) break;
                 var e = _prioritizedQ.Remove();
                 _entries.Remove(e);

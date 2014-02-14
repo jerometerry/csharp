@@ -5,9 +5,9 @@ namespace sodium
     public class MapEventSink<TA, TB> : EventSink<TB>
     {
         private readonly Event<TA> _ev;
-        private readonly ILambda1<TA, TB> _f;
+        private readonly ISingleParameterFunction<TA, TB> _f;
 
-        public MapEventSink(Event<TA> ev, ILambda1<TA, TB> f)
+        public MapEventSink(Event<TA> ev, ISingleParameterFunction<TA, TB> f)
         {
             _ev = ev;
             _f = f;

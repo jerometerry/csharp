@@ -39,7 +39,7 @@ namespace sodium
             lock (Transaction.ListenersLock)
             {
                 if (Node.LinkTo(target))
-                    trans.ToRegen = true;
+                    trans.NeedToRegeneratePriorityQueue = true;
                 Listeners.Add(action);
             }
             var aNow = SampleNow();
@@ -61,7 +61,7 @@ namespace sodium
         /**
          * Transform the event's value according to the supplied function.
          */
-        public Event<TB> Map<TB>(ILambda1<TA, TB> f)
+        public Event<TB> Map<TB>(ISingleParameterFunction<TA, TB> f)
         {
             var ev = this;
             var o = new MapEventSink<TA, TB>(ev, f);
@@ -86,7 +86,7 @@ namespace sodium
 	     */
         public Event<TB> Snapshot<TB>(Behavior<TB> beh)
         {
-            return Snapshot(beh, new Lambda2<TA, TB, TB>((a,b) => b));
+            return Snapshot(beh, new TwoParameterFunction<TA, TB, TB>((a,b) => b));
         }
 
         /**
@@ -94,7 +94,7 @@ namespace sodium
          * of the behavior that's sampled is the value as at the start of the transaction
          * before any state changes of the current transaction are applied through 'hold's.
          */
-        public Event<TC> Snapshot<TB, TC>(Behavior<TB> b, ILambda2<TA, TB, TC> f)
+        public Event<TC> Snapshot<TB, TC>(Behavior<TB> b, ITwoParameterFunction<TA, TB, TC> f)
         {
             var ev = this;
             var o = new SnapshotEventSink<TA, TB, TC>(ev, f, b);
@@ -139,12 +139,12 @@ namespace sodium
          * make any assumptions about the ordering, and the combining function would
          * ideally be commutative.
          */
-        public Event<TA> Coalesce(ILambda2<TA, TA, TA> f)
+        public Event<TA> Coalesce(ITwoParameterFunction<TA, TA, TA> f)
         {
             return Transaction.Apply(new CoalesceInvoker<TA>(this, f));
         }
 
-        public Event<TA> Coalesce(Transaction trans1, ILambda2<TA, TA, TA> f)
+        public Event<TA> Coalesce(Transaction trans1, ITwoParameterFunction<TA, TA, TA> f)
         {
             var ev = this;
             var o = new CoalesceEventSink<TA>(ev, f);
@@ -158,7 +158,7 @@ namespace sodium
          */
         public Event<TA> LastFiringOnly(Transaction trans)
         {
-            return Coalesce(trans, new Lambda2<TA, TA, TA>((first, second) => { return second; }));
+            return Coalesce(trans, new TwoParameterFunction<TA, TA, TA>((first, second) => { return second; }));
         }
 
         /**
@@ -169,7 +169,7 @@ namespace sodium
          * within the same transaction), they are combined using the same logic as
          * 'coalesce'.
          */
-        public static Event<TA> MergeWith(ILambda2<TA, TA, TA> f, Event<TA> ea, Event<TA> eb)
+        public static Event<TA> MergeWith(ITwoParameterFunction<TA, TA, TA> f, Event<TA> ea, Event<TA> eb)
         {
             return Merge(ea, eb).Coalesce(f);
         }
@@ -177,7 +177,7 @@ namespace sodium
         /**
          * Only keep event occurrences for which the predicate returns true.
          */
-        public Event<TA> Filter(ILambda1<TA, Boolean> f)
+        public Event<TA> Filter(ISingleParameterFunction<TA, Boolean> f)
         {
             var ev = this;
             var o = new FilterEventSink<TA>(ev, f);
@@ -190,7 +190,7 @@ namespace sodium
          */
         public Event<TA> FilterNotNull()
         {
-            return Filter(new Lambda1<TA, bool>((a) => a != null));
+            return Filter(new SingleParameterFunction<TA, bool>((a) => a != null));
         }
 
         /**
@@ -200,21 +200,21 @@ namespace sodium
          */
         public Event<TA> Gate(Behavior<Boolean> bPred)
         {
-            return Snapshot(bPred, new Lambda2<TA, bool, TA>((a,pred) => pred ? a : default(TA))).FilterNotNull();
+            return Snapshot(bPred, new TwoParameterFunction<TA, bool, TA>((a,pred) => pred ? a : default(TA))).FilterNotNull();
         }
 
         /**
          * Transform an event with a generalized state loop (a mealy machine). The function
          * is passed the input and the old state and returns the new state and output value.
          */
-        public Event<TB> Collect<TB, TS>(TS initState, ILambda2<TA, TS, Tuple2<TB, TS>> f)
+        public Event<TB> Collect<TB, TS>(TS initState, ITwoParameterFunction<TA, TS, Tuple2<TB, TS>> f)
         {
             var ea = this;
             var es = new EventLoop<TS>();
             var s = es.Hold(initState);
             var ebs = ea.Snapshot(s, f);
-            var eb = ebs.Map(new Lambda1<Tuple2<TB, TS>, TB>((bs) => bs.X));
-            var esOut = ebs.Map(new Lambda1<Tuple2<TB, TS>, TS>((bs) => bs.Y));
+            var eb = ebs.Map(new SingleParameterFunction<Tuple2<TB, TS>, TB>((bs) => bs.X));
+            var esOut = ebs.Map(new SingleParameterFunction<Tuple2<TB, TS>, TS>((bs) => bs.Y));
             es.Loop(esOut);
             return eb;
         }
@@ -222,7 +222,7 @@ namespace sodium
         /**
          * Accumulate on input event, outputting the new state each time.
          */
-        public Behavior<TS> Accum<TS>(TS initState, ILambda2<TA, TS, TS> f)
+        public Behavior<TS> Accum<TS>(TS initState, ITwoParameterFunction<TA, TS, TS> f)
         {
             var ea = this;
             var es = new EventLoop<TS>();

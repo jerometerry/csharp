@@ -1,6 +1,6 @@
 ﻿namespace sodium
 {
-    public class ListenerInvoker<TA> : ILambda1<Transaction, IListener>
+    public class ListenerInvoker<TA> : ISingleParameterFunction<Transaction, IListener>
     {
         private readonly Event<TA> _listener;
         private readonly Node _target;
