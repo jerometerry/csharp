@@ -1,16 +1,16 @@
 namespace sodium
 {
-    public sealed class BehaviorLoop<A> : Behavior<A>
+    public sealed class BehaviorLoop<TA> : Behavior<TA>
     {
         public BehaviorLoop()
-            : base(new EventLoop<A>(), default(A))
+            : base(new EventLoop<TA>(), default(TA))
         {
         }
 
-        public void loop(Behavior<A> a_out)
+        public void Loop(Behavior<TA> aOut)
         {
-            ((EventLoop<A>)Evt).loop(a_out.Updates());
-            Value = a_out.Sample();
+            ((EventLoop<TA>)Evt).Loop(aOut.Updates());
+            Value = aOut.Sample();
         }
     }
 }

@@ -26,7 +26,7 @@ namespace sodium
          */
         public IListener Listen(IHandler<TA> action)
         {
-            return Listen(Node.NULL, new ActionInvoker<TA>(action));
+            return Listen(Node.Null, new ActionInvoker<TA>(action));
         }
 
         public IListener Listen(Node target, ITransactionHandler<TA> action)
@@ -38,21 +38,21 @@ namespace sodium
         {
             lock (Transaction.ListenersLock)
             {
-                if (Node.linkTo(target))
+                if (Node.LinkTo(target))
                     trans.ToRegen = true;
                 Listeners.Add(action);
             }
-            Object[] aNow = SampleNow();
+            var aNow = SampleNow();
             if (aNow != null)
             {    // In cases like value(), we start with an initial value.
-                for (var i = 0; i < aNow.Length; i++)
-                    action.Run(trans, (TA)aNow[i]);  // <-- unchecked warning is here
+                foreach (object t in aNow)
+                    action.Run(trans, (TA)t);  // <-- unchecked warning is here
             }
             if (!suppressEarlierFirings)
             {
                 // Anything sent already in this transaction must be sent now so that
                 // there's no order dependency between send and listen.
-                foreach (TA a in Firings)
+                foreach (var a in Firings)
                     action.Run(trans, a);
             }
             return new Listener<TA>(this, action, target);
@@ -86,7 +86,7 @@ namespace sodium
 	     */
         public Event<TB> Snapshot<TB>(Behavior<TB> beh)
         {
-            return Snapshot(beh, new SnapshotBehavior<TA, TB>());
+            return Snapshot(beh, new Lambda2<TA, TB, TB>((a,b) => b));
         }
 
         /**
@@ -213,10 +213,9 @@ namespace sodium
             var es = new EventLoop<TS>();
             var s = es.Hold(initState);
             var ebs = ea.Snapshot(s, f);
-
             var eb = ebs.Map(new Lambda1<Tuple2<TB, TS>, TB>((bs) => bs.X));
             var esOut = ebs.Map(new Lambda1<Tuple2<TB, TS>, TS>((bs) => bs.Y));
-            es.loop(esOut);
+            es.Loop(esOut);
             return eb;
         }
 
@@ -229,7 +228,7 @@ namespace sodium
             var es = new EventLoop<TS>();
             var s = es.Hold(initState);
             var esOut = ea.Snapshot(s, f);
-            es.loop(esOut);
+            es.Loop(esOut);
             return esOut.Hold(initState);
         }
 

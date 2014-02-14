@@ -5,52 +5,52 @@ namespace sodium
 
     public class Node : IComparable<Node>
     {
-        public readonly static Node NULL = new Node(long.MaxValue);
-        private long rank;
-        private readonly ISet<Node> listeners = new HashSet<Node>();
+        public readonly static Node Null = new Node(long.MaxValue);
+        private long _rank;
+        private readonly ISet<Node> _listeners = new HashSet<Node>();
 
         public Node(long rank)
         {
-            this.rank = rank;
+            _rank = rank;
         }
 
         /**
          * @return true if any changes were made. 
          */
-        public bool linkTo(Node target)
+        public bool LinkTo(Node target)
         {
-            if (target == NULL)
+            if (target == Null)
                 return false;
 
-            bool changed = target.ensureBiggerThan(rank, new HashSet<Node>());
-            listeners.Add(target);
+            bool changed = target.EnsureBiggerThan(_rank, new HashSet<Node>());
+            _listeners.Add(target);
             return changed;
         }
 
-        public void unlinkTo(Node target)
+        public void UnlinkTo(Node target)
         {
-            if (target == NULL)
+            if (target == Null)
                 return;
 
-            listeners.Remove(target);
+            _listeners.Remove(target);
         }
 
-        private bool ensureBiggerThan(long limit, ISet<Node> visited)
+        private bool EnsureBiggerThan(long limit, ISet<Node> visited)
         {
-            if (rank > limit || visited.Contains(this))
+            if (_rank > limit || visited.Contains(this))
                 return false;
 
             visited.Add(this);
-            rank = limit + 1;
-            foreach (Node l in listeners)
-                l.ensureBiggerThan(rank, visited);
+            _rank = limit + 1;
+            foreach (Node l in _listeners)
+                l.EnsureBiggerThan(_rank, visited);
             return true;
         }
 
         public int CompareTo(Node o)
         {
-            if (rank < o.rank) return -1;
-            if (rank > o.rank) return 1;
+            if (_rank < o._rank) return -1;
+            if (_rank > o._rank) return 1;
             return 0;
         }
     }

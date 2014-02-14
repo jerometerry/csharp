@@ -20,9 +20,11 @@
             if (oa != null && ob != null)
             {
                 var oo = new Object[oa.Length + ob.Length];
-                int j = 0;
-                for (var i = 0; i < oa.Length; i++) oo[j++] = oa[i];
-                for (var i = 0; i < ob.Length; i++) oo[j++] = ob[i];
+                int i = 0;
+                foreach (var t in oa)
+                    oo[i++] = t;
+                foreach (var t in ob)
+                    oo[i++] = t;
                 return oo;
             }
             else

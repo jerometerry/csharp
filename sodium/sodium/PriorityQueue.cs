@@ -1,6 +1,6 @@
 ﻿namespace sodium
 {
-    public class PriorityQueue<T>
+    public class PriorityQueue<T> : IPriorityQueue<T>
     {
         public void Add(T t)
         {
@@ -22,7 +22,7 @@
             return default(T);
         }
 
-        public bool isEmpty()
+        public bool IsEmpty()
         {
             return true;
         }

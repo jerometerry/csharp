@@ -19,7 +19,7 @@ namespace sodium
             if (oi != null)
             {
                 var oo = new Object[oi.Length];
-                for (int i = 0; i < oo.Length; i++)
+                for (var i = 0; i < oo.Length; i++)
                     oo[i] = _f.Apply((TA)oi[i]);
                 return oo;
             }

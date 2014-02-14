@@ -74,7 +74,6 @@ namespace sodium
         public Event<TA> GetValue(Transaction trans1)
         {
             var o = new GetBehaviorValueEventSink<TA>(this);
-
             var l = Evt.Listen(o.Node, trans1,
                 new GetBehaviorValueTransactionHandler<TA>(o), false);
             return o.AddCleanup(l)
@@ -95,8 +94,8 @@ namespace sodium
          */
         public Behavior<TC> Lift<TB, TC>(ILambda2<TA, TB, TC> f, Behavior<TB> b)
         {
-            ILambda1<TA, ILambda1<TB, TC>> ffa = new BehaviorLifter2<TA, TB, TC>(f);
-		    Behavior<ILambda1<TB,TC>> bf = Map(ffa);
+            var ffa = new BehaviorLifter2<TA, TB, TC>(f);
+		    var bf = Map(ffa);
 		    return Behavior<TB>.Apply(bf, b);
         }
 
@@ -114,9 +113,9 @@ namespace sodium
         public Behavior<TD> Lift<TB, TC, TD>(ILambda3<TA, TB, TC, TD> f, Behavior<TB> b, Behavior<TC> c)
         {
             ILambda1<TA, ILambda1<TB, ILambda1<TC, TD>>> ffa = new BehaviorLifter3<TA, TB, TC, TD>(f);
-		    Behavior<ILambda1<TB, ILambda1<TC, TD>>> bf = Map(ffa);
-            Behavior<ILambda1<TC,TD>> r1 = Behavior<TB>.Apply(bf, b);
-            Behavior<TD> res = Behavior<TC>.Apply(r1, c);
+		    var bf = Map(ffa);
+            var r1 = Behavior<TB>.Apply(bf, b);
+            var res = Behavior<TC>.Apply(r1, c);
             return res;
         }
 
@@ -183,7 +182,7 @@ namespace sodium
             var bbs = ebs.Hold(zbs);
             var bs = bbs.Map(new Lambda1<Tuple2<TB, TS>, TS>((x) => x.Y));
             var ebsOut = ea.Snapshot(bs, f);
-            ebs.loop(ebsOut);
+            ebs.Loop(ebsOut);
             return bbs.Map(new Lambda1<Tuple2<TB, TS>, TB>((x) => x.X));
         }
 

@@ -13,7 +13,7 @@ namespace sodium
         // True if we need to re-generate the priority queue.
         public bool ToRegen = false;
 
-        private readonly PriorityQueue<Entry> _prioritizedQ = new PriorityQueue<Entry>();
+        private readonly IPriorityQueue<Entry> _prioritizedQ = new PriorityQueue<Entry>();
         private readonly ISet<Entry> _entries = new HashSet<Entry>();
         private readonly List<IRunnable> _lastQ = new List<IRunnable>();
         private List<IRunnable> _postQ;
@@ -24,13 +24,13 @@ namespace sodium
             private readonly Node _rank;
             public readonly IHandler<Transaction> Action;
             private static long _nextSeq;
-            private readonly long seq;
+            private readonly long _seq;
 
             public Entry(Node rank, IHandler<Transaction> action)
             {
                 _rank = rank;
                 Action = action;
-                seq = _nextSeq++;
+                _seq = _nextSeq++;
             }
 
             public int CompareTo(Entry o)
@@ -38,9 +38,9 @@ namespace sodium
                 int answer = _rank.CompareTo(o._rank);
                 if (answer == 0)
                 {  // Same rank: preserve chronological sequence.
-                    if (seq < o.seq) answer = -1;
+                    if (_seq < o._seq) answer = -1;
                     else
-                        if (seq > o.seq) answer = 1;
+                        if (_seq > o._seq) answer = 1;
                 }
                 return answer;
             }
@@ -61,12 +61,12 @@ namespace sodium
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
                 // keep using that same transaction.
-                Transaction transWas = _currentTransaction;
+                var transWas = _currentTransaction;
                 try
                 {
                     if (_currentTransaction == null)
                         _currentTransaction = new Transaction();
-                    code.run();
+                    code.Run();
                 }
                 finally
                 {
@@ -84,7 +84,7 @@ namespace sodium
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
                 // keep using that same transaction.
-                Transaction transWas = _currentTransaction;
+                var transWas = _currentTransaction;
                 try
                 {
                     if (_currentTransaction == null)
@@ -100,14 +100,14 @@ namespace sodium
             }
         }
 
-        public static A Apply<A>(ILambda1<Transaction, A> code)
+        public static TA Apply<TA>(ILambda1<Transaction, TA> code)
         {
             lock (TransactionLock)
             {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
                 // keep using that same transaction.
-                Transaction transWas = _currentTransaction;
+                var transWas = _currentTransaction;
                 try
                 {
                     if (_currentTransaction == null)
@@ -167,18 +167,18 @@ namespace sodium
             while (true)
             {
                 CheckRegen();
-                if (_prioritizedQ.isEmpty()) break;
+                if (_prioritizedQ.IsEmpty()) break;
                 var e = _prioritizedQ.Remove();
                 _entries.Remove(e);
                 e.Action.Run(this);
             }
-            foreach (IRunnable action in _lastQ)
-                action.run();
+            foreach (var action in _lastQ)
+                action.Run();
             _lastQ.Clear();
             if (_postQ != null)
             {
-                foreach (IRunnable action in _postQ)
-                    action.run();
+                foreach (var action in _postQ)
+                    action.Run();
                 _postQ.Clear();
             }
         }

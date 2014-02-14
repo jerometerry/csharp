@@ -14,10 +14,10 @@ namespace sodium
             if (_b.ValueUpdate == null)
             {
                 trans.Last(new Runnable(() =>
-                                            {
-                                                _b.Value = _b.ValueUpdate;
-                                                _b.ValueUpdate = default(TA);
-                                            }));
+                {
+                    _b.Value = _b.ValueUpdate;
+                    _b.ValueUpdate = default(TA);
+                }));
                 _b.ValueUpdate = a;
             }
         }

@@ -13,7 +13,7 @@ namespace sodium
 
         public void Run(Transaction trans1)
         {
-            _b.Cleanup = _evt.Listen(Node.NULL, trans1, new BehaviorTransactionHandler<TA>(_b), false);
+            _b.Cleanup = _evt.Listen(Node.Null, trans1, new BehaviorTransactionHandler<TA>(_b), false);
         }
     }
 }

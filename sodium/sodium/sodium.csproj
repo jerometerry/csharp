@@ -79,7 +79,9 @@
     <Compile Include="DualListener.cs" />
     <Compile Include="Event.cs" />
     <Compile Include="EventLoop.cs" />
+    <Compile Include="EventLoopTransactionHandler.cs" />
     <Compile Include="EventSink.cs" />
+    <Compile Include="EventSinkRunner.cs" />
     <Compile Include="FilterEventSink.cs" />
     <Compile Include="FilterTransactionHandler.cs" />
     <Compile Include="GetBehaviorValueEventSink.cs" />
@@ -91,6 +93,7 @@
     <Compile Include="ILambda2.cs" />
     <Compile Include="ILambda3.cs" />
     <Compile Include="IListener.cs" />
+    <Compile Include="IPriorityQueue.cs" />
     <Compile Include="IRunnable.cs" />
     <Compile Include="Lambda1.cs" />
     <Compile Include="Lambda2.cs" />
@@ -108,7 +111,6 @@
     <Compile Include="PriorityQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Runnable.cs" />
-    <Compile Include="SnapshotBehavior.cs" />
     <Compile Include="SnapshotEventSink.cs" />
     <Compile Include="SnapshotTransactionHandler.cs" />
     <Compile Include="SwitchToBehaviorTransactionHandler.cs" />
@@ -120,7 +122,6 @@
     <Compile Include="ITransactionHandler.cs" />
     <Compile Include="TransactionHandler.cs" />
     <Compile Include="Tuple2.cs" />
-    <Compile Include="Unit.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

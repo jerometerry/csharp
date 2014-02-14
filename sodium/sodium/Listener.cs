@@ -24,7 +24,7 @@
             lock (Transaction.ListenersLock)
             {
                 _evt.Listeners.Remove(_action);
-                _evt.Node.unlinkTo(_target);
+                _evt.Node.UnlinkTo(_target);
             }
         }
 

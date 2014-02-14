@@ -4,12 +4,12 @@ namespace sodium
     using System.Collections.Generic;
     using System.Linq;
 
-    public class EventLoop<A> : Event<A>
+    public class EventLoop<TA> : Event<TA>
     {
-        private Event<A> ea_out;
+        private Event<TA> _eaOut;
 
         // TO DO: Copy & paste from EventSink. Can we improve this?
-        private void send(Transaction trans, A a)
+        public void Send(Transaction trans, TA a)
         {
             if (!Firings.Any())
                 trans.Last(new Runnable(() => Firings.Clear())
@@ -17,8 +17,8 @@ namespace sodium
                 });
             Firings.Add(a);
 
-            List<ITransactionHandler<A>> listeners = new List<ITransactionHandler<A>>(this.Listeners);
-            foreach (ITransactionHandler<A> action in listeners)
+            var listeners = new List<ITransactionHandler<TA>>(this.Listeners);
+            foreach (var action in listeners)
             {
                 try
                 {
@@ -31,30 +31,14 @@ namespace sodium
             }
         }
 
-        public void loop(Event<A> ea_out)
+        public void Loop(Event<TA> eaOut)
         {
-            if (this.ea_out != null)
+            if (_eaOut != null)
                 throw new ApplicationException("EventLoop looped more than once");
-            this.ea_out = ea_out;
-            EventLoop<A> me = this;
-            ITransactionHandler<A> action = new TransactionHandler(me);
-            AddCleanup(ea_out.Listen(this.Node, action));
-        }
-
-        private class TransactionHandler : ITransactionHandler<A>
-        {
-            private EventLoop<A> me;
-
-            public TransactionHandler(EventLoop<A> me)
-            {
-                this.me = me;
-            }
-
-            public void Run(Transaction trans, A a)
-            {
-                me.send(trans, a);
-            }
+            _eaOut = eaOut;
+            var me = this;
+            var action = new EventLoopTransactionHandler<TA>(me);
+            AddCleanup(eaOut.Listen(Node, action));
         }
     }
-
 }

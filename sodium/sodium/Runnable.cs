@@ -11,7 +11,7 @@
             _action = action;
         }
 
-        public void run()
+        public void Run()
         {
             _action();
         }

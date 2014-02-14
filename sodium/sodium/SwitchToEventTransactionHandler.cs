@@ -2,12 +2,11 @@ namespace sodium
 {
     using System;
 
-    public class SwitchToEventTransactionHandler<TA> : ITransactionHandler<Event<TA>>, IDisposable
+    public sealed class SwitchToEventTransactionHandler<TA> : ITransactionHandler<Event<TA>>, IDisposable
     {
         private readonly EventSink<TA> _o;
         private IListener _currentListener;
         private readonly ITransactionHandler<TA> _h2;
-        private bool _disposed;
 
         public SwitchToEventTransactionHandler(EventSink<TA> o, Behavior<Event<TA>> bea, Transaction trans, ITransactionHandler<TA> h2)
         {
@@ -28,23 +27,8 @@ namespace sodium
 
         public void Dispose()
         {
-            Dispose(true);
-
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    if (_currentListener != null)
-                        _currentListener.Unlisten();
-                }
-
-                _disposed = true;
-            }
+            if (_currentListener != null)
+                _currentListener.Unlisten();
         }
     }
 }
