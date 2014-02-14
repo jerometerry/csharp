@@ -3,12 +3,12 @@ namespace sodium
     using System;
     using System.Collections.Generic;
 
-    public class Event<TA> : IDisposable
+    public class Event<TEvent> : IDisposable
     {
-        public readonly List<ITransactionHandler<TA>> Listeners = new List<ITransactionHandler<TA>>();
+        public readonly List<ITransactionHandler<TEvent>> Listeners = new List<ITransactionHandler<TEvent>>();
         protected readonly List<IListener> Finalizers = new List<IListener>();
         public Node Node = new Node(0L);
-        protected readonly List<TA> Firings = new List<TA>();
+        protected readonly List<TEvent> Firings = new List<TEvent>();
         private bool _disposed;
 
         /**
@@ -24,17 +24,17 @@ namespace sodium
          * Listen for firings of this event. The returned Listener has an unlisten()
          * method to cause the listener to be removed. This is the observer pattern.
          */
-        public IListener Listen(IHandler<TA> action)
+        public IListener Listen(IHandler<TEvent> action)
         {
-            return Listen(Node.Null, new ActionInvoker<TA>(action));
+            return Listen(Node.Null, new ActionInvoker<TEvent>(action));
         }
 
-        public IListener Listen(Node target, ITransactionHandler<TA> action)
+        public IListener Listen(Node target, ITransactionHandler<TEvent> action)
         {
-            return Transaction.Apply(new ListenerInvoker<TA>(this, target, action));
+            return Transaction.Apply(new ListenerInvoker<TEvent>(this, target, action));
         }
 
-        public IListener Listen(Node target, Transaction trans, ITransactionHandler<TA> action, bool suppressEarlierFirings)
+        public IListener Listen(Node target, Transaction trans, ITransactionHandler<TEvent> action, bool suppressEarlierFirings)
         {
             lock (Transaction.ListenersLock)
             {
@@ -46,7 +46,7 @@ namespace sodium
             if (aNow != null)
             {    // In cases like value(), we start with an initial value.
                 foreach (object t in aNow)
-                    action.Run(trans, (TA)t);  // <-- unchecked warning is here
+                    action.Run(trans, (TEvent)t);  // <-- unchecked warning is here
             }
             if (!suppressEarlierFirings)
             {
@@ -55,17 +55,17 @@ namespace sodium
                 foreach (var a in Firings)
                     action.Run(trans, a);
             }
-            return new Listener<TA>(this, action, target);
+            return new Listener<TEvent>(this, action, target);
         }
 
         /**
          * Transform the event's value according to the supplied function.
          */
-        public Event<TB> Map<TB>(ISingleParameterFunction<TA, TB> f)
+        public Event<TNewEvent> Map<TNewEvent>(ISingleParameterFunction<TEvent, TNewEvent> mapFunction)
         {
             var ev = this;
-            var o = new MapEventSink<TA, TB>(ev, f);
-            var l = Listen(o.Node, new MapTransactionHandler<TA, TB>(o, f));
+            var o = new MapEventSink<TEvent, TNewEvent>(ev, mapFunction);
+            var l = Listen(o.Node, new MapTransactionHandler<TEvent, TNewEvent>(o, mapFunction));
             return o.AddCleanup(l);
         }
 
@@ -76,17 +76,18 @@ namespace sodium
          * That is, state updates caused by event firings get processed at the end of
          * the transaction.
          */
-        public Behavior<TA> Hold(TA initValue)
+        public Behavior<TEvent> Hold(TEvent initValue)
         {
-            return Transaction.Apply(new BehaviorBuilder<TA>(this, initValue));
+            return Transaction.Apply(new BehaviorBuilder<TEvent>(this, initValue));
         }
 
         /**
 	     * Variant of snapshot that throws away the event's value and captures the behavior's.
 	     */
-        public Event<TB> Snapshot<TB>(Behavior<TB> beh)
+        public Event<TNewEvent> Snapshot<TNewEvent>(Behavior<TNewEvent> behavior)
         {
-            return Snapshot(beh, new TwoParameterFunction<TA, TB, TB>((a,b) => b));
+            var snapshotGenerator = new TwoParameterFunction<TEvent, TNewEvent, TNewEvent>((a,b) => b);
+            return Snapshot(behavior, snapshotGenerator);
         }
 
         /**
@@ -94,11 +95,13 @@ namespace sodium
          * of the behavior that's sampled is the value as at the start of the transaction
          * before any state changes of the current transaction are applied through 'hold's.
          */
-        public Event<TC> Snapshot<TB, TC>(Behavior<TB> b, ITwoParameterFunction<TA, TB, TC> f)
+        public Event<TSnapshot> Snapshot<TBehavior, TSnapshot>(
+            Behavior<TBehavior> behavior, 
+            ITwoParameterFunction<TEvent, TBehavior, TSnapshot> snapshotGenerator)
         {
             var ev = this;
-            var o = new SnapshotEventSink<TA, TB, TC>(ev, f, b);
-            var l = Listen(o.Node, new SnapshotTransactionHandler<TA, TB, TC>(o, f, b));
+            var o = new SnapshotEventSink<TEvent, TBehavior, TSnapshot>(ev, snapshotGenerator, behavior);
+            var l = Listen(o.Node, new SnapshotTransactionHandler<TEvent, TBehavior, TSnapshot>(o, snapshotGenerator, behavior));
             return o.AddCleanup(l);
         }
 
@@ -111,22 +114,22 @@ namespace sodium
          * their ordering is retained. In many common cases the ordering will
          * be undefined.
          */
-        public static Event<TA> Merge(Event<TA> ea, Event<TA> eb)
+        public static Event<TEvent> Merge(Event<TEvent> event1, Event<TEvent> event2)
         {
-            var o = new MergeEventSink<TA>(ea, eb);
-            var h = new MergeTransactionHandler<TA>(o);
-            var l1 = ea.Listen(o.Node, h);
-            var l2 = eb.Listen(o.Node, h);
+            var o = new MergeEventSink<TEvent>(event1, event2);
+            var h = new MergeTransactionHandler<TEvent>(o);
+            var l1 = event1.Listen(o.Node, h);
+            var l2 = event2.Listen(o.Node, h);
             return o.AddCleanup(l1).AddCleanup(l2);
         }
 
         /**
 	     * Push each event occurrence onto a new transaction.
 	     */
-        public Event<TA> Delay()
+        public Event<TEvent> Delay()
         {
-            var o = new EventSink<TA>();
-            var l1 = Listen(o.Node, new DelayTransactionHandler<TA>(o));
+            var o = new EventSink<TEvent>();
+            var l1 = Listen(o.Node, new DelayTransactionHandler<TEvent>(o));
             return o.AddCleanup(l1);
         }
 
@@ -139,26 +142,27 @@ namespace sodium
          * make any assumptions about the ordering, and the combining function would
          * ideally be commutative.
          */
-        public Event<TA> Coalesce(ITwoParameterFunction<TA, TA, TA> f)
+        public Event<TEvent> Coalesce(ITwoParameterFunction<TEvent, TEvent, TEvent> combiningFunction)
         {
-            return Transaction.Apply(new CoalesceInvoker<TA>(this, f));
+            return Transaction.Apply(new CoalesceInvoker<TEvent>(this, combiningFunction));
         }
 
-        public Event<TA> Coalesce(Transaction trans1, ITwoParameterFunction<TA, TA, TA> f)
+        public Event<TEvent> Coalesce(Transaction transaction, ITwoParameterFunction<TEvent, TEvent, TEvent> combiningFunction)
         {
             var ev = this;
-            var o = new CoalesceEventSink<TA>(ev, f);
-            var h = new CoalesceHandler<TA>(f, o);
-            var l = Listen(o.Node, trans1, h, false);
+            var o = new CoalesceEventSink<TEvent>(ev, combiningFunction);
+            var h = new CoalesceHandler<TEvent>(combiningFunction, o);
+            var l = Listen(o.Node, transaction, h, false);
             return o.AddCleanup(l);
         }
 
         /**
          * Clean up the output by discarding any firing other than the last one. 
          */
-        public Event<TA> LastFiringOnly(Transaction trans)
+        public Event<TEvent> LastFiringOnly(Transaction transaction)
         {
-            return Coalesce(trans, new TwoParameterFunction<TA, TA, TA>((first, second) => { return second; }));
+            var combiningFunction = new TwoParameterFunction<TEvent, TEvent, TEvent>((first, second) => { return second; });
+            return Coalesce(transaction, combiningFunction);
         }
 
         /**
@@ -169,28 +173,29 @@ namespace sodium
          * within the same transaction), they are combined using the same logic as
          * 'coalesce'.
          */
-        public static Event<TA> MergeWith(ITwoParameterFunction<TA, TA, TA> f, Event<TA> ea, Event<TA> eb)
+        public static Event<TEvent> MergeWith(ITwoParameterFunction<TEvent, TEvent, TEvent> combiningFunction, Event<TEvent> event1, Event<TEvent> event2)
         {
-            return Merge(ea, eb).Coalesce(f);
+            return Merge(event1, event2).Coalesce(combiningFunction);
         }
 
         /**
          * Only keep event occurrences for which the predicate returns true.
          */
-        public Event<TA> Filter(ISingleParameterFunction<TA, Boolean> f)
+        public Event<TEvent> Filter(ISingleParameterFunction<TEvent, Boolean> predicate)
         {
             var ev = this;
-            var o = new FilterEventSink<TA>(ev, f);
-            var l = Listen(o.Node, new FilterTransactionHandler<TA>(f, o));
+            var o = new FilterEventSink<TEvent>(ev, predicate);
+            var l = Listen(o.Node, new FilterTransactionHandler<TEvent>(predicate, o));
             return o.AddCleanup(l);
         }
 
         /**
          * Filter out any event occurrences whose value is a Java null pointer.
          */
-        public Event<TA> FilterNotNull()
+        public Event<TEvent> FilterNotNull()
         {
-            return Filter(new SingleParameterFunction<TA, bool>((a) => a != null));
+            var predicate = new SingleParameterFunction<TEvent, bool>((a) => a != null);
+            return Filter(predicate);
         }
 
         /**
@@ -198,23 +203,26 @@ namespace sodium
          * Note that the behavior's value is as it was at the start of the transaction,
          * that is, no state changes from the current transaction are taken into account.
          */
-        public Event<TA> Gate(Behavior<Boolean> bPred)
+        public Event<TEvent> Gate(Behavior<Boolean> behaviorPredicate)
         {
-            return Snapshot(bPred, new TwoParameterFunction<TA, bool, TA>((a,pred) => pred ? a : default(TA))).FilterNotNull();
+            var snapshotGenerator = new TwoParameterFunction<TEvent, bool, TEvent>((a,pred) => pred ? a : default(TEvent));
+            return Snapshot(behaviorPredicate, snapshotGenerator).FilterNotNull();
         }
 
         /**
          * Transform an event with a generalized state loop (a mealy machine). The function
          * is passed the input and the old state and returns the new state and output value.
          */
-        public Event<TB> Collect<TB, TS>(TS initState, ITwoParameterFunction<TA, TS, Tuple2<TB, TS>> f)
+        public Event<TNewEvent> Collect<TNewEvent, TState>(
+            TState initState, 
+            ITwoParameterFunction<TEvent, TState, Tuple2<TNewEvent, TState>> melayMachineFunction)
         {
             var ea = this;
-            var es = new EventLoop<TS>();
+            var es = new EventLoop<TState>();
             var s = es.Hold(initState);
-            var ebs = ea.Snapshot(s, f);
-            var eb = ebs.Map(new SingleParameterFunction<Tuple2<TB, TS>, TB>((bs) => bs.X));
-            var esOut = ebs.Map(new SingleParameterFunction<Tuple2<TB, TS>, TS>((bs) => bs.Y));
+            var ebs = ea.Snapshot(s, melayMachineFunction);
+            var eb = ebs.Map(new SingleParameterFunction<Tuple2<TNewEvent, TState>, TNewEvent>((bs) => bs.X));
+            var esOut = ebs.Map(new SingleParameterFunction<Tuple2<TNewEvent, TState>, TState>((bs) => bs.Y));
             es.Loop(esOut);
             return eb;
         }
@@ -222,12 +230,12 @@ namespace sodium
         /**
          * Accumulate on input event, outputting the new state each time.
          */
-        public Behavior<TS> Accum<TS>(TS initState, ITwoParameterFunction<TA, TS, TS> f)
+        public Behavior<TState> Accumulate<TState>(TState initState, ITwoParameterFunction<TEvent, TState, TState> snapshotGenerator)
         {
             var ea = this;
-            var es = new EventLoop<TS>();
+            var es = new EventLoop<TState>();
             var s = es.Hold(initState);
-            var esOut = ea.Snapshot(s, f);
+            var esOut = ea.Snapshot(s, snapshotGenerator);
             es.Loop(esOut);
             return esOut.Hold(initState);
         }
@@ -235,18 +243,18 @@ namespace sodium
         /**
          * Throw away all event occurrences except for the first one.
          */
-        public Event<TA> Once()
+        public Event<TEvent> Once()
         {
             // This is a bit long-winded but it's efficient because it deregisters
             // the listener.
             var ev = this;
             var la = new IListener[1];
-            var o = new OnceEventSink<TA>(ev, la);
-            la[0] = ev.Listen(o.Node, new OnceTransactionHandler<TA>(o, la));
+            var o = new OnceEventSink<TEvent>(ev, la);
+            la[0] = ev.Listen(o.Node, new OnceTransactionHandler<TEvent>(o, la));
             return o.AddCleanup(la[0]);
         }
 
-        public Event<TA> AddCleanup(IListener cleanup)
+        public Event<TEvent> AddCleanup(IListener cleanup)
         {
             Finalizers.Add(cleanup);
             return this;
