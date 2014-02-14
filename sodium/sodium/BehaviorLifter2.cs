@@ -11,15 +11,15 @@ namespace sodium
 
         public ILambda1<TB, TC> Apply(TA a)
         {
-            return new T2<TB, TC>(_f, a);
+            return new Lifter(_f, a);
         }
 
-        private class T2<TB, TC> : ILambda1<TB, TC>
+        private class Lifter : ILambda1<TB, TC>
         {
             private readonly TA _a;
             private readonly ILambda2<TA, TB, TC> _f;
 
-            public T2(ILambda2<TA, TB, TC> f, TA a)
+            public Lifter(ILambda2<TA, TB, TC> f, TA a)
             {
                 _f = f;
                 _a = a;
