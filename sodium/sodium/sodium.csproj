@@ -66,6 +66,7 @@
     <Compile Include="EventHelpers.cs" />
     <Compile Include="EventLoop.cs" />
     <Compile Include="EventSink.cs" />
+    <Compile Include="Handler.cs" />
     <Compile Include="IHandler.cs" />
     <Compile Include="ILambda1.cs" />
     <Compile Include="ILambda2.cs" />
