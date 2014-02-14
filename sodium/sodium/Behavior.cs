@@ -4,11 +4,69 @@ namespace sodium
 
     public class Behavior<TA> : IDisposable
     {
-        protected Event<TA> Evt;
-        public TA Value;
-        public TA ValueUpdate;
-        public IListener Cleanup;
+        private Event<TA> _event;
+        private TA _value;
+        private TA _valueUpdate;
+        private IListener _cleanup;
         private bool _disposed;
+        private bool _valueUpdated = false;
+
+        public TA Value
+        {
+            get
+            {
+                return _value;
+            }
+            set
+            {
+                _value = value;
+            }
+        }
+
+        public TA ValueUpdate
+        {
+            get
+            {
+                return _valueUpdate;
+            }
+            set 
+            { 
+                _valueUpdate = value;
+                _valueUpdated = true;
+            }
+        }
+
+        public bool HasValueUpdate
+        {
+            get
+            {
+                return _valueUpdated;
+            }
+        }
+
+        public IListener Cleanup
+        {
+            get
+            {
+                return _cleanup;
+            }
+            set
+            {
+                _cleanup = value;
+            }
+        }
+
+        public Event<TA> Evt
+        {
+            get
+            {
+                return _event;
+            }
+            set
+            {
+                _event = value;
+            }
+        }
 
         /**
          * A behavior with a constant value.
@@ -31,7 +89,7 @@ namespace sodium
          */
         public TA NewValue()
         {
-            return ValueUpdate == null ? Value : ValueUpdate;
+            return HasValueUpdate ? ValueUpdate : Value;
         }
 
         /**

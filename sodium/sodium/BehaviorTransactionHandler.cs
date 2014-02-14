@@ -11,7 +11,7 @@ namespace sodium
 
         public void Run(Transaction trans, TA a)
         {
-            if (_b.ValueUpdate == null)
+            if (!_b.HasValueUpdate)
             {
                 trans.Last(new Runnable(() =>
                 {
