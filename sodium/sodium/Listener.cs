@@ -1,34 +1,36 @@
-namespace sodium
+﻿namespace sodium
 {
-    public class Listener
-    {
-        public virtual void Unlisten() { }
+    using System;
 
+    public sealed class Listener<TA> : ListenerBase, IDisposable
+    {
         /**
-         * Combine listeners into one where a single unlisten() invocation will unlisten
-         * both the inputs.
+         * It's essential that we keep the listener alive while the caller holds
+         * the Listener, so that the finalizer doesn't get triggered.
          */
-        public Listener Append(Listener two)
+        private readonly Event<TA> _evt;
+        private readonly ITransactionHandler<TA> _action;
+        private readonly Node _target;
+
+        public Listener(Event<TA> evt, ITransactionHandler<TA> action, Node target)
         {
-            return new DualListener(this, two);
+            _evt = evt;
+            _action = action;
+            _target = target;
         }
 
-        private class DualListener : Listener
+        public override void Unlisten()
         {
-            private readonly Listener _listener1;
-            private readonly Listener _listener2;
-
-            public DualListener(Listener listener1, Listener listener2)
+            lock (Transaction.ListenersLock)
             {
-                _listener1 = listener1;
-                _listener2 = listener2;
+                _evt.Listeners.Remove(_action);
+                _evt.Node.unlinkTo(_target);
             }
+        }
 
-            public override void Unlisten()
-            {
-                _listener1.Unlisten();
-                _listener2.Unlisten();
-            }
+        public void Dispose()
+        {
+            Unlisten();
         }
     }
 }

@@ -6,7 +6,7 @@ namespace sodium
     public class Event<TA> : IDisposable
     {
         public readonly List<ITransactionHandler<TA>> Listeners = new List<ITransactionHandler<TA>>();
-        protected readonly List<Listener> Finalizers = new List<Listener>();
+        protected readonly List<IListener> Finalizers = new List<IListener>();
         public Node Node = new Node(0L);
         protected readonly List<TA> Firings = new List<TA>();
         private bool _disposed;
@@ -24,17 +24,17 @@ namespace sodium
          * Listen for firings of this event. The returned Listener has an unlisten()
          * method to cause the listener to be removed. This is the observer pattern.
          */
-        public Listener Listen(IHandler<TA> action)
+        public IListener Listen(IHandler<TA> action)
         {
-            return Listen(Node.NULL, new EventHelpers.TmpTransHandler1<TA>(action));
+            return Listen(Node.NULL, new ActionInvoker<TA>(action));
         }
 
-        public Listener Listen(Node target, ITransactionHandler<TA> action)
+        public IListener Listen(Node target, ITransactionHandler<TA> action)
         {
-            return Transaction.Apply(new EventHelpers.ListenerApplier<TA>(this, target, action));
+            return Transaction.Apply(new ListenerInvoker<TA>(this, target, action));
         }
 
-        public Listener Listen(Node target, Transaction trans, ITransactionHandler<TA> action, bool suppressEarlierFirings)
+        public IListener Listen(Node target, Transaction trans, ITransactionHandler<TA> action, bool suppressEarlierFirings)
         {
             lock (Transaction.ListenersLock)
             {
@@ -55,7 +55,7 @@ namespace sodium
                 foreach (TA a in Firings)
                     action.Run(trans, a);
             }
-            return new EventHelpers.ListenerImplementation<TA>(this, action, target);
+            return new Listener<TA>(this, action, target);
         }
 
         /**
@@ -64,8 +64,8 @@ namespace sodium
         public Event<TB> Map<TB>(ILambda1<TA, TB> f)
         {
             var ev = this;
-            var o = new EventHelpers.TmpEventtSink7<TA, TB>(ev, f);
-            var l = Listen(o.Node, new EventHelpers.TmpTransHandler7<TA, TB>(o, f));
+            var o = new MapEventSink<TA, TB>(ev, f);
+            var l = Listen(o.Node, new MapTransactionHandler<TA, TB>(o, f));
             return o.AddCleanup(l);
         }
 
@@ -78,7 +78,7 @@ namespace sodium
          */
         public Behavior<TA> Hold(TA initValue)
         {
-            return Transaction.Apply(new EventHelpers.BehaviorBuilder<TA>(this, initValue));
+            return Transaction.Apply(new BehaviorBuilder<TA>(this, initValue));
         }
 
         /**
@@ -86,7 +86,7 @@ namespace sodium
 	     */
         public Event<TB> Snapshot<TB>(Behavior<TB> beh)
         {
-            return Snapshot(beh, new EventHelpers.SnapshotBehavior<TA, TB>());
+            return Snapshot(beh, new SnapshotBehavior<TA, TB>());
         }
 
         /**
@@ -97,8 +97,8 @@ namespace sodium
         public Event<TC> Snapshot<TB, TC>(Behavior<TB> b, ILambda2<TA, TB, TC> f)
         {
             var ev = this;
-            var o = new EventHelpers.TmpEventSink1<TA, TB, TC>(ev, f, b);
-            var l = Listen(o.Node, new EventHelpers.TmpTransHandler5<TA, TB, TC>(o, f, b));
+            var o = new SnapshotEventSink<TA, TB, TC>(ev, f, b);
+            var l = Listen(o.Node, new SnapshotTransactionHandler<TA, TB, TC>(o, f, b));
             return o.AddCleanup(l);
         }
 
@@ -113,10 +113,10 @@ namespace sodium
          */
         public static Event<TA> Merge(Event<TA> ea, Event<TA> eb)
         {
-            EventSink<TA> o = new EventHelpers.TmpEventSink2<TA>(ea, eb);
-            ITransactionHandler<TA> h = new EventHelpers.TmpTransHandler2<TA>(o);
-            Listener l1 = ea.Listen(o.Node, h);
-            Listener l2 = eb.Listen(o.Node, h);
+            var o = new MergeEventSink<TA>(ea, eb);
+            var h = new MergeTransactionHandler<TA>(o);
+            var l1 = ea.Listen(o.Node, h);
+            var l2 = eb.Listen(o.Node, h);
             return o.AddCleanup(l1).AddCleanup(l2);
         }
 
@@ -126,7 +126,7 @@ namespace sodium
         public Event<TA> Delay()
         {
             var o = new EventSink<TA>();
-            var l1 = Listen(o.Node, new EventHelpers.TmpTransHandler3<TA>(o));
+            var l1 = Listen(o.Node, new DelayTransactionHandler<TA>(o));
             return o.AddCleanup(l1);
         }
 
@@ -141,14 +141,14 @@ namespace sodium
          */
         public Event<TA> Coalesce(ILambda2<TA, TA, TA> f)
         {
-            return Transaction.Apply(new EventHelpers.Tmp2<TA>(this, f));
+            return Transaction.Apply(new CoalesceInvoker<TA>(this, f));
         }
 
         public Event<TA> Coalesce(Transaction trans1, ILambda2<TA, TA, TA> f)
         {
             var ev = this;
-            var o = new EventHelpers.TmpEventSink3<TA>(ev, f);
-            var h = new EventHelpers.CoalesceHandler<TA>(f, o);
+            var o = new CoalesceEventSink<TA>(ev, f);
+            var h = new CoalesceHandler<TA>(f, o);
             var l = Listen(o.Node, trans1, h, false);
             return o.AddCleanup(l);
         }
@@ -158,7 +158,7 @@ namespace sodium
          */
         public Event<TA> LastFiringOnly(Transaction trans)
         {
-            return Coalesce(trans, new EventHelpers.Tmp4<TA>());
+            return Coalesce(trans, new Lambda2<TA, TA, TA>((first, second) => { return second; }));
         }
 
         /**
@@ -180,8 +180,8 @@ namespace sodium
         public Event<TA> Filter(ILambda1<TA, Boolean> f)
         {
             var ev = this;
-            var o = new EventHelpers.TmpEventSink5<TA>(ev, f);
-            var l = Listen(o.Node, new EventHelpers.TmpTransHandler4<TA>(f, o));
+            var o = new FilterEventSink<TA>(ev, f);
+            var l = Listen(o.Node, new FilterTransactionHandler<TA>(f, o));
             return o.AddCleanup(l);
         }
 
@@ -190,7 +190,7 @@ namespace sodium
          */
         public Event<TA> FilterNotNull()
         {
-            return Filter(new EventHelpers.Tmp5<TA>());
+            return Filter(new Lambda1<TA, bool>((a) => a != null));
         }
 
         /**
@@ -200,7 +200,7 @@ namespace sodium
          */
         public Event<TA> Gate(Behavior<Boolean> bPred)
         {
-            return Snapshot(bPred, new EventHelpers.Tmp6<TA>()).FilterNotNull();
+            return Snapshot(bPred, new Lambda2<TA, bool, TA>((a,pred) => pred ? a : default(TA))).FilterNotNull();
         }
 
         /**
@@ -213,8 +213,9 @@ namespace sodium
             var es = new EventLoop<TS>();
             var s = es.Hold(initState);
             var ebs = ea.Snapshot(s, f);
-            var eb = ebs.Map(new EventHelpers.Tmp7<TA, TB, TS>());
-            var esOut = ebs.Map(new EventHelpers.Tmp8<TA, TB, TS>());
+
+            var eb = ebs.Map(new Lambda1<Tuple2<TB, TS>, TB>((bs) => bs.X));
+            var esOut = ebs.Map(new Lambda1<Tuple2<TB, TS>, TS>((bs) => bs.Y));
             es.loop(esOut);
             return eb;
         }
@@ -240,13 +241,13 @@ namespace sodium
             // This is a bit long-winded but it's efficient because it deregisters
             // the listener.
             var ev = this;
-            var la = new Listener[1];
-            var o = new EventHelpers.TmpEventSink4<TA>(ev, la);
-            la[0] = ev.Listen(o.Node, new EventHelpers.TmpTransHandler8<TA>(o, la));
+            var la = new IListener[1];
+            var o = new OnceEventSink<TA>(ev, la);
+            la[0] = ev.Listen(o.Node, new OnceTransactionHandler<TA>(o, la));
             return o.AddCleanup(la[0]);
         }
 
-        public Event<TA> AddCleanup(Listener cleanup)
+        public Event<TA> AddCleanup(IListener cleanup)
         {
             Finalizers.Add(cleanup);
             return this;

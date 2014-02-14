@@ -7,7 +7,7 @@ namespace sodium
         protected Event<TA> Evt;
         public TA Value;
         public TA ValueUpdate;
-        public Listener Cleanup;
+        public IListener Cleanup;
         private bool _disposed;
 
         /**

@@ -265,7 +265,7 @@
 
         public class Tmp11<TA> : ITransactionHandler<Behavior<TA>>, IDisposable
         {
-            private Listener _currentListener;
+            private IListener _currentListener;
             private readonly EventSink<TA> _o;
             private bool _disposed;
 
@@ -342,7 +342,7 @@
         public class Tmp15<TA> : ITransactionHandler<Event<TA>>, IDisposable
         {
             private readonly EventSink<TA> _o;
-            private Listener _currentListener;
+            private IListener _currentListener;
             private readonly ITransactionHandler<TA> _h2;
             private bool _disposed;
 

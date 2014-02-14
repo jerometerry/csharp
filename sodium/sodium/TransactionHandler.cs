@@ -2,18 +2,18 @@
 {
     using System;
 
-    public class TransactionHandler<A> : ITransactionHandler<A>
+    public class TransactionHandler<TA> : ITransactionHandler<TA>
     {
-        private Action<Transaction, A> f;
+        private readonly Action<Transaction, TA> _f;
 
-        public TransactionHandler(Action<Transaction, A> f)
+        public TransactionHandler(Action<Transaction, TA> f)
         {
-            this.f = f;
+            _f = f;
         }
 
-        public void Run(Transaction trans, A a)
+        public void Run(Transaction trans, TA a)
         {
-            this.f(trans, a);
+            _f(trans, a);
         }
     }
 }
