@@ -1,162 +1,186 @@
-namespace sodium {
-    
+namespace sodium
+{
     using System;
     using System.Collections.Generic;
 
-    public sealed class Transaction {
+    public sealed class Transaction
+    {
         // Coarse-grained lock that's held during the whole transaction.
-        private static readonly Object transactionLock = new Object();
+        private static readonly Object TransactionLock = new Object();
         // Fine-grained lock that protects listeners and nodes.
-        public static readonly Object listenersLock = new Object();
+        public static readonly Object ListenersLock = new Object();
 
         // True if we need to re-generate the priority queue.
-        public bool toRegen = false;
+        public bool ToRegen = false;
 
-	    private class Entry : IComparable<Entry> {
-		    private Node rank;
-		    public IHandler<Transaction> action;
-		    private static long nextSeq;
-		    private long seq;
+        private readonly PriorityQueue<Entry> _prioritizedQ = new PriorityQueue<Entry>();
+        private readonly ISet<Entry> _entries = new HashSet<Entry>();
+        private readonly List<IRunnable> _lastQ = new List<IRunnable>();
+        private List<IRunnable> _postQ;
+        private static Transaction _currentTransaction;
 
-		    public Entry(Node rank, IHandler<Transaction> action) {
-			    this.rank = rank;
-			    this.action = action;
-			    this.seq = nextSeq++;
-		    }
+        private class Entry : IComparable<Entry>
+        {
+            private readonly Node _rank;
+            public readonly IHandler<Transaction> Action;
+            private static long _nextSeq;
+            private readonly long seq;
 
-		    public int CompareTo(Entry o) {
-			    int answer = rank.CompareTo(o.rank);
-			    if (answer == 0) {  // Same rank: preserve chronological sequence.
-				    if (seq < o.seq) answer = -1; else
-				    if (seq > o.seq) answer = 1;
-			    }
-			    return answer;
-		    }
+            public Entry(Node rank, IHandler<Transaction> action)
+            {
+                _rank = rank;
+                Action = action;
+                seq = _nextSeq++;
+            }
 
-	    }
+            public int CompareTo(Entry o)
+            {
+                int answer = _rank.CompareTo(o._rank);
+                if (answer == 0)
+                {  // Same rank: preserve chronological sequence.
+                    if (seq < o.seq) answer = -1;
+                    else
+                        if (seq > o.seq) answer = 1;
+                }
+                return answer;
+            }
 
-	    private PriorityQueue<Entry> prioritizedQ = new PriorityQueue<Entry>();
-	    private ISet<Entry> entries = new HashSet<Entry>();
-	    private List<IRunnable> lastQ = new List<IRunnable>(); 
-	    private List<IRunnable> postQ;
+        }
 
-	    public Transaction() {
-	    }
-
-	    private static Transaction currentTransaction;
-
-	    /**
-	     * Run the specified code inside a single transaction.
-	     *
-	     * In most cases this is not needed, because all APIs will create their own
-	     * transaction automatically. It is useful where you want to run multiple
-	     * reactive operations atomically.
-	     */
-	    public static void run(IRunnable code) {
-            lock (transactionLock) {
+        /**
+         * Run the specified code inside a single transaction.
+         *
+         * In most cases this is not needed, because all APIs will create their own
+         * transaction automatically. It is useful where you want to run multiple
+         * reactive operations atomically.
+         */
+        public static void Run(IRunnable code)
+        {
+            lock (TransactionLock)
+            {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
                 // keep using that same transaction.
-                Transaction transWas = currentTransaction;
-                try {
-                    if (currentTransaction == null)
-                        currentTransaction = new Transaction();
+                Transaction transWas = _currentTransaction;
+                try
+                {
+                    if (_currentTransaction == null)
+                        _currentTransaction = new Transaction();
                     code.run();
-                } finally {
+                }
+                finally
+                {
                     if (transWas == null)
-                        currentTransaction.close();
-                    currentTransaction = transWas;
+                        _currentTransaction.Close();
+                    _currentTransaction = transWas;
                 }
             }
-	    }
+        }
 
-	    public static void run(IHandler<Transaction> code) {
-            lock (transactionLock) {
+        public static void Run(IHandler<Transaction> code)
+        {
+            lock (TransactionLock)
+            {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
                 // keep using that same transaction.
-                Transaction transWas = currentTransaction;
-                try {
-                    if (currentTransaction == null)
-                        currentTransaction = new Transaction();
-                    code.run(currentTransaction);
-                } finally {
+                Transaction transWas = _currentTransaction;
+                try
+                {
+                    if (_currentTransaction == null)
+                        _currentTransaction = new Transaction();
+                    code.Run(_currentTransaction);
+                }
+                finally
+                {
                     if (transWas == null)
-                        currentTransaction.close();
-                    currentTransaction = transWas;
+                        _currentTransaction.Close();
+                    _currentTransaction = transWas;
                 }
             }
-	    }
+        }
 
-        public static A apply<A>(ILambda1<Transaction, A> code) {
-            lock (transactionLock) {
+        public static A Apply<A>(ILambda1<Transaction, A> code)
+        {
+            lock (TransactionLock)
+            {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
                 // keep using that same transaction.
-                Transaction transWas = currentTransaction;
-                try {
-                    if (currentTransaction == null)
-                        currentTransaction = new Transaction();
-                    return code.apply(currentTransaction);
-                } finally {
-                    currentTransaction.close();
-                    currentTransaction = transWas;
+                Transaction transWas = _currentTransaction;
+                try
+                {
+                    if (_currentTransaction == null)
+                        _currentTransaction = new Transaction();
+                    return code.Apply(_currentTransaction);
+                }
+                finally
+                {
+                    _currentTransaction.Close();
+                    _currentTransaction = transWas;
                 }
             }
-	    }
+        }
 
-	    public void prioritized(Node rank, IHandler<Transaction> action) {
-	        Entry e = new Entry(rank, action);
-		    prioritizedQ.Add(e);
-		    entries.Add(e);
-	    }
+        public void Prioritized(Node rank, IHandler<Transaction> action)
+        {
+            var e = new Entry(rank, action);
+            _prioritizedQ.Add(e);
+            _entries.Add(e);
+        }
 
-	    /**
+        /**
          * Add an action to run after all prioritized() actions.
          */
-	    public void last(IRunnable action) {
-	        lastQ.Add(action);
-	    }
+        public void Last(IRunnable action)
+        {
+            _lastQ.Add(action);
+        }
 
-	    /**
+        /**
          * Add an action to run after all last() actions.
          */
-	    public void post(IRunnable action) {
-	        if (postQ == null)
-	            postQ = new List<IRunnable>();
-	        postQ.Add(action);
-	    }
+        public void Post(IRunnable action)
+        {
+            if (_postQ == null)
+                _postQ = new List<IRunnable>();
+            _postQ.Add(action);
+        }
 
-	    /**
-	     * If the priority queue has entries in it when we modify any of the nodes'
-	     * ranks, then we need to re-generate it to make sure it's up-to-date.
-	     */
-	    private void checkRegen()
-	    {
-	        if (toRegen) {
-	            toRegen = false;
-	            prioritizedQ.Clear();
-	            foreach (Entry e in entries)
-	                prioritizedQ.Add(e);
-	        }
-	    }
+        /**
+         * If the priority queue has entries in it when we modify any of the nodes'
+         * ranks, then we need to re-generate it to make sure it's up-to-date.
+         */
+        private void CheckRegen()
+        {
+            if (ToRegen)
+            {
+                ToRegen = false;
+                _prioritizedQ.Clear();
+                foreach (var e in _entries)
+                    _prioritizedQ.Add(e);
+            }
+        }
 
-	    public void close() {
-	        while (true) {
-	            checkRegen();
-		        if (prioritizedQ.isEmpty()) break;
-		        Entry e = prioritizedQ.Remove();
-		        entries.Remove(e);
-			    e.action.run(this);
-		    }
-		    foreach (IRunnable action in lastQ)
-			    action.run();
-		    lastQ.Clear();
-		    if (postQ != null) {
-                foreach (IRunnable action in postQ)
+        public void Close()
+        {
+            while (true)
+            {
+                CheckRegen();
+                if (_prioritizedQ.isEmpty()) break;
+                var e = _prioritizedQ.Remove();
+                _entries.Remove(e);
+                e.Action.Run(this);
+            }
+            foreach (IRunnable action in _lastQ)
+                action.run();
+            _lastQ.Clear();
+            if (_postQ != null)
+            {
+                foreach (IRunnable action in _postQ)
                     action.run();
-                postQ.Clear();
-		    }
-	    }
+                _postQ.Clear();
+            }
+        }
     }
 }

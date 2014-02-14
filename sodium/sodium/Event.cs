@@ -1,15 +1,14 @@
 namespace sodium
 {
-
     using System;
     using System.Collections.Generic;
 
-    public class Event<A> : IDisposable
+    public class Event<TA> : IDisposable
     {
-        public readonly List<ITransactionHandler<A>> listeners = new List<ITransactionHandler<A>>();
-        protected readonly List<Listener> finalizers = new List<Listener>();
-        public Node node = new Node(0L);
-        protected readonly List<A> firings = new List<A>();
+        public readonly List<ITransactionHandler<TA>> Listeners = new List<ITransactionHandler<TA>>();
+        protected readonly List<Listener> Finalizers = new List<Listener>();
+        public Node Node = new Node(0L);
+        protected readonly List<TA> Firings = new List<TA>();
         private bool _disposed;
 
         /**
@@ -19,55 +18,55 @@ namespace sodium
         {
         }
 
-        public virtual Object[] sampleNow() { return null; }
+        public virtual Object[] SampleNow() { return null; }
 
         /**
          * Listen for firings of this event. The returned Listener has an unlisten()
          * method to cause the listener to be removed. This is the observer pattern.
          */
-        public Listener listen(IHandler<A> action)
+        public Listener Listen(IHandler<TA> action)
         {
-            return listen_(Node.NULL, new EventHelpers.TmpTransHandler1<A>(action));
+            return Listen(Node.NULL, new EventHelpers.TmpTransHandler1<TA>(action));
         }
 
-        public Listener listen_(Node target, ITransactionHandler<A> action)
+        public Listener Listen(Node target, ITransactionHandler<TA> action)
         {
-            return Transaction.apply(new EventHelpers.ListenerApplier<A>(this, target, action));
+            return Transaction.Apply(new EventHelpers.ListenerApplier<TA>(this, target, action));
         }
 
-        public Listener listen(Node target, Transaction trans, ITransactionHandler<A> action, bool suppressEarlierFirings)
+        public Listener Listen(Node target, Transaction trans, ITransactionHandler<TA> action, bool suppressEarlierFirings)
         {
-            lock (Transaction.listenersLock)
+            lock (Transaction.ListenersLock)
             {
-                if (node.linkTo(target))
-                    trans.toRegen = true;
-                listeners.Add(action);
+                if (Node.linkTo(target))
+                    trans.ToRegen = true;
+                Listeners.Add(action);
             }
-            Object[] aNow = sampleNow();
+            Object[] aNow = SampleNow();
             if (aNow != null)
             {    // In cases like value(), we start with an initial value.
-                for (int i = 0; i < aNow.Length; i++)
-                    action.run(trans, (A)aNow[i]);  // <-- unchecked warning is here
+                for (var i = 0; i < aNow.Length; i++)
+                    action.Run(trans, (TA)aNow[i]);  // <-- unchecked warning is here
             }
             if (!suppressEarlierFirings)
             {
                 // Anything sent already in this transaction must be sent now so that
                 // there's no order dependency between send and listen.
-                foreach (A a in firings)
-                    action.run(trans, a);
+                foreach (TA a in Firings)
+                    action.Run(trans, a);
             }
-            return new EventHelpers.ListenerImplementation<A>(this, action, target);
+            return new EventHelpers.ListenerImplementation<TA>(this, action, target);
         }
 
         /**
          * Transform the event's value according to the supplied function.
          */
-        public Event<B> map<B>(ILambda1<A, B> f)
+        public Event<TB> Map<TB>(ILambda1<TA, TB> f)
         {
-            Event<A> ev = this;
-            EventSink<B> o = new EventHelpers.TmpEventtSink7<A, B>(ev, f);
-            Listener l = listen_(o.node, new EventHelpers.TmpTransHandler7<A, B>(o, f));
-            return o.addCleanup(l);
+            var ev = this;
+            var o = new EventHelpers.TmpEventtSink7<TA, TB>(ev, f);
+            var l = Listen(o.Node, new EventHelpers.TmpTransHandler7<TA, TB>(o, f));
+            return o.AddCleanup(l);
         }
 
         /**
@@ -77,17 +76,17 @@ namespace sodium
          * That is, state updates caused by event firings get processed at the end of
          * the transaction.
          */
-        public Behavior<A> hold(A initValue)
+        public Behavior<TA> Hold(TA initValue)
         {
-            return Transaction.apply(new EventHelpers.BehaviorBuilder<A>(this, initValue));
+            return Transaction.Apply(new EventHelpers.BehaviorBuilder<TA>(this, initValue));
         }
 
         /**
 	     * Variant of snapshot that throws away the event's value and captures the behavior's.
 	     */
-        public Event<B> snapshot<B>(Behavior<B> beh)
+        public Event<TB> Snapshot<TB>(Behavior<TB> beh)
         {
-            return snapshot(beh, new EventHelpers.SnapshotBehavior<A, B>());
+            return Snapshot(beh, new EventHelpers.SnapshotBehavior<TA, TB>());
         }
 
         /**
@@ -95,12 +94,12 @@ namespace sodium
          * of the behavior that's sampled is the value as at the start of the transaction
          * before any state changes of the current transaction are applied through 'hold's.
          */
-        public Event<C> snapshot<B, C>(Behavior<B> b, ILambda2<A, B, C> f)
+        public Event<TC> Snapshot<TB, TC>(Behavior<TB> b, ILambda2<TA, TB, TC> f)
         {
-            Event<A> ev = this;
-            EventSink<C> o = new EventHelpers.TmpEventSink1<A, B, C>(ev, f, b);
-            Listener l = listen_(o.node, new EventHelpers.TmpTransHandler5<A, B, C>(o, f, b));
-            return o.addCleanup(l);
+            var ev = this;
+            var o = new EventHelpers.TmpEventSink1<TA, TB, TC>(ev, f, b);
+            var l = Listen(o.Node, new EventHelpers.TmpTransHandler5<TA, TB, TC>(o, f, b));
+            return o.AddCleanup(l);
         }
 
         /**
@@ -112,23 +111,23 @@ namespace sodium
          * their ordering is retained. In many common cases the ordering will
          * be undefined.
          */
-        public static Event<A> merge<A>(Event<A> ea, Event<A> eb)
+        public static Event<TA> Merge(Event<TA> ea, Event<TA> eb)
         {
-            EventSink<A> o = new EventHelpers.TmpEventSink2<A>(ea, eb);
-            ITransactionHandler<A> h = new EventHelpers.TmpTransHandler2<A>(o);
-            Listener l1 = ea.listen_(o.node, h);
-            Listener l2 = eb.listen_(o.node, h);
-            return o.addCleanup(l1).addCleanup(l2);
+            EventSink<TA> o = new EventHelpers.TmpEventSink2<TA>(ea, eb);
+            ITransactionHandler<TA> h = new EventHelpers.TmpTransHandler2<TA>(o);
+            Listener l1 = ea.Listen(o.Node, h);
+            Listener l2 = eb.Listen(o.Node, h);
+            return o.AddCleanup(l1).AddCleanup(l2);
         }
 
         /**
 	     * Push each event occurrence onto a new transaction.
 	     */
-        public Event<A> delay()
+        public Event<TA> Delay()
         {
-            EventSink<A> o = new EventSink<A>();
-            Listener l1 = listen_(o.node, new EventHelpers.TmpTransHandler3<A>(o));
-            return o.addCleanup(l1);
+            var o = new EventSink<TA>();
+            var l1 = Listen(o.Node, new EventHelpers.TmpTransHandler3<TA>(o));
+            return o.AddCleanup(l1);
         }
 
         /**
@@ -140,26 +139,26 @@ namespace sodium
          * make any assumptions about the ordering, and the combining function would
          * ideally be commutative.
          */
-        public Event<A> coalesce(ILambda2<A, A, A> f)
+        public Event<TA> Coalesce(ILambda2<TA, TA, TA> f)
         {
-            return Transaction.apply(new EventHelpers.Tmp2<A>(this, f));
+            return Transaction.Apply(new EventHelpers.Tmp2<TA>(this, f));
         }
 
-        public Event<A> coalesce(Transaction trans1, ILambda2<A, A, A> f)
+        public Event<TA> Coalesce(Transaction trans1, ILambda2<TA, TA, TA> f)
         {
-            Event<A> ev = this;
-            EventSink<A> o = new EventHelpers.TmpEventSink3<A>(ev, f);
-            ITransactionHandler<A> h = new EventHelpers.CoalesceHandler<A>(f, o);
-            Listener l = listen(o.node, trans1, h, false);
-            return o.addCleanup(l);
+            var ev = this;
+            var o = new EventHelpers.TmpEventSink3<TA>(ev, f);
+            var h = new EventHelpers.CoalesceHandler<TA>(f, o);
+            var l = Listen(o.Node, trans1, h, false);
+            return o.AddCleanup(l);
         }
 
         /**
          * Clean up the output by discarding any firing other than the last one. 
          */
-        public Event<A> lastFiringOnly(Transaction trans)
+        public Event<TA> LastFiringOnly(Transaction trans)
         {
-            return coalesce(trans, new EventHelpers.Tmp4<A>());
+            return Coalesce(trans, new EventHelpers.Tmp4<TA>());
         }
 
         /**
@@ -170,28 +169,28 @@ namespace sodium
          * within the same transaction), they are combined using the same logic as
          * 'coalesce'.
          */
-        public static Event<A> mergeWith<A>(ILambda2<A, A, A> f, Event<A> ea, Event<A> eb)
+        public static Event<TA> MergeWith(ILambda2<TA, TA, TA> f, Event<TA> ea, Event<TA> eb)
         {
-            return merge(ea, eb).coalesce(f);
+            return Merge(ea, eb).Coalesce(f);
         }
 
         /**
          * Only keep event occurrences for which the predicate returns true.
          */
-        public Event<A> filter(ILambda1<A, Boolean> f)
+        public Event<TA> Filter(ILambda1<TA, Boolean> f)
         {
-            Event<A> ev = this;
-            EventSink<A> o = new EventHelpers.TmpEventSink5<A>(ev, f);
-            Listener l = listen_(o.node, new EventHelpers.TmpTransHandler4<A>(f, o));
-            return o.addCleanup(l);
+            var ev = this;
+            var o = new EventHelpers.TmpEventSink5<TA>(ev, f);
+            var l = Listen(o.Node, new EventHelpers.TmpTransHandler4<TA>(f, o));
+            return o.AddCleanup(l);
         }
 
         /**
          * Filter out any event occurrences whose value is a Java null pointer.
          */
-        public Event<A> filterNotNull()
+        public Event<TA> FilterNotNull()
         {
-            return filter(new EventHelpers.Tmp5<A>());
+            return Filter(new EventHelpers.Tmp5<TA>());
         }
 
         /**
@@ -199,57 +198,57 @@ namespace sodium
          * Note that the behavior's value is as it was at the start of the transaction,
          * that is, no state changes from the current transaction are taken into account.
          */
-        public Event<A> gate(Behavior<Boolean> bPred)
+        public Event<TA> Gate(Behavior<Boolean> bPred)
         {
-            return snapshot(bPred, new EventHelpers.Tmp6<A>()).filterNotNull();
+            return Snapshot(bPred, new EventHelpers.Tmp6<TA>()).FilterNotNull();
         }
 
         /**
          * Transform an event with a generalized state loop (a mealy machine). The function
          * is passed the input and the old state and returns the new state and output value.
          */
-        public Event<B> collect<B, S>(S initState, ILambda2<A, S, Tuple2<B, S>> f)
+        public Event<TB> Collect<TB, TS>(TS initState, ILambda2<TA, TS, Tuple2<TB, TS>> f)
         {
-            Event<A> ea = this;
-            EventLoop<S> es = new EventLoop<S>();
-            Behavior<S> s = es.hold(initState);
-            Event<Tuple2<B, S>> ebs = ea.snapshot(s, f);
-            Event<B> eb = ebs.map(new EventHelpers.Tmp7<A, B, S>());
-            Event<S> es_out = ebs.map(new EventHelpers.Tmp8<A, B, S>());
-            es.loop(es_out);
+            var ea = this;
+            var es = new EventLoop<TS>();
+            var s = es.Hold(initState);
+            var ebs = ea.Snapshot(s, f);
+            var eb = ebs.Map(new EventHelpers.Tmp7<TA, TB, TS>());
+            var esOut = ebs.Map(new EventHelpers.Tmp8<TA, TB, TS>());
+            es.loop(esOut);
             return eb;
         }
 
         /**
          * Accumulate on input event, outputting the new state each time.
          */
-        public Behavior<S> accum<S>(S initState, ILambda2<A, S, S> f)
+        public Behavior<TS> Accum<TS>(TS initState, ILambda2<TA, TS, TS> f)
         {
-            Event<A> ea = this;
-            EventLoop<S> es = new EventLoop<S>();
-            Behavior<S> s = es.hold(initState);
-            Event<S> es_out = ea.snapshot(s, f);
-            es.loop(es_out);
-            return es_out.hold(initState);
+            var ea = this;
+            var es = new EventLoop<TS>();
+            var s = es.Hold(initState);
+            var esOut = ea.Snapshot(s, f);
+            es.loop(esOut);
+            return esOut.Hold(initState);
         }
 
         /**
          * Throw away all event occurrences except for the first one.
          */
-        public Event<A> once()
+        public Event<TA> Once()
         {
             // This is a bit long-winded but it's efficient because it deregisters
             // the listener.
-            Event<A> ev = this;
-            Listener[] la = new Listener[1];
-            EventSink<A> o = new EventHelpers.TmpEventSink4<A>(ev, la);
-            la[0] = ev.listen_(o.node, new EventHelpers.TmpTransHandler8<A>(o, la));
-            return o.addCleanup(la[0]);
+            var ev = this;
+            var la = new Listener[1];
+            var o = new EventHelpers.TmpEventSink4<TA>(ev, la);
+            la[0] = ev.Listen(o.Node, new EventHelpers.TmpTransHandler8<TA>(o, la));
+            return o.AddCleanup(la[0]);
         }
 
-        public Event<A> addCleanup(Listener cleanup)
+        public Event<TA> AddCleanup(Listener cleanup)
         {
-            finalizers.Add(cleanup);
+            Finalizers.Add(cleanup);
             return this;
         }
 
@@ -269,8 +268,8 @@ namespace sodium
             {
                 if (disposing)
                 {
-                    foreach (Listener l in finalizers)
-                        l.unlisten();
+                    foreach (var l in Finalizers)
+                        l.Unlisten();
                 }
 
                 // Indicate that the instance has been disposed.

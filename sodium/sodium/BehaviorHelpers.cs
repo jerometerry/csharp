@@ -4,276 +4,277 @@
 
     class BehaviorHelpers
     {
-        public class TmpTransHandler1<A> : IHandler<Transaction>
+        public class TmpTransHandler1<TA> : IHandler<Transaction>
         {
-            private Behavior<A> b;
-            private Event<A> evt;
+            private readonly Behavior<TA> _b;
+            private readonly Event<TA> _evt;
 
-            public TmpTransHandler1(Behavior<A> b, Event<A> evt)
+            public TmpTransHandler1(Behavior<TA> b, Event<TA> evt)
             {
-                this.b = b;
-                this.evt = evt;
+                _b = b;
+                _evt = evt;
             }
 
-            public void run(Transaction trans1)
+            public void Run(Transaction trans1)
             {
-                b.cleanup = evt.listen(Node.NULL, trans1, new TransHandler2<A>(this.b), false);
+                _b.Cleanup = _evt.Listen(Node.NULL, trans1, new TransHandler2<TA>(_b), false);
             }
         }
-        public sealed class TransHandler2<A> : ITransactionHandler<A>
-        {
-            private Behavior<A> b;
 
-            public TransHandler2(Behavior<A> b)
+        public sealed class TransHandler2<TA> : ITransactionHandler<TA>
+        {
+            private readonly Behavior<TA> _b;
+
+            public TransHandler2(Behavior<TA> b)
             {
-                this.b = b;
+                this._b = b;
             }
 
-            public void run(Transaction trans, A a)
+            public void Run(Transaction trans, TA a)
             {
-                if (b.valueUpdate == null)
+                if (_b.ValueUpdate == null)
                 {
-                    trans.last(new Runnable(() =>
+                    trans.Last(new Runnable(() =>
                     {
-                        b._value = b.valueUpdate;
-                        b.valueUpdate = default(A);
+                        _b.Value = _b.ValueUpdate;
+                        _b.ValueUpdate = default(TA);
                     }));
-                    b.valueUpdate = a;
+                    _b.ValueUpdate = a;
                 }
             }
         }
 
-        public class Tmp1<A> : ILambda1<Transaction, Event<A>>
+        public class Tmp1<TA> : ILambda1<Transaction, Event<TA>>
         {
-            private Behavior<A> b;
+            private readonly Behavior<TA> _b;
 
-            public Tmp1(Behavior<A> b)
+            public Tmp1(Behavior<TA> b)
             {
-                this.b = b;
+                _b = b;
             }
 
-            public Event<A> apply(Transaction trans)
+            public Event<TA> Apply(Transaction trans)
             {
-                return b.value(trans);
+                return _b.GetValue(trans);
             }
         }
 
-        public class TmpTransHandler2<A> : ITransactionHandler<A>
+        public class TmpTransHandler2<TA> : ITransactionHandler<TA>
         {
-            private EventSink<A> o;
+            private readonly EventSink<TA> _o;
 
-            public TmpTransHandler2(EventSink<A> o)
+            public TmpTransHandler2(EventSink<TA> o)
             {
-                this.o = o;
+                _o = o;
             }
 
-            public void run(Transaction trans, A a)
+            public void Run(Transaction trans, TA a)
             {
-                o.send(trans, a);
+                _o.Send(trans, a);
             }
         }
 
-        public class TmpEventSink1<A> : EventSink<A>
+        public class TmpEventSink1<TA> : EventSink<TA>
         {
-            private Behavior<A> b;
+            private readonly Behavior<TA> _b;
 
-            public TmpEventSink1(Behavior<A> b)
+            public TmpEventSink1(Behavior<TA> b)
             {
-                this.b = b;
+                _b = b;
             }
 
-            public override Object[] sampleNow()
+            public override Object[] SampleNow()
             {
-                return new Object[] { this.b.sample() };
+                return new Object[] { _b.Sample() };
             }
         }
 
-        public class Tmp2<A, B, C> : ILambda1<A, ILambda1<B, C>>
+        public class Tmp2<TA, TB, TC> : ILambda1<TA, ILambda1<TB, TC>>
         {
-            private ILambda2<A, B, C> f;
+            private readonly ILambda2<TA, TB, TC> _f;
 
-            public Tmp2(ILambda2<A, B, C> f)
+            public Tmp2(ILambda2<TA, TB, TC> f)
             {
-                this.f = f;
+                _f = f;
             }
 
-            public ILambda1<B, C> apply(A a)
+            public ILambda1<TB, TC> Apply(TA a)
             {
-                return new Tmp3<A, B, C>(f, a);
+                return new Tmp3<TA, TB, TC>(_f, a);
             }
         }
 
-        public class Tmp3<A, B, C> : ILambda1<B, C>
+        public class Tmp3<TA, TB, TC> : ILambda1<TB, TC>
         {
-            private ILambda2<A, B, C> f;
-            private A a;
+            private readonly ILambda2<TA, TB, TC> _f;
+            private readonly TA _a;
 
-            public Tmp3(ILambda2<A, B, C> f, A a)
+            public Tmp3(ILambda2<TA, TB, TC> f, TA a)
             {
-                this.f = f;
-                this.a = a;
+                _f = f;
+                _a = a;
             }
 
-            public C apply(B b)
+            public TC Apply(TB b)
             {
-                return f.apply(a, b);
+                return _f.Apply(_a, b);
             }
         }
 
-        public class Tmp4<A, B, C, D> : ILambda1<A, ILambda1<B, ILambda1<C, D>>>
+        public class Tmp4<TA, TB, TC, TD> : ILambda1<TA, ILambda1<TB, ILambda1<TC, TD>>>
         {
-            private ILambda3<A, B, C, D> f;
+            private readonly ILambda3<TA, TB, TC, TD> _f;
 
-            public Tmp4(ILambda3<A, B, C, D> f)
+            public Tmp4(ILambda3<TA, TB, TC, TD> f)
             {
-                this.f = f;
+                _f = f;
             }
 
-            public ILambda1<B, ILambda1<C, D>> apply(A a)
+            public ILambda1<TB, ILambda1<TC, TD>> Apply(TA a)
             {
-                return new Tmp5<A, B, C, D>(a, f);
+                return new Tmp5<TA, TB, TC, TD>(a, _f);
             }
         }
 
-        public class Tmp5<A, B, C, D> : ILambda1<B, ILambda1<C, D>>
+        public class Tmp5<TA, TB, TC, TD> : ILambda1<TB, ILambda1<TC, TD>>
         {
-            private A a;
-            private ILambda3<A, B, C, D> f;
+            private readonly TA _a;
+            private readonly ILambda3<TA, TB, TC, TD> _f;
 
-            public Tmp5(A a, ILambda3<A, B, C, D> f)
+            public Tmp5(TA a, ILambda3<TA, TB, TC, TD> f)
             {
-                this.a = a;
-                this.f = f;
+                _a = a;
+                _f = f;
             }
 
-            public ILambda1<C, D> apply(B b)
+            public ILambda1<TC, TD> Apply(TB b)
             {
-                return new Tmp6<A, B, C, D>(a, b, f);
+                return new Tmp6<TA, TB, TC, TD>(_a, b, _f);
             }
         }
 
-        public class Tmp6<A, B, C, D> : ILambda1<C, D>
+        public class Tmp6<TA, TB, TC, TD> : ILambda1<TC, TD>
         {
-            private A a;
-            private B b;
-            private ILambda3<A, B, C, D> f;
+            private readonly TA _a;
+            private readonly TB _b;
+            private readonly ILambda3<TA, TB, TC, TD> _f;
 
-            public Tmp6(A a, B b, ILambda3<A, B, C, D> f)
+            public Tmp6(TA a, TB b, ILambda3<TA, TB, TC, TD> f)
             {
-                this.a = a;
-                this.b = b;
-                this.f = f;
+                _a = a;
+                _b = b;
+                _f = f;
             }
 
-            public D apply(C c)
+            public TD Apply(TC c)
             {
-                return f.apply(a, b, c);
+                return _f.Apply(_a, _b, c);
             }
         }
 
-        public class Tmp9<A, B> : ITransactionHandler<ILambda1<A, B>>
+        public class Tmp9<TA, TB> : ITransactionHandler<ILambda1<TA, TB>>
         {
-            private IHandler<Transaction> h;
+            private readonly IHandler<Transaction> _h;
 
             public Tmp9(IHandler<Transaction> h)
             {
-                this.h = h;
+                _h = h;
             }
 
-            public void run(Transaction trans, ILambda1<A, B> a)
+            public void Run(Transaction trans, ILambda1<TA, TB> a)
             {
-                h.run(trans);
+                _h.Run(trans);
             }
         }
 
-        public class Tmp10<A, B> : ITransactionHandler<A>
+        public class Tmp10<TA, TB> : ITransactionHandler<TA>
         {
-            private IHandler<Transaction> h;
+            private readonly IHandler<Transaction> _h;
 
             public Tmp10(IHandler<Transaction> h)
             {
-                this.h = h;
+                _h = h;
             }
 
-            public void run(Transaction trans, A a)
+            public void Run(Transaction trans, TA a)
             {
-                h.run(trans);
+                _h.Run(trans);
             }
         }
 
-        public class Tmp7<A, B> : IHandler<Transaction>
+        public class Tmp7<TA, TB> : IHandler<Transaction>
         {
-            public bool fired = false;
-            private EventSink<B> o;
-            private Behavior<ILambda1<A, B>> bf;
-            private Behavior<A> ba;
+            public bool Fired = false;
+            private readonly EventSink<TB> _o;
+            private readonly Behavior<ILambda1<TA, TB>> _bf;
+            private readonly Behavior<TA> _ba;
 
-            public Tmp7(EventSink<B> o, Behavior<ILambda1<A, B>> bf, Behavior<A> ba)
+            public Tmp7(EventSink<TB> o, Behavior<ILambda1<TA, TB>> bf, Behavior<TA> ba)
             {
-                this.o = o;
-                this.bf = bf;
-                this.ba = ba;
+                _o = o;
+                _bf = bf;
+                _ba = ba;
             }
 
-            public void run(Transaction trans)
+            public void Run(Transaction trans)
             {
-                if (fired)
+                if (Fired)
                     return;
 
-                fired = true;
-                trans.prioritized(o.node, new Tmp8<A, B>(o, bf, ba, this));
+                Fired = true;
+                trans.Prioritized(_o.Node, new Tmp8<TA, TB>(_o, _bf, _ba, this));
             }
         }
 
-        public class Tmp8<A, B> : IHandler<Transaction>
+        public class Tmp8<TA, TB> : IHandler<Transaction>
         {
-            private EventSink<B> o;
-            private Behavior<ILambda1<A, B>> bf;
-            private Behavior<A> ba;
-            private Tmp7<A, B> tmp7;
+            private readonly EventSink<TB> _o;
+            private readonly Behavior<ILambda1<TA, TB>> _bf;
+            private readonly Behavior<TA> _ba;
+            private readonly Tmp7<TA, TB> _tmp7;
 
-            public Tmp8(EventSink<B> o, Behavior<ILambda1<A, B>> bf, Behavior<A> ba, Tmp7<A, B> tmp7)
+            public Tmp8(EventSink<TB> o, Behavior<ILambda1<TA, TB>> bf, Behavior<TA> ba, Tmp7<TA, TB> tmp7)
             {
-                this.o = o;
-                this.bf = bf;
-                this.ba = ba;
-                this.tmp7 = tmp7;
+                _o = o;
+                _bf = bf;
+                _ba = ba;
+                _tmp7 = tmp7;
             }
 
-            public void run(Transaction trans)
+            public void Run(Transaction trans)
             {
-                o.send(trans, bf.newValue().apply(ba.newValue()));
-                tmp7.fired = false;
+                _o.Send(trans, _bf.NewValue().Apply(_ba.NewValue()));
+                _tmp7.Fired = false;
             }
         }
 
-        public class Tmp13<A> : ILambda1<Transaction, Event<A>>
+        public class Tmp13<TA> : ILambda1<Transaction, Event<TA>>
         {
-            private Behavior<Event<A>> bea;
+            private readonly Behavior<Event<TA>> _bea;
 
-            public Tmp13(Behavior<Event<A>> bea)
+            public Tmp13(Behavior<Event<TA>> bea)
             {
-                this.bea = bea;
+                _bea = bea;
             }
 
-            public Event<A> apply(Transaction trans)
+            public Event<TA> Apply(Transaction trans)
             {
-                return Behavior<A>.switchE(trans, bea);
+                return Behavior<TA>.SwitchE(trans, _bea);
             }
         }
 
-        public class Tmp11<A> : ITransactionHandler<Behavior<A>>, IDisposable
+        public class Tmp11<TA> : ITransactionHandler<Behavior<TA>>, IDisposable
         {
-            private Listener currentListener;
-            private EventSink<A> o;
+            private Listener _currentListener;
+            private readonly EventSink<TA> _o;
             private bool _disposed;
 
-            public Tmp11(EventSink<A> o)
+            public Tmp11(EventSink<TA> o)
             {
-                this.o = o;
+                _o = o;
             }
 
-            public void run(Transaction trans, Behavior<A> a)
+            public void Run(Transaction trans, Behavior<TA> a)
             {
                 // Note: If any switch takes place during a transaction, then the
                 // value().listen will always cause a sample to be fetched from the
@@ -281,9 +282,9 @@
                 // using value().listen, and value() throws away all firings except
                 // for the last one. Therefore, anything from the old input behaviour
                 // that might have happened during this transaction will be suppressed.
-                if (currentListener != null)
-                    currentListener.unlisten();
-                currentListener = a.value(trans).listen(o.node, trans, new Tmp12<A>(o), false);
+                if (_currentListener != null)
+                    _currentListener.Unlisten();
+                _currentListener = a.GetValue(trans).Listen(_o.Node, trans, new Tmp12<TA>(_o), false);
             }
 
             public void Dispose()
@@ -299,8 +300,8 @@
                 {
                     if (disponsing)
                     {
-                        if (currentListener != null)
-                            currentListener.unlisten();
+                        if (_currentListener != null)
+                            _currentListener.Unlisten();
                     }
 
                     _disposed = true;
@@ -308,56 +309,57 @@
             }
         }
 
-        public class Tmp12<A> : ITransactionHandler<A>
+        public class Tmp12<TA> : ITransactionHandler<TA>
         {
-            private EventSink<A> o;
+            private readonly EventSink<TA> _o;
 
-            public Tmp12(EventSink<A> o)
+            public Tmp12(EventSink<TA> o)
             {
-                this.o = o;
+                _o = o;
             }
 
-            public void run(Transaction trans, A a)
+            public void Run(Transaction trans, TA a)
             {
-                o.send(trans, a);
+                _o.Send(trans, a);
             }
         }
 
-        public class Tmp14<A> : ITransactionHandler<A>
+        public class Tmp14<TA> : ITransactionHandler<TA>
         {
-            private EventSink<A> o;
+            private readonly EventSink<TA> _o;
 
-            public Tmp14(EventSink<A> o)
+            public Tmp14(EventSink<TA> o)
             {
-                this.o = o;
+                _o = o;
             }
 
-            public void run(Transaction trans, A a)
+            public void Run(Transaction trans, TA a)
             {
-                o.send(trans, a);
+                _o.Send(trans, a);
             }
         }
 
-        public class Tmp15<A> : ITransactionHandler<Event<A>>, IDisposable
+        public class Tmp15<TA> : ITransactionHandler<Event<TA>>, IDisposable
         {
-            private EventSink<A> o;
-            private Listener currentListener;
-            private ITransactionHandler<A> h2;
+            private readonly EventSink<TA> _o;
+            private Listener _currentListener;
+            private readonly ITransactionHandler<TA> _h2;
             private bool _disposed;
 
-            public Tmp15(EventSink<A> o, Behavior<Event<A>> bea, Transaction trans, ITransactionHandler<A> h2)
+            public Tmp15(EventSink<TA> o, Behavior<Event<TA>> bea, Transaction trans, ITransactionHandler<TA> h2)
             {
-                this.currentListener = bea.sample().listen(o.node, trans, h2, false);
-                this.h2 = h2;
+                _currentListener = bea.Sample().Listen(o.Node, trans, h2, false);
+                _h2 = h2;
+                _o = o;
             }
 
-            public void run(Transaction trans, Event<A> a)
+            public void Run(Transaction trans, Event<TA> a)
             {
-                trans.last(new Runnable(() =>
+                trans.Last(new Runnable(() =>
                 {
-                    if (currentListener != null)
-                        currentListener.unlisten();
-                    currentListener = a.listen(o.node, trans, h2, true);
+                    if (_currentListener != null)
+                        _currentListener.Unlisten();
+                    _currentListener = a.Listen(_o.Node, trans, _h2, true);
                 }));
             }
 
@@ -374,8 +376,8 @@
                 {
                     if (disposing)
                     {
-                        if (currentListener != null)
-                            currentListener.unlisten();
+                        if (_currentListener != null)
+                            _currentListener.Unlisten();
                     }
 
                     _disposed = true;
@@ -383,27 +385,27 @@
             }
         }
 
-        public class Tmp16<A> : ILambda2<A, A, A>
+        public class Tmp16<TA> : ILambda2<TA, TA, TA>
         {
-            public A apply(A a, A b)
+            public TA Apply(TA a, TA b)
             {
                 return b;
             }
         }
 
-        public class Tmp17<A, B, S> : ILambda1<Tuple2<B, S>, S>
+        public class Tmp17<TA, TB, TS> : ILambda1<Tuple2<TB, TS>, TS>
         {
-            public S apply(Tuple2<B, S> x)
+            public TS Apply(Tuple2<TB, TS> x)
             {
-                return x.b;
+                return x.Y;
             }
         }
 
-        public class Tmp18<A, B, S> : ILambda1<Tuple2<B, S>, B>
+        public class Tmp18<TA, TB, TS> : ILambda1<Tuple2<TB, TS>, TB>
         {
-            public B apply(Tuple2<B, S> x)
+            public TB Apply(Tuple2<TB, TS> x)
             {
-                return x.a;
+                return x.X;
             }
         }
     }

@@ -1,5 +1,4 @@
-﻿
-namespace sodium
+﻿namespace sodium
 {
     public class PriorityQueue<T>
     {

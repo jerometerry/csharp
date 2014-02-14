@@ -2,36 +2,36 @@ namespace sodium
 {
     using System;
 
-    public class Behavior<A> : IDisposable
+    public class Behavior<TA> : IDisposable
     {
-        protected Event<A> evt;
-        public A _value;
-        public A valueUpdate;
-        public Listener cleanup;
+        protected Event<TA> Evt;
+        public TA Value;
+        public TA ValueUpdate;
+        public Listener Cleanup;
         private bool _disposed;
 
         /**
          * A behavior with a constant value.
          */
-        public Behavior(A value)
+        public Behavior(TA value)
         {
-            this.evt = new Event<A>();
-            this._value = value;
+            Evt = new Event<TA>();
+            Value = value;
         }
 
-        public Behavior(Event<A> evt, A initValue)
+        public Behavior(Event<TA> evt, TA initValue)
         {
-            this.evt = evt;
-            this._value = initValue;
-            Transaction.run(new BehaviorHelpers.TmpTransHandler1<A>(this, evt));
+            Evt = evt;
+            Value = initValue;
+            Transaction.Run(new BehaviorHelpers.TmpTransHandler1<TA>(this, evt));
         }
 
         /**
          * @return The value including any updates that have happened in this transaction.
          */
-        public A newValue()
+        public TA NewValue()
         {
-            return valueUpdate == null ? _value : valueUpdate;
+            return ValueUpdate == null ? Value : ValueUpdate;
         }
 
         /**
@@ -45,20 +45,20 @@ namespace sodium
          * b.updates().listen(..) will capture the current value and any updates without risk
          * of missing any in between.
          */
-        public A sample()
+        public TA Sample()
         {
             // Since pointers in Java are atomic, we don't need to explicitly create a
             // transaction.
-            return _value;
+            return Value;
         }
 
         /**
          * An evt that gives the updates for the behavior. If this behavior was created
          * with a hold, then updates() gives you an evt equivalent to the one that was held.
          */
-        public Event<A> updates()
+        public Event<TA> Updates()
         {
-            return evt;
+            return Evt;
         }
 
         /**
@@ -66,124 +66,121 @@ namespace sodium
          * the current value of the behavior, and thereafter behaves like updates(),
          * firing for each update to the behavior's value.
          */
-        public Event<A> value()
+        public Event<TA> GetValue()
         {
-            return Transaction.apply(new BehaviorHelpers.Tmp1<A>(this));
+            return Transaction.Apply(new BehaviorHelpers.Tmp1<TA>(this));
         }
-        public Event<A> value(Transaction trans1)
-        {
-            EventSink<A> o = new BehaviorHelpers.TmpEventSink1<A>(this);
 
-            Listener l = evt.listen(o.node, trans1,
-                new BehaviorHelpers.TmpTransHandler2<A>(o), false);
-            return o.addCleanup(l)
-                .lastFiringOnly(trans1);  // Needed in case of an initial value and an update
+        public Event<TA> GetValue(Transaction trans1)
+        {
+            var o = new BehaviorHelpers.TmpEventSink1<TA>(this);
+
+            var l = Evt.Listen(o.Node, trans1,
+                new BehaviorHelpers.TmpTransHandler2<TA>(o), false);
+            return o.AddCleanup(l)
+                .LastFiringOnly(trans1);  // Needed in case of an initial value and an update
             // in the same transaction.
         }
 
         /**
          * Transform the behavior's value according to the supplied function.
          */
-        public Behavior<B> map<B>(ILambda1<A, B> f)
+        public Behavior<TB> Map<TB>(ILambda1<TA, TB> f)
         {
-            return updates().map(f).hold(f.apply(sample()));
+            return Updates().Map(f).Hold(f.Apply(Sample()));
         }
 
         /**
          * Lift a binary function into behaviors.
          */
-        public Behavior<C> lift<B, C>(ILambda2<A, B, C> f, Behavior<B> b)
+        public Behavior<TC> Lift<TB, TC>(ILambda2<TA, TB, TC> f, Behavior<TB> b)
         {
-            ILambda1<A, ILambda1<B, C>> ffa = new BehaviorHelpers.Tmp2<A, B, C>(f);
-            Behavior<ILambda1<B, C>> bf = map(ffa);
-            return apply(bf, b);
+            return null;
         }
 
         /**
 	     * Lift a binary function into behaviors.
 	     */
-        public static Behavior<C> lift<A, B, C>(ILambda2<A, B, C> f, Behavior<A> a, Behavior<B> b)
+        public static Behavior<TC> Lift<TB, TC>(ILambda2<TA, TB, TC> f, Behavior<TA> a, Behavior<TB> b)
         {
-            return a.lift(f, b);
+            return a.Lift(f, b);
         }
 
         /**
          * Lift a ternary function into behaviors.
          */
-        public Behavior<D> lift<B, C, D>(ILambda3<A, B, C, D> f, Behavior<B> b, Behavior<C> c)
+        public Behavior<TD> Lift<TB, TC, TD>(ILambda3<TA, TB, TC, TD> f, Behavior<TB> b, Behavior<TC> c)
         {
-            ILambda1<A, ILambda1<B, ILambda1<C, D>>> ffa = new BehaviorHelpers.Tmp4<A, B, C, D>(f);
-            Behavior<ILambda1<B, ILambda1<C, D>>> bf = map(ffa);
-            return apply(apply(bf, b), c);
+            return null;
         }
 
         /**
 	     * Lift a ternary function into behaviors.
 	     */
-        public static Behavior<D> lift<A, B, C, D>(ILambda3<A, B, C, D> f, Behavior<A> a, Behavior<B> b, Behavior<C> c)
+        public static Behavior<TD> Lift<TB, TC, TD>(ILambda3<TA, TB, TC, TD> f, Behavior<TA> a, Behavior<TB> b, Behavior<TC> c)
         {
-            return a.lift(f, b, c);
+            return a.Lift(f, b, c);
         }
 
         /**
          * Apply a value inside a behavior to a function inside a behavior. This is the
          * primitive for all function lifting.
          */
-        public static Behavior<B> apply<A, B>(Behavior<ILambda1<A, B>> bf, Behavior<A> ba)
+        public static Behavior<TB> Apply<TB>(Behavior<ILambda1<TA, TB>> bf, Behavior<TA> ba)
         {
-            EventSink<B> o = new EventSink<B>();
+            var o = new EventSink<TB>();
 
-            IHandler<Transaction> h = new BehaviorHelpers.Tmp7<A, B>(o, bf, ba);
+            var h = new BehaviorHelpers.Tmp7<TA, TB>(o, bf, ba);
 
-            Listener l1 = bf.updates().listen_(o.node, new BehaviorHelpers.Tmp9<A, B>(h));
-            Listener l2 = ba.updates().listen_(o.node, new BehaviorHelpers.Tmp10<A, B>(h));
-            return o.addCleanup(l1).addCleanup(l2).hold(bf.sample().apply(ba.sample()));
+            var l1 = bf.Updates().Listen(o.Node, new BehaviorHelpers.Tmp9<TA, TB>(h));
+            var l2 = ba.Updates().Listen(o.Node, new BehaviorHelpers.Tmp10<TA, TB>(h));
+            return o.AddCleanup(l1).AddCleanup(l2).Hold(bf.Sample().Apply(ba.Sample()));
         }
 
         /**
 	     * Unwrap a behavior inside another behavior to give a time-varying behavior implementation.
 	     */
-        public static Behavior<A> switchB<A>(Behavior<Behavior<A>> bba)
+        public static Behavior<TA> SwitchB(Behavior<Behavior<TA>> bba)
         {
-            A za = bba.sample().sample();
-            EventSink<A> o = new EventSink<A>();
-            ITransactionHandler<Behavior<A>> h = new BehaviorHelpers.Tmp11<A>(o);
-            Listener l1 = bba.value().listen_(o.node, h);
-            return o.addCleanup(l1).hold(za);
+            var za = bba.Sample().Sample();
+            var o = new EventSink<TA>();
+            var h = new BehaviorHelpers.Tmp11<TA>(o);
+            var l1 = bba.GetValue().Listen(o.Node, h);
+            return o.AddCleanup(l1).Hold(za);
         }
 
         /**
          * Unwrap an evt inside a behavior to give a time-varying evt implementation.
          */
-        public static Event<A> switchE<A>(Behavior<Event<A>> bea)
+        public static Event<TA> SwitchE(Behavior<Event<TA>> bea)
         {
-            return Transaction.apply(new BehaviorHelpers.Tmp13<A>(bea));
-        }
-        public static Event<A> switchE<A>(Transaction trans1, Behavior<Event<A>> bea)
-        {
-            EventSink<A> o = new EventSink<A>();
-            ITransactionHandler<A> h2 = new BehaviorHelpers.Tmp14<A>(o);
-            ITransactionHandler<Event<A>> h1 = new BehaviorHelpers.Tmp15<A>(o, bea, trans1, h2);
-            Listener l1 = bea.updates().listen(o.node, trans1, h1, false);
-            return o.addCleanup(l1);
+            return Transaction.Apply(new BehaviorHelpers.Tmp13<TA>(bea));
         }
 
+        public static Event<TA> SwitchE(Transaction trans1, Behavior<Event<TA>> bea)
+        {
+            var o = new EventSink<TA>();
+            var h2 = new BehaviorHelpers.Tmp14<TA>(o);
+            var h1 = new BehaviorHelpers.Tmp15<TA>(o, bea, trans1, h2);
+            var l1 = bea.Updates().Listen(o.Node, trans1, h1, false);
+            return o.AddCleanup(l1);
+        }
 
         /**
          * Transform a behavior with a generalized state loop (a mealy machine). The function
          * is passed the input and the old state and returns the new state and output value.
          */
-        public Behavior<B> collect<B, S>(S initState, ILambda2<A, S, Tuple2<B, S>> f)
+        public Behavior<TB> Collect<TB, TS>(TS initState, ILambda2<TA, TS, Tuple2<TB, TS>> f)
         {
-            Event<A> ea = updates().coalesce(new BehaviorHelpers.Tmp16<A>());
-            A za = sample();
-            Tuple2<B, S> zbs = f.apply(za, initState);
-            EventLoop<Tuple2<B, S>> ebs = new EventLoop<Tuple2<B, S>>();
-            Behavior<Tuple2<B, S>> bbs = ebs.hold(zbs);
-            Behavior<S> bs = bbs.map(new BehaviorHelpers.Tmp17<A, B, S>());
-            Event<Tuple2<B, S>> ebs_out = ea.snapshot(bs, f);
-            ebs.loop(ebs_out);
-            return bbs.map(new BehaviorHelpers.Tmp18<A, B, S>());
+            var ea = Updates().Coalesce(new BehaviorHelpers.Tmp16<TA>());
+            var za = Sample();
+            var zbs = f.Apply(za, initState);
+            var ebs = new EventLoop<Tuple2<TB, TS>>();
+            var bbs = ebs.Hold(zbs);
+            var bs = bbs.Map(new BehaviorHelpers.Tmp17<TA, TB, TS>());
+            var ebsOut = ea.Snapshot(bs, f);
+            ebs.loop(ebsOut);
+            return bbs.Map(new BehaviorHelpers.Tmp18<TA, TB, TS>());
         }
 
         public void Dispose()
@@ -202,8 +199,8 @@ namespace sodium
             {
                 if (disposing)
                 {
-                    if (cleanup != null)
-                        cleanup.unlisten();
+                    if (Cleanup != null)
+                        Cleanup.Unlisten();
                 }
 
                 // Indicate that the instance has been disposed.

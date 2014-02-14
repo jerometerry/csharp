@@ -1,203 +1,211 @@
 ﻿namespace sodium
 {
     using System;
-    using System.Collections.Generic;
 
     class EventHelpers
     {
-        public sealed class ListenerImplementation<A> : Listener
+        public sealed class ListenerImplementation<TA> : Listener, IDisposable
         {
             /**
              * It's essential that we keep the listener alive while the caller holds
              * the Listener, so that the finalizer doesn't get triggered.
              */
-            private readonly Event<A> evt;
-            private readonly ITransactionHandler<A> action;
-            private readonly Node target;
+            private readonly Event<TA> _evt;
+            private readonly ITransactionHandler<TA> _action;
+            private readonly Node _target;
 
-            public ListenerImplementation(Event<A> evt, ITransactionHandler<A> action, Node target)
+            public ListenerImplementation(Event<TA> evt, ITransactionHandler<TA> action, Node target)
             {
-                this.evt = evt;
-                this.action = action;
-                this.target = target;
+                _evt = evt;
+                _action = action;
+                _target = target;
             }
 
-            public void unlisten()
+            public override void Unlisten()
             {
-                lock (Transaction.listenersLock)
+                lock (Transaction.ListenersLock)
                 {
-                    evt.listeners.Remove(action);
-                    evt.node.unlinkTo(target);
+                    _evt.Listeners.Remove(_action);
+                    _evt.Node.unlinkTo(_target);
                 }
             }
 
-            protected void finalize()
+            public void Dispose()
             {
-                unlisten();
+                Unlisten();
             }
         }
-        public class TmpTransHandler1<A> : ITransactionHandler<A>
-        {
-            private IHandler<A> action;
 
-            public TmpTransHandler1(IHandler<A> action)
+        public class TmpTransHandler1<TA> : ITransactionHandler<TA>
+        {
+            private readonly IHandler<TA> _action;
+
+            public TmpTransHandler1(IHandler<TA> action)
             {
-                this.action = action;
+                _action = action;
             }
 
-            public void run(Transaction trans, A a)
+            public void Run(Transaction trans, TA a)
             {
-                action.run(a);
+                _action.Run(a);
             }
         }
-        public class ListenerApplier<A> : ILambda1<Transaction, Listener>
-        {
-            private Event<A> listener;
-            private Node target;
-            private ITransactionHandler<A> action;
 
-            public ListenerApplier(Event<A> listener, Node target, ITransactionHandler<A> action)
+        public class ListenerApplier<TA> : ILambda1<Transaction, Listener>
+        {
+            private readonly Event<TA> _listener;
+            private readonly Node _target;
+            private readonly ITransactionHandler<TA> _action;
+
+            public ListenerApplier(Event<TA> listener, Node target, ITransactionHandler<TA> action)
             {
-                this.listener = listener;
-                this.target = target;
-                this.action = action;
+                _listener = listener;
+                _target = target;
+                _action = action;
             }
 
-            public Listener apply(Transaction trans)
+            public Listener Apply(Transaction trans)
             {
-                return listener.listen(target, trans, action, false);
+                return _listener.Listen(_target, trans, _action, false);
             }
         }
-        public class TmpTransHandler7<A, B> : ITransactionHandler<A>
-        {
-            private EventSink<B> o;
-            private ILambda1<A, B> f;
 
-            public TmpTransHandler7(EventSink<B> o, ILambda1<A, B> f)
+        public class TmpTransHandler7<TA, TB> : ITransactionHandler<TA>
+        {
+            private readonly EventSink<TB> _o;
+            private readonly ILambda1<TA, TB> _f;
+
+            public TmpTransHandler7(EventSink<TB> o, ILambda1<TA, TB> f)
             {
-                this.o = o;
-                this.f = f;
+                _o = o;
+                _f = f;
             }
 
-            public void run(Transaction trans, A a)
+            public void Run(Transaction trans, TA a)
             {
-                o.send(trans, f.apply(a));
+                _o.Send(trans, _f.Apply(a));
             }
         }
-        public class TmpEventtSink7<A, B> : EventSink<B>
-        {
-            private Event<A> ev;
-            private ILambda1<A, B> f;
 
-            public TmpEventtSink7(Event<A> ev, ILambda1<A, B> f)
+        public class TmpEventtSink7<TA, TB> : EventSink<TB>
+        {
+            private readonly Event<TA> _ev;
+            private readonly ILambda1<TA, TB> _f;
+
+            public TmpEventtSink7(Event<TA> ev, ILambda1<TA, TB> f)
             {
-                this.ev = ev;
-                this.f = f;
+                _ev = ev;
+                _f = f;
             }
 
-            public override Object[] sampleNow()
+            public override Object[] SampleNow()
             {
-                Object[] oi = ev.sampleNow();
+                var oi = _ev.SampleNow();
                 if (oi != null)
                 {
-                    Object[] oo = new Object[oi.Length];
+                    var oo = new Object[oi.Length];
                     for (int i = 0; i < oo.Length; i++)
-                        oo[i] = f.apply((A)oi[i]);
+                        oo[i] = _f.Apply((TA)oi[i]);
                     return oo;
                 }
                 else
                     return null;
             }
         }
-        public class BehaviorBuilder<A> : ILambda1<Transaction, Behavior<A>>
-        {
-            private Event<A> evt;
-            private A initValue;
 
-            public BehaviorBuilder(Event<A> evt, A initValue)
+        public class BehaviorBuilder<TA> : ILambda1<Transaction, Behavior<TA>>
+        {
+            private readonly Event<TA> _evt;
+            private readonly TA _initValue;
+
+            public BehaviorBuilder(Event<TA> evt, TA initValue)
             {
-                this.evt = evt;
-                this.initValue = initValue;
+                _evt = evt;
+                _initValue = initValue;
             }
 
-            public Behavior<A> apply(Transaction trans)
+            public Behavior<TA> Apply(Transaction trans)
             {
-                return new Behavior<A>(evt.lastFiringOnly(trans), initValue);
+                return new Behavior<TA>(_evt.LastFiringOnly(trans), _initValue);
             }
         }
-        public class SnapshotBehavior<A, B> : ILambda2<A, B, B>
+
+        public class SnapshotBehavior<TA, TB> : ILambda2<TA, TB, TB>
         {
-            public B apply(A a, B b)
+            public TB Apply(TA a, TB b)
             {
                 return b;
             }
         }
-        public class TmpEventSink1<A, B, C> : EventSink<C>
-        {
-            private Event<A> ev;
-            private ILambda2<A, B, C> f;
-            private Behavior<B> b;
 
-            public TmpEventSink1(Event<A> ev, ILambda2<A, B, C> f, Behavior<B> b)
+        public class TmpEventSink1<TA, TB, TC> : EventSink<TC>
+        {
+            private readonly Event<TA> _ev;
+            private readonly ILambda2<TA, TB, TC> _f;
+            private readonly Behavior<TB> _b;
+
+            public TmpEventSink1(Event<TA> ev, ILambda2<TA, TB, TC> f, Behavior<TB> b)
             {
-                this.ev = ev;
-                this.f = f;
-                this.b = b;
+                _ev = ev;
+                _f = f;
+                _b = b;
             }
 
-            public override Object[] sampleNow()
+            public override Object[] SampleNow()
             {
-                Object[] oi = ev.sampleNow();
+                var oi = _ev.SampleNow();
                 if (oi != null)
                 {
-                    Object[] oo = new Object[oi.Length];
+                    var oo = new Object[oi.Length];
                     for (int i = 0; i < oo.Length; i++)
-                        oo[i] = f.apply((A)oi[i], b.sample());
+                        oo[i] = _f.Apply((TA)oi[i], _b.Sample());
                     return oo;
                 }
                 else
                     return null;
             }
         }
-        public class TmpTransHandler5<A, B, C> : ITransactionHandler<A>
-        {
-            private EventSink<C> o;
-            private ILambda2<A, B, C> f;
-            private Behavior<B> b;
 
-            public TmpTransHandler5(EventSink<C> o, ILambda2<A, B, C> f, Behavior<B> b)
+        public class TmpTransHandler5<TA, TB, TC> : ITransactionHandler<TA>
+        {
+            private readonly EventSink<TC> _o;
+            private readonly ILambda2<TA, TB, TC> _f;
+            private readonly Behavior<TB> _b;
+
+            public TmpTransHandler5(EventSink<TC> o, ILambda2<TA, TB, TC> f, Behavior<TB> b)
             {
-                this.o = o;
-                this.f = f;
-                this.b = b;
+                _o = o;
+                _f = f;
+                _b = b;
             }
 
-            public void run(Transaction trans, A a)
+            public void Run(Transaction trans, TA a)
             {
-                o.send(trans, f.apply(a, b.sample()));
+                _o.Send(trans, _f.Apply(a, _b.Sample()));
             }
         }
-        public class TmpEventSink2<A> : EventSink<A>
-        {
-            private Event<A> ea;
-            private Event<A> eb;
 
-            public TmpEventSink2(Event<A> ea, Event<A> eb)
+        public class TmpEventSink2<TA> : EventSink<TA>
+        {
+            private readonly Event<TA> _ea;
+            private readonly Event<TA> _eb;
+
+            public TmpEventSink2(Event<TA> ea, Event<TA> eb)
             {
-                this.ea = ea;
-                this.eb = eb;
+                _ea = ea;
+                _eb = eb;
             }
 
-            public override Object[] sampleNow()
+            public override Object[] SampleNow()
             {
-                Object[] oa = ea.sampleNow();
-                Object[] ob = eb.sampleNow();
+                var oa = _ea.SampleNow();
+                var ob = _eb.SampleNow();
                 if (oa != null && ob != null)
                 {
-                    Object[] oo = new Object[oa.Length + ob.Length];
+                    var oo = new Object[oa.Length + ob.Length];
                     int j = 0;
-                    for (int i = 0; i < oa.Length; i++) oo[j++] = oa[i];
-                    for (int i = 0; i < ob.Length; i++) oo[j++] = ob[i];
+                    for (var i = 0; i < oa.Length; i++) oo[j++] = oa[i];
+                    for (var i = 0; i < ob.Length; i++) oo[j++] = ob[i];
                     return oo;
                 }
                 else
@@ -207,121 +215,127 @@
                         return ob;
             }
         }
-        public class TmpTransHandler2<A> : ITransactionHandler<A>
-        {
-            private EventSink<A> o;
 
-            public TmpTransHandler2(EventSink<A> o)
+        public class TmpTransHandler2<TA> : ITransactionHandler<TA>
+        {
+            private readonly EventSink<TA> _o;
+
+            public TmpTransHandler2(EventSink<TA> o)
             {
-                this.o = o;
+                _o = o;
             }
 
-            public void run(Transaction trans, A a)
+            public void Run(Transaction trans, TA a)
             {
-                o.send(trans, a);
+                _o.Send(trans, a);
             }
         }
-        public class TmpTransHandler3<A> : ITransactionHandler<A>
-        {
-            private EventSink<A> o;
 
-            public TmpTransHandler3(EventSink<A> o)
+        public class TmpTransHandler3<TA> : ITransactionHandler<TA>
+        {
+            private readonly EventSink<TA> _o;
+
+            public TmpTransHandler3(EventSink<TA> o)
             {
-                this.o = o;
+                _o = o;
             }
 
-            public void run(Transaction trans, A a)
+            public void Run(Transaction trans, TA a)
             {
-                trans.post(new Runnable(() =>
+                trans.Post(new Runnable(() =>
                 {
-                    Transaction trans2 = new Transaction();
+                    var trans2 = new Transaction();
                     try
                     {
-                        o.send(trans2, a);
+                        _o.Send(trans2, a);
                     }
                     finally
                     {
-                        trans2.close();
+                        trans2.Close();
                     }
                 }));
             }
         }
-        public class Tmp2<A> : ILambda1<Transaction, Event<A>>
-        {
-            private Event<A> evt;
-            private ILambda2<A, A, A> f;
 
-            public Tmp2(Event<A> evt, ILambda2<A, A, A> f)
+        public class Tmp2<TA> : ILambda1<Transaction, Event<TA>>
+        {
+            private readonly Event<TA> _evt;
+            private readonly ILambda2<TA, TA, TA> _f;
+
+            public Tmp2(Event<TA> evt, ILambda2<TA, TA, TA> f)
             {
-                this.evt = evt;
-                this.f = f;
+                _evt = evt;
+                _f = f;
             }
 
-            public Event<A> apply(Transaction trans)
+            public Event<TA> Apply(Transaction trans)
             {
-                return evt.coalesce(trans, f);
+                return _evt.Coalesce(trans, _f);
             }
         }
-        public class TmpEventSink3<A> : EventSink<A>
-        {
-            private Event<A> ev;
-            private ILambda2<A, A, A> f;
 
-            public TmpEventSink3(Event<A> ev, ILambda2<A, A, A> f)
+        public class TmpEventSink3<TA> : EventSink<TA>
+        {
+            private readonly Event<TA> _ev;
+            private readonly ILambda2<TA, TA, TA> _f;
+
+            public TmpEventSink3(Event<TA> ev, ILambda2<TA, TA, TA> f)
             {
-                this.ev = ev;
-                this.f = f;
+                _ev = ev;
+                _f = f;
             }
 
-            public override Object[] sampleNow()
+            public override Object[] SampleNow()
             {
-                Object[] oi = ev.sampleNow();
+                var oi = _ev.SampleNow();
                 if (oi != null)
                 {
-                    A o = (A)oi[0];
-                    for (int i = 1; i < oi.Length; i++)
-                        o = f.apply(o, (A)oi[i]);
+                    var o = (TA)oi[0];
+                    for (var i = 1; i < oi.Length; i++)
+                        o = _f.Apply(o, (TA)oi[i]);
                     return new Object[] { o };
                 }
                 else
                     return null;
             }
         }
-        public class Tmp4<A> : ILambda2<A, A, A>
+
+        public class Tmp4<TA> : ILambda2<TA, TA, TA>
         {
-            public A apply(A first, A second)
+            public TA Apply(TA first, TA second)
             {
                 return second;
             }
         }
-        public class TmpEventSink5<A> : EventSink<A>
-        {
-            private Event<A> ev;
-            private ILambda1<A, Boolean> f;
 
-            public TmpEventSink5(Event<A> ev, ILambda1<A, Boolean> f)
+        public class TmpEventSink5<TA> : EventSink<TA>
+        {
+            private readonly Event<TA> _ev;
+            private readonly ILambda1<TA, Boolean> _f;
+
+            public TmpEventSink5(Event<TA> ev, ILambda1<TA, Boolean> f)
             {
-                this.ev = ev;
-                this.f = f;
+                _ev = ev;
+                _f = f;
             }
 
-            public override Object[] sampleNow()
+            public override Object[] SampleNow()
             {
-                Object[] oi = ev.sampleNow();
+                var oi = _ev.SampleNow();
                 if (oi != null)
                 {
-                    Object[] oo = new Object[oi.Length];
-                    int j = 0;
-                    for (int i = 0; i < oi.Length; i++)
-                        if (f.apply((A)oi[i]))
+                    var oo = new Object[oi.Length];
+                    var j = 0;
+                    for (var i = 0; i < oi.Length; i++)
+                        if (_f.Apply((TA)oi[i]))
                             oo[j++] = oi[i];
                     if (j == 0)
                         oo = null;
                     else
                         if (j < oo.Length)
                         {
-                            Object[] oo2 = new Object[j];
-                            for (int i = 0; i < j; i++)
+                            var oo2 = new Object[j];
+                            for (var i = 0; i < j; i++)
                                 oo2[i] = oo[i];
                             oo = oo2;
                         }
@@ -331,142 +345,149 @@
                     return null;
             }
         }
-        public class TmpTransHandler4<A> : ITransactionHandler<A>
-        {
-            private ILambda1<A, Boolean> f;
-            private EventSink<A> o;
 
-            public TmpTransHandler4(ILambda1<A, Boolean> f, EventSink<A> o)
+        public class TmpTransHandler4<TA> : ITransactionHandler<TA>
+        {
+            private readonly ILambda1<TA, Boolean> _f;
+            private readonly EventSink<TA> _o;
+
+            public TmpTransHandler4(ILambda1<TA, Boolean> f, EventSink<TA> o)
             {
-                this.f = f;
-                this.o = o;
+                _f = f;
+                _o = o;
             }
 
-            public void run(Transaction trans, A a)
+            public void Run(Transaction trans, TA a)
             {
-                if (f.apply(a)) o.send(trans, a);
+                if (_f.Apply(a)) _o.Send(trans, a);
             }
         }
-        public class Tmp5<A> : ILambda1<A, Boolean>
+
+        public class Tmp5<TA> : ILambda1<TA, Boolean>
         {
-            public bool apply(A a)
+            public bool Apply(TA a)
             {
                 return a != null;
             }
         }
-        public class Tmp6<A> : ILambda2<A, Boolean, A>
-        {
-            public A apply(A a, bool pred)
-            {
-                return pred ? a : default(A);
-            }
-        }
-        public class Tmp7<A, B, S> : ILambda1<Tuple2<B, S>, B>
-        {
-            public B apply(Tuple2<B, S> bs)
-            {
-                return bs.a;
-            }
-        }
-        public class Tmp8<A, B, S> : ILambda1<Tuple2<B, S>, S>
-        {
-            public S apply(Tuple2<B, S> bs)
-            {
-                return bs.b;
-            }
-        }
-        public class TmpEventSink4<A> : EventSink<A>
-        {
-            private Event<A> ev;
-            private Listener[] la;
 
-            public TmpEventSink4(Event<A> ev, Listener[] la)
+        public class Tmp6<TA> : ILambda2<TA, Boolean, TA>
+        {
+            public TA Apply(TA a, bool pred)
             {
-                this.ev = ev;
-                this.la = la;
+                return pred ? a : default(TA);
+            }
+        }
+
+        public class Tmp7<TA, TB, TS> : ILambda1<Tuple2<TB, TS>, TB>
+        {
+            public TB Apply(Tuple2<TB, TS> bs)
+            {
+                return bs.X;
+            }
+        }
+
+        public class Tmp8<TA, TB, TS> : ILambda1<Tuple2<TB, TS>, TS>
+        {
+            public TS Apply(Tuple2<TB, TS> bs)
+            {
+                return bs.Y;
+            }
+        }
+
+        public class TmpEventSink4<TA> : EventSink<TA>
+        {
+            private readonly Event<TA> _ev;
+            private readonly Listener[] _la;
+
+            public TmpEventSink4(Event<TA> ev, Listener[] la)
+            {
+                _ev = ev;
+                _la = la;
             }
 
-            public override Object[] sampleNow()
+            public override Object[] SampleNow()
             {
-                Object[] oi = ev.sampleNow();
-                Object[] oo = oi;
+                var oi = _ev.SampleNow();
+                var oo = oi;
                 if (oo != null)
                 {
                     if (oo.Length > 1)
                         oo = new Object[] { oi[0] };
-                    if (la[0] != null)
+                    if (_la[0] != null)
                     {
-                        la[0].unlisten();
-                        la[0] = null;
+                        _la[0].Unlisten();
+                        _la[0] = null;
                     }
                 }
                 return oo;
             }
         }
-        public class CoalesceHandler<A> : ITransactionHandler<A>
-        {
-            private ILambda2<A, A, A> f;
-            private EventSink<A> o;
-            public bool accumValid = false;
-            public A accum;
 
-            public CoalesceHandler(ILambda2<A, A, A> f, EventSink<A> o)
+        public class CoalesceHandler<TA> : ITransactionHandler<TA>
+        {
+            private readonly ILambda2<TA, TA, TA> _f;
+            private readonly EventSink<TA> _o;
+            public bool AccumValid = false;
+            public TA Accum;
+
+            public CoalesceHandler(ILambda2<TA, TA, TA> f, EventSink<TA> o)
             {
-                this.f = f;
-                this.o = o;
+                _f = f;
+                _o = o;
             }
 
-            public void run(Transaction trans1, A a)
+            public void Run(Transaction trans1, TA a)
             {
-                if (accumValid)
-                    accum = f.apply(accum, a);
+                if (AccumValid)
+                    Accum = _f.Apply(Accum, a);
                 else
                 {
-                    CoalesceHandler<A> thiz = this;
-                    trans1.prioritized(o.node, new TransHandler<A>(thiz, o));
-                    accum = a;
-                    accumValid = true;
+                    var thiz = this;
+                    trans1.Prioritized(_o.Node, new TransHandler<TA>(thiz, _o));
+                    Accum = a;
+                    AccumValid = true;
                 }
             }
-
-
         }
-        public class TransHandler<A> : IHandler<Transaction>
-        {
-            private CoalesceHandler<A> h;
-            private EventSink<A> o;
 
-            public TransHandler(CoalesceHandler<A> h, EventSink<A> o)
+        public class TransHandler<TA> : IHandler<Transaction>
+        {
+            private readonly CoalesceHandler<TA> _h;
+            private readonly EventSink<TA> _o;
+
+            public TransHandler(CoalesceHandler<TA> h, EventSink<TA> o)
             {
-                this.h = h;
-                this.o = o;
+                _h = h;
+                _o = o;
             }
 
-            public void run(Transaction trans)
+            public void Run(Transaction trans)
             {
-                o.send(trans, h.accum);
-                h.accumValid = false;
-                h.accum = default(A);
+                _o.Send(trans, _h.Accum);
+                _h.AccumValid = false;
+                _h.Accum = default(TA);
             }
         }
-        public class TmpTransHandler8<A> : ITransactionHandler<A>
-        {
-            private EventSink<A> o;
-            private Listener[] la;
 
-            public TmpTransHandler8(EventSink<A> o, Listener[] la)
+        public class TmpTransHandler8<TA> : ITransactionHandler<TA>
+        {
+            private readonly EventSink<TA> _o;
+            private readonly Listener[] _la;
+
+            public TmpTransHandler8(EventSink<TA> o, Listener[] la)
             {
-                this.o = o;
-                this.la = la;
+                _o = o;
+                _la = la;
             }
 
-            public void run(Transaction trans, A a)
+            public void Run(Transaction trans, TA a)
             {
-                o.send(trans, a);
-                if (la[0] != null)
+                _o.Send(trans, a);
+                if (_la[0] != null)
                 {
-                    la[0].unlisten();
-                    la[0] = null;
+                    _la[0].Unlisten();
+                    _la[0] = null;
                 }
             }
         }

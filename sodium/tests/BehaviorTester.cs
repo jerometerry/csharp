@@ -17,19 +17,51 @@ namespace sodium.tests
         [Test]
 	    public void testHold()
         {
-            EventSink<Int32> e = new EventSink<Int32>();
-            Behavior<Int32> b = e.hold(0);
-            List<Int32> o = new List<Int32>();
-            Listener l = b.updates().listen(new Handler<Int32>(x => { o.Add(x); }));
-            e.send(2);
-            e.send(9);
-            l.unlisten();
-            //Assert.AreEqual(Arrays.asList(2,9), o);
+            var e = new EventSink<Int32>();
+            var b = e.Hold(0);
+            var o = new List<Int32>();
+            var l = b.Updates().Listen(new Handler<Int32>(o.Add));
+            e.Send(2);
+            e.Send(9);
+            l.Unlisten();
+            AssertArraysEqual(Arrays<Int32>.asList(2, 9), o);
+        }
+
+        private void AssertArraysEqual<TA>(List<TA> l1, List<TA> l2)
+        {
+            Assert.True(Arrays<TA>.AreArraysEqual(l1,l2));
+        }
+
+        private static class Arrays<TA>
+        {
+            public static List<TA> asList(params TA[] items)
+            {
+                return new List<TA>(items);
+            }
+
+            public static bool AreArraysEqual(List<TA> l1, List<TA> l2)
+            {
+                if (l1.Count != l2.Count)
+                    return false;
+
+                l1.Sort();
+                l2.Sort();
+
+                for (int i = 0; i < l1.Count; i++)
+                {
+                    TA item1 = l1[i];
+                    TA item2 = l2[i];
+                    if (!item1.Equals(item2))
+                        return false;
+                }
+
+                return true;
+            }
         }
 
         private class TmpHandler1<A> : IHandler<A>
         {
-            public void run(A a)
+            public void Run(A a)
             {
             }
         }
@@ -93,7 +125,7 @@ namespace sodium.tests
 	     */
 	    private static Event<Int32> doubleUp(Event<Int32> ev)
 	    {
-	        return Event<Int32>.merge(ev, ev);
+	        return Event<Int32>.Merge(ev, ev);
 	    }
 
         /*

@@ -2,23 +2,18 @@
 {
     using System;
 
-    public class Runnable : IRunnable
+    public sealed class Runnable : IRunnable
     {
-        protected readonly Action action;
-
-        public Runnable()
-        {
-            
-        }
+        private readonly Action _action;
 
         public Runnable(Action action)
         {
-            this.action = action;
+            _action = action;
         }
 
-        public virtual void run()
+        public void run()
         {
-            action();
+            _action();
         }
     }
 }

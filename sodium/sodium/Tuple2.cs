@@ -1,12 +1,14 @@
-namespace sodium {
+namespace sodium
+{
+    public sealed class Tuple2<TA, TB>
+    {
+        public TA X;
+        public TB Y;
 
-    public sealed class Tuple2<A,B> {
-        public Tuple2(A a, B b) {
-            this.a = a;
-            this.b = b;
+        public Tuple2(TA x, TB y)
+        {
+            X = x;
+            Y = y;
         }
-        public A a;
-        public B b;
     }
-
 }

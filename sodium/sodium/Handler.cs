@@ -2,18 +2,18 @@
 {
     using System;
 
-    public class Handler<A> : IHandler<A>
+    public class Handler<TA> : IHandler<TA>
     {
-        Action<A> f;
+        readonly Action<TA> _f;
 
-        public Handler(Action<A> f)
+        public Handler(Action<TA> f)
         {
-            this.f = f;
+            _f = f;
         }
 
-        public void run(A a)
+        public void Run(TA a)
         {
-            this.f(a);
+            _f(a);
         }
     }
 }

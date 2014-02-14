@@ -1,9 +1,7 @@
 namespace sodium
 {
-
-    public interface ILambda2<A, B, C>
+    public interface ILambda2<in TA, in TB, out TC>
     {
-        C apply(A a, B b);
+        TC Apply(TA a, TB b);
     }
-
 }

@@ -1,32 +1,34 @@
-namespace sodium {
-
+namespace sodium
+{
     using System;
     using System.Collections.Generic;
     using System.Linq;
 
-    public class EventLoop<A> : Event<A> {
+    public class EventLoop<A> : Event<A>
+    {
         private Event<A> ea_out;
 
-        public EventLoop()
-        {
-        }
-
         // TO DO: Copy & paste from EventSink. Can we improve this?
-        private void send(Transaction trans, A a) {
-            if (!firings.Any())
-                trans.last(new Runnable(() => firings.Clear()) {
+        private void send(Transaction trans, A a)
+        {
+            if (!Firings.Any())
+                trans.Last(new Runnable(() => Firings.Clear())
+                {
                 });
-            firings.Add(a);
+            Firings.Add(a);
 
-            List<ITransactionHandler<A>> listeners = new List<ITransactionHandler<A>>(this.listeners);
-    	    foreach (ITransactionHandler<A> action in listeners) {
-    		    try {
-                    action.run(trans, a);
-    		    }
-    		    catch (Exception t) {
-    		        Console.WriteLine("{0}", t);
-    		    }
-    	    }
+            List<ITransactionHandler<A>> listeners = new List<ITransactionHandler<A>>(this.Listeners);
+            foreach (ITransactionHandler<A> action in listeners)
+            {
+                try
+                {
+                    action.Run(trans, a);
+                }
+                catch (Exception t)
+                {
+                    Console.WriteLine("{0}", t);
+                }
+            }
         }
 
         public void loop(Event<A> ea_out)
@@ -36,7 +38,7 @@ namespace sodium {
             this.ea_out = ea_out;
             EventLoop<A> me = this;
             ITransactionHandler<A> action = new TransactionHandler(me);
-            addCleanup(ea_out.listen_(this.node, action));
+            AddCleanup(ea_out.Listen(this.Node, action));
         }
 
         private class TransactionHandler : ITransactionHandler<A>
@@ -48,7 +50,7 @@ namespace sodium {
                 this.me = me;
             }
 
-            public void run(Transaction trans, A a)
+            public void Run(Transaction trans, A a)
             {
                 me.send(trans, a);
             }
