@@ -4,8 +4,9 @@ namespace sodium
     {
         void Add(T t);
         void Clear();
-        void Remove(T t);
+        bool Remove(T t);
         T Remove();
+        T Peek();
         bool IsEmpty();
     }
 }
