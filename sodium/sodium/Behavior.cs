@@ -23,7 +23,7 @@ namespace sodium
         {
             Evt = evt;
             Value = initValue;
-            Transaction.Run(new BehaviorHelpers.TmpTransHandler1<TA>(this, evt));
+            Transaction.Run(new BehaviorListenInvoker<TA>(this, evt));
         }
 
         /**
@@ -68,15 +68,15 @@ namespace sodium
          */
         public Event<TA> GetValue()
         {
-            return Transaction.Apply(new BehaviorHelpers.Tmp1<TA>(this));
+            return Transaction.Apply(new GetBehaviorValueInvoker<TA>(this));
         }
 
         public Event<TA> GetValue(Transaction trans1)
         {
-            var o = new BehaviorHelpers.TmpEventSink1<TA>(this);
+            var o = new GetBehaviorValueEventSink<TA>(this);
 
             var l = Evt.Listen(o.Node, trans1,
-                new BehaviorHelpers.TmpTransHandler2<TA>(o), false);
+                new GetBehaviorValueTransactionHandler<TA>(o), false);
             return o.AddCleanup(l)
                 .LastFiringOnly(trans1);  // Needed in case of an initial value and an update
             // in the same transaction.
@@ -95,7 +95,9 @@ namespace sodium
          */
         public Behavior<TC> Lift<TB, TC>(ILambda2<TA, TB, TC> f, Behavior<TB> b)
         {
-            return null;
+            ILambda1<TA, ILambda1<TB, TC>> ffa = new BehaviorLifter2<TA, TB, TC>(f);
+		    Behavior<ILambda1<TB,TC>> bf = Map(ffa);
+		    return Behavior<TB>.Apply(bf, b);
         }
 
         /**
@@ -111,7 +113,11 @@ namespace sodium
          */
         public Behavior<TD> Lift<TB, TC, TD>(ILambda3<TA, TB, TC, TD> f, Behavior<TB> b, Behavior<TC> c)
         {
-            return null;
+            ILambda1<TA, ILambda1<TB, ILambda1<TC, TD>>> ffa = new BehaviorLifter3<TA, TB, TC, TD>(f);
+		    Behavior<ILambda1<TB, ILambda1<TC, TD>>> bf = Map(ffa);
+            Behavior<ILambda1<TC,TD>> r1 = Behavior<TB>.Apply(bf, b);
+            Behavior<TD> res = Behavior<TC>.Apply(r1, c);
+            return res;
         }
 
         /**
@@ -129,11 +135,9 @@ namespace sodium
         public static Behavior<TB> Apply<TB>(Behavior<ILambda1<TA, TB>> bf, Behavior<TA> ba)
         {
             var o = new EventSink<TB>();
-
-            var h = new BehaviorHelpers.Tmp7<TA, TB>(o, bf, ba);
-
-            var l1 = bf.Updates().Listen(o.Node, new BehaviorHelpers.Tmp9<TA, TB>(h));
-            var l2 = ba.Updates().Listen(o.Node, new BehaviorHelpers.Tmp10<TA, TB>(h));
+            var h = new BehaviorPrioritizedInvoker<TA, TB>(o, bf, ba);
+            var l1 = bf.Updates().Listen(o.Node, new ApplyBehaviorTransactionHandler<TA, TB>(h));
+            var l2 = ba.Updates().Listen(o.Node, new ApplyBehaviorTransactionHandler2<TA, TB>(h));
             return o.AddCleanup(l1).AddCleanup(l2).Hold(bf.Sample().Apply(ba.Sample()));
         }
 
@@ -144,7 +148,7 @@ namespace sodium
         {
             var za = bba.Sample().Sample();
             var o = new EventSink<TA>();
-            var h = new BehaviorHelpers.Tmp11<TA>(o);
+            var h = new SwitchToBehaviorTransactionHandler<TA>(o);
             var l1 = bba.GetValue().Listen(o.Node, h);
             return o.AddCleanup(l1).Hold(za);
         }
@@ -154,14 +158,14 @@ namespace sodium
          */
         public static Event<TA> SwitchE(Behavior<Event<TA>> bea)
         {
-            return Transaction.Apply(new BehaviorHelpers.Tmp13<TA>(bea));
+            return Transaction.Apply(new SwitchToEventInvoker<TA>(bea));
         }
 
         public static Event<TA> SwitchE(Transaction trans1, Behavior<Event<TA>> bea)
         {
             var o = new EventSink<TA>();
-            var h2 = new BehaviorHelpers.Tmp14<TA>(o);
-            var h1 = new BehaviorHelpers.Tmp15<TA>(o, bea, trans1, h2);
+            var h2 = new SwitchToEventTransactionHandler2<TA>(o);
+            var h1 = new SwitchToEventTransactionHandler<TA>(o, bea, trans1, h2);
             var l1 = bea.Updates().Listen(o.Node, trans1, h1, false);
             return o.AddCleanup(l1);
         }
@@ -172,15 +176,15 @@ namespace sodium
          */
         public Behavior<TB> Collect<TB, TS>(TS initState, ILambda2<TA, TS, Tuple2<TB, TS>> f)
         {
-            var ea = Updates().Coalesce(new BehaviorHelpers.Tmp16<TA>());
+            var ea = Updates().Coalesce(new Lambda2<TA, TA, TA>((a, b) => b));
             var za = Sample();
             var zbs = f.Apply(za, initState);
             var ebs = new EventLoop<Tuple2<TB, TS>>();
             var bbs = ebs.Hold(zbs);
-            var bs = bbs.Map(new BehaviorHelpers.Tmp17<TA, TB, TS>());
+            var bs = bbs.Map(new Lambda1<Tuple2<TB, TS>, TS>((x) => x.Y));
             var ebsOut = ea.Snapshot(bs, f);
             ebs.loop(ebsOut);
-            return bbs.Map(new BehaviorHelpers.Tmp18<TA, TB, TS>());
+            return bbs.Map(new Lambda1<Tuple2<TB, TS>, TB>((x) => x.X));
         }
 
         public void Dispose()

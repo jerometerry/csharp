@@ -59,11 +59,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActionInvoker.cs" />
+    <Compile Include="ApplyBehaviorEventSinkSender.cs" />
+    <Compile Include="ApplyBehaviorTransactionHandler.cs" />
+    <Compile Include="ApplyBehaviorTransactionHandler2.cs" />
     <Compile Include="Behavior.cs" />
     <Compile Include="BehaviorBuilder.cs" />
-    <Compile Include="BehaviorHelpers.cs" />
+    <Compile Include="BehaviorLifter2.cs" />
+    <Compile Include="BehaviorLifter3.cs" />
+    <Compile Include="BehaviorListenInvoker.cs" />
     <Compile Include="BehaviorLoop.cs" />
+    <Compile Include="BehaviorPrioritizedInvoker.cs" />
     <Compile Include="BehaviorSink.cs" />
+    <Compile Include="BehaviorTransactionHandler.cs" />
     <Compile Include="CoalesceEventSink.cs" />
     <Compile Include="CoalesceHandler.cs" />
     <Compile Include="CoalesceInvoker.cs" />
@@ -75,6 +82,9 @@
     <Compile Include="EventSink.cs" />
     <Compile Include="FilterEventSink.cs" />
     <Compile Include="FilterTransactionHandler.cs" />
+    <Compile Include="GetBehaviorValueEventSink.cs" />
+    <Compile Include="GetBehaviorValueInvoker.cs" />
+    <Compile Include="GetBehaviorValueTransactionHandler.cs" />
     <Compile Include="Handler.cs" />
     <Compile Include="IHandler.cs" />
     <Compile Include="ILambda1.cs" />
@@ -101,6 +111,11 @@
     <Compile Include="SnapshotBehavior.cs" />
     <Compile Include="SnapshotEventSink.cs" />
     <Compile Include="SnapshotTransactionHandler.cs" />
+    <Compile Include="SwitchToBehaviorTransactionHandler.cs" />
+    <Compile Include="SwitchToBehaviorTransactionHandler2.cs" />
+    <Compile Include="SwitchToEventInvoker.cs" />
+    <Compile Include="SwitchToEventTransactionHandler.cs" />
+    <Compile Include="SwitchToEventTransactionHandler2.cs" />
     <Compile Include="Transaction.cs" />
     <Compile Include="ITransactionHandler.cs" />
     <Compile Include="TransactionHandler.cs" />
