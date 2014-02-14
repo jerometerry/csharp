@@ -26,95 +26,59 @@ namespace sodium.tests
             l.Unlisten();
             AssertArraysEqual(Arrays<Int32>.asList(2, 9), o);
         }
-
-        private void AssertArraysEqual<TA>(List<TA> l1, List<TA> l2)
+        
+        [Test]
+	    public void testSnapshot()
         {
-            Assert.True(Arrays<TA>.AreArraysEqual(l1,l2));
-        }
+            var b = new BehaviorSink<Int32>(0);
+            var trigger = new EventSink<Int64>();
+            var o = new List<String>();
 
-        private static class Arrays<TA>
-        {
-            public static List<TA> asList(params TA[] items)
-            {
-                return new List<TA>(items);
-            }
+            var l = trigger
+                .Snapshot(b, new Lambda2<long,int,string>((x,y) => string.Format("{0} {1}", x, y)))
+                .Listen(new Handler<string>(o.Add));
 
-            public static bool AreArraysEqual(List<TA> l1, List<TA> l2)
-            {
-                if (l1.Count != l2.Count)
-                    return false;
-
-                l1.Sort();
-                l2.Sort();
-
-                for (int i = 0; i < l1.Count; i++)
-                {
-                    TA item1 = l1[i];
-                    TA item2 = l2[i];
-                    if (!item1.Equals(item2))
-                        return false;
-                }
-
-                return true;
-            }
-        }
-
-        private class TmpHandler1<A> : IHandler<A>
-        {
-            public void Run(A a)
-            {
-            }
+            trigger.Send(100L);
+            b.Send(2);
+            trigger.Send(200L);
+            b.Send(9);
+            b.Send(1);
+            trigger.Send(300L);
+            l.Unlisten();
+            AssertArraysEqual(Arrays<string>.asList("100 0", "200 2", "300 1"), o);
         }
 
         /*
         [Test]
-	    public void testSnapshot()
-        {
-            BehaviorSink<Int32> b = new BehaviorSink<Int32>(0);
-            EventSink<Int64> trigger = new EventSink<Int64>();
-            List<String> o = new List<String>();
-            Listener l = trigger.snapshot(b, (x, y) => x + " " + y)
-                .listen(x => { o.add(x); });
-            trigger.send(100L);
+        public void testValues() {
+            BehaviorSink<Int32> b = new BehaviorSink<Int32>(9);
+            List<Int32> o = new List<Int32>();
+            Listener l = b.value().listen(x => { o.add(x); });
             b.send(2);
-            trigger.send(200L);
-            b.send(9);
-            b.send(1);
-            trigger.send(300L);
+            b.send(7);
             l.unlisten();
-            Assert.AreEqual(Arrays.asList("100 0", "200 2", "300 1"), o);
+            Assert.AreEqual(Arrays.asList(9,2,7), o);
         }
 	
         [Test]
-	    public void testValues() {
-		    BehaviorSink<Int32> b = new BehaviorSink<Int32>(9);
-		    List<Int32> o = new List<Int32>();
-		    Listener l = b.value().listen(x => { o.add(x); });
-		    b.send(2);
-		    b.send(7);
-		    l.unlisten();
-		    Assert.AreEqual(Arrays.asList(9,2,7), o);
-	    }
-	
-        [Test]
-	    public void testConstantBehavior() {
-	        Behavior<Int32> b = new Behavior<Int32>(12);
-	        List<Int32> o = new List();
-	        Listener l = b.value().listen(x => { o.add(x); });
-	        l.unlisten();
-	        Assert.AreEqual(Arrays.asList(12), o);
-	    }
+        public void testConstantBehavior() {
+            Behavior<Int32> b = new Behavior<Int32>(12);
+            List<Int32> o = new List();
+            Listener l = b.value().listen(x => { o.add(x); });
+            l.unlisten();
+            Assert.AreEqual(Arrays.asList(12), o);
+        }
 
         [Test]
-	    public void testValuesThenMap() {
-		    BehaviorSink<Int32> b = new BehaviorSink<Int32>(9);
-		    List<Int32> o = new List<Int32>();
-		    Listener l = b.value().map(x => x+100).listen(x => { o.add(x); });
-		    b.send(2);
-		    b.send(7);
-		    l.unlisten();
-		    Assert.AreEqual(Arrays.asList(109,102,107), o);
-	    }
+        public void testValuesThenMap() {
+            BehaviorSink<Int32> b = new BehaviorSink<Int32>(9);
+            List<Int32> o = new List<Int32>();
+            Listener l = b.value().map(x => x+100).listen(x => { o.add(x); });
+            b.send(2);
+            b.send(7);
+            l.unlisten();
+            Assert.AreEqual(Arrays.asList(109,102,107), o);
+        }
         */
 
 	    /**
@@ -477,5 +441,37 @@ namespace sodium.tests
             Assert.AreEqual(Arrays.asList(100,105,112,113,115,118), o);
         }
         */
+
+        private void AssertArraysEqual<TA>(List<TA> l1, List<TA> l2)
+        {
+            Assert.True(Arrays<TA>.AreArraysEqual(l1, l2));
+        }
+
+        private static class Arrays<TA>
+        {
+            public static List<TA> asList(params TA[] items)
+            {
+                return new List<TA>(items);
+            }
+
+            public static bool AreArraysEqual(List<TA> l1, List<TA> l2)
+            {
+                if (l1.Count != l2.Count)
+                    return false;
+
+                l1.Sort();
+                l2.Sort();
+
+                for (int i = 0; i < l1.Count; i++)
+                {
+                    TA item1 = l1[i];
+                    TA item2 = l2[i];
+                    if (!item1.Equals(item2))
+                        return false;
+                }
+
+                return true;
+            }
+        }
     }
 }
