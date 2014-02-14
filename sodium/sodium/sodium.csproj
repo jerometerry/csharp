@@ -40,9 +40,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Behavior.cs" />
+    <Compile Include="BehaviorHelpers.cs" />
     <Compile Include="BehaviorLoop.cs" />
     <Compile Include="BehaviorSink.cs" />
     <Compile Include="Event.cs" />
+    <Compile Include="EventHelpers.cs" />
     <Compile Include="EventLoop.cs" />
     <Compile Include="EventSink.cs" />
     <Compile Include="IHandler.cs" />
