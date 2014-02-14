@@ -61,7 +61,7 @@ namespace sodium
         /**
          * Transform the event's value according to the supplied function.
          */
-        public Event<TNewEvent> Map<TNewEvent>(ISingleParameterFunction<TEvent, TNewEvent> mapFunction)
+        public Event<TNewEvent> Map<TNewEvent>(IFunction<TEvent, TNewEvent> mapFunction)
         {
             var ev = this;
             var o = new MapEventSink<TEvent, TNewEvent>(ev, mapFunction);
@@ -86,7 +86,7 @@ namespace sodium
 	     */
         public Event<TNewEvent> Snapshot<TNewEvent>(Behavior<TNewEvent> behavior)
         {
-            var snapshotGenerator = new TwoParameterFunction<TEvent, TNewEvent, TNewEvent>((a,b) => b);
+            var snapshotGenerator = new BinaryFunction<TEvent, TNewEvent, TNewEvent>((a,b) => b);
             return Snapshot(behavior, snapshotGenerator);
         }
 
@@ -97,7 +97,7 @@ namespace sodium
          */
         public Event<TSnapshot> Snapshot<TBehavior, TSnapshot>(
             Behavior<TBehavior> behavior, 
-            ITwoParameterFunction<TEvent, TBehavior, TSnapshot> snapshotGenerator)
+            IBinaryFunction<TEvent, TBehavior, TSnapshot> snapshotGenerator)
         {
             var ev = this;
             var o = new SnapshotEventSink<TEvent, TBehavior, TSnapshot>(ev, snapshotGenerator, behavior);
@@ -142,12 +142,12 @@ namespace sodium
          * make any assumptions about the ordering, and the combining function would
          * ideally be commutative.
          */
-        public Event<TEvent> Coalesce(ITwoParameterFunction<TEvent, TEvent, TEvent> combiningFunction)
+        public Event<TEvent> Coalesce(IBinaryFunction<TEvent, TEvent, TEvent> combiningFunction)
         {
             return Transaction.Apply(new CoalesceInvoker<TEvent>(this, combiningFunction));
         }
 
-        public Event<TEvent> Coalesce(Transaction transaction, ITwoParameterFunction<TEvent, TEvent, TEvent> combiningFunction)
+        public Event<TEvent> Coalesce(Transaction transaction, IBinaryFunction<TEvent, TEvent, TEvent> combiningFunction)
         {
             var ev = this;
             var o = new CoalesceEventSink<TEvent>(ev, combiningFunction);
@@ -161,7 +161,7 @@ namespace sodium
          */
         public Event<TEvent> LastFiringOnly(Transaction transaction)
         {
-            var combiningFunction = new TwoParameterFunction<TEvent, TEvent, TEvent>((first, second) => { return second; });
+            var combiningFunction = new BinaryFunction<TEvent, TEvent, TEvent>((first, second) => { return second; });
             return Coalesce(transaction, combiningFunction);
         }
 
@@ -173,7 +173,7 @@ namespace sodium
          * within the same transaction), they are combined using the same logic as
          * 'coalesce'.
          */
-        public static Event<TEvent> MergeWith(ITwoParameterFunction<TEvent, TEvent, TEvent> combiningFunction, Event<TEvent> event1, Event<TEvent> event2)
+        public static Event<TEvent> MergeWith(IBinaryFunction<TEvent, TEvent, TEvent> combiningFunction, Event<TEvent> event1, Event<TEvent> event2)
         {
             return Merge(event1, event2).Coalesce(combiningFunction);
         }
@@ -181,7 +181,7 @@ namespace sodium
         /**
          * Only keep event occurrences for which the predicate returns true.
          */
-        public Event<TEvent> Filter(ISingleParameterFunction<TEvent, Boolean> predicate)
+        public Event<TEvent> Filter(IFunction<TEvent, Boolean> predicate)
         {
             var ev = this;
             var o = new FilterEventSink<TEvent>(ev, predicate);
@@ -194,7 +194,7 @@ namespace sodium
          */
         public Event<TEvent> FilterNotNull()
         {
-            var predicate = new SingleParameterFunction<TEvent, bool>((a) => a != null);
+            var predicate = new Function<TEvent, bool>((a) => a != null);
             return Filter(predicate);
         }
 
@@ -205,7 +205,7 @@ namespace sodium
          */
         public Event<TEvent> Gate(Behavior<Boolean> behaviorPredicate)
         {
-            var snapshotGenerator = new TwoParameterFunction<TEvent, bool, TEvent>((a,pred) => pred ? a : default(TEvent));
+            var snapshotGenerator = new BinaryFunction<TEvent, bool, TEvent>((a,pred) => pred ? a : default(TEvent));
             return Snapshot(behaviorPredicate, snapshotGenerator).FilterNotNull();
         }
 
@@ -215,14 +215,14 @@ namespace sodium
          */
         public Event<TNewEvent> Collect<TNewEvent, TState>(
             TState initState, 
-            ITwoParameterFunction<TEvent, TState, Tuple2<TNewEvent, TState>> melayMachineFunction)
+            IBinaryFunction<TEvent, TState, Tuple2<TNewEvent, TState>> melayMachineFunction)
         {
             var ea = this;
             var es = new EventLoop<TState>();
             var s = es.Hold(initState);
             var ebs = ea.Snapshot(s, melayMachineFunction);
-            var eb = ebs.Map(new SingleParameterFunction<Tuple2<TNewEvent, TState>, TNewEvent>((bs) => bs.X));
-            var esOut = ebs.Map(new SingleParameterFunction<Tuple2<TNewEvent, TState>, TState>((bs) => bs.Y));
+            var eb = ebs.Map(new Function<Tuple2<TNewEvent, TState>, TNewEvent>((bs) => bs.X));
+            var esOut = ebs.Map(new Function<Tuple2<TNewEvent, TState>, TState>((bs) => bs.Y));
             es.Loop(esOut);
             return eb;
         }
@@ -230,7 +230,7 @@ namespace sodium
         /**
          * Accumulate on input event, outputting the new state each time.
          */
-        public Behavior<TState> Accumulate<TState>(TState initState, ITwoParameterFunction<TEvent, TState, TState> snapshotGenerator)
+        public Behavior<TState> Accumulate<TState>(TState initState, IBinaryFunction<TEvent, TState, TState> snapshotGenerator)
         {
             var ea = this;
             var es = new EventLoop<TState>();

@@ -2,11 +2,11 @@
 {
     using System;
 
-    public class TwoParameterFunction<TP1, TP2, TR> : ITwoParameterFunction<TP1, TP2, TR>
+    public class BinaryFunction<TP1, TP2, TR> : IBinaryFunction<TP1, TP2, TR>
     {
         private readonly Func<TP1, TP2, TR> _f;
 
-        public TwoParameterFunction(Func<TP1, TP2, TR> f)
+        public BinaryFunction(Func<TP1, TP2, TR> f)
         {
             _f = f;
         }

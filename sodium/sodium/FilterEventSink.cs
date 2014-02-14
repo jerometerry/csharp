@@ -5,9 +5,9 @@
     public class FilterEventSink<TA> : EventSink<TA>
     {
         private readonly Event<TA> _ev;
-        private readonly ISingleParameterFunction<TA, Boolean> _f;
+        private readonly IFunction<TA, Boolean> _f;
 
-        public FilterEventSink(Event<TA> ev, ISingleParameterFunction<TA, Boolean> f)
+        public FilterEventSink(Event<TA> ev, IFunction<TA, Boolean> f)
         {
             _ev = ev;
             _f = f;

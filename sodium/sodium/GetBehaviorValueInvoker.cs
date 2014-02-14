@@ -1,15 +1,15 @@
 namespace sodium
 {
-    public class GetBehaviorValueInvoker<TA> : ISingleParameterFunction<Transaction, Event<TA>>
+    public class GetBehaviorValueInvoker<TBehavior> : IFunction<Transaction, Event<TBehavior>>
     {
-        private readonly Behavior<TA> _b;
+        private readonly Behavior<TBehavior> _b;
 
-        public GetBehaviorValueInvoker(Behavior<TA> b)
+        public GetBehaviorValueInvoker(Behavior<TBehavior> b)
         {
             _b = b;
         }
 
-        public Event<TA> Apply(Transaction trans)
+        public Event<TBehavior> Apply(Transaction trans)
         {
             return _b.GetValue(trans);
         }

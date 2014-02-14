@@ -1,6 +1,6 @@
 namespace sodium
 {
-    public class BehaviorBuilder<TA> : ISingleParameterFunction<Transaction, Behavior<TA>>
+    public class BehaviorBuilder<TA> : IFunction<Transaction, Behavior<TA>>
     {
         private readonly Event<TA> _evt;
         private readonly TA _initValue;

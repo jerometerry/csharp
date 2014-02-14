@@ -5,9 +5,9 @@
     public class CoalesceEventSink<TA> : EventSink<TA>
     {
         private readonly Event<TA> _ev;
-        private readonly ITwoParameterFunction<TA, TA, TA> _f;
+        private readonly IBinaryFunction<TA, TA, TA> _f;
 
-        public CoalesceEventSink(Event<TA> ev, ITwoParameterFunction<TA, TA, TA> f)
+        public CoalesceEventSink(Event<TA> ev, IBinaryFunction<TA, TA, TA> f)
         {
             _ev = ev;
             _f = f;

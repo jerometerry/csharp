@@ -2,11 +2,11 @@
 {
     using System;
 
-    public class ThreeParameterFunction<TP1, TP2, TP3, TR> : IThreeParameterFunction<TP1, TP2, TP3, TR>
+    public class TernaryFunction<TP1, TP2, TP3, TR> : ITernaryFunction<TP1, TP2, TP3, TR>
     {
         private readonly Func<TP1, TP2, TP3, TR> _f;
 
-        public ThreeParameterFunction(Func<TP1, TP2, TP3, TR> f)
+        public TernaryFunction(Func<TP1, TP2, TP3, TR> f)
         {
             _f = f;
         }

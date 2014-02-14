@@ -2,16 +2,16 @@ namespace sodium
 {
     using System;
 
-    public class Behavior<TA> : IDisposable
+    public class Behavior<TBehavior> : IDisposable
     {
-        private Event<TA> _event;
-        private TA _value;
-        private TA _valueUpdate;
+        private Event<TBehavior> _event;
+        private TBehavior _value;
+        private TBehavior _valueUpdate;
         private IListener _cleanup;
         private bool _disposed;
         private bool _valueUpdated = false;
 
-        public TA Value
+        public TBehavior Value
         {
             get
             {
@@ -23,7 +23,7 @@ namespace sodium
             }
         }
 
-        public TA ValueUpdate
+        public TBehavior ValueUpdate
         {
             get
             {
@@ -56,7 +56,7 @@ namespace sodium
             }
         }
 
-        public Event<TA> Evt
+        public Event<TBehavior> Evt
         {
             get
             {
@@ -71,23 +71,24 @@ namespace sodium
         /**
          * A behavior with a constant value.
          */
-        public Behavior(TA value)
+        public Behavior(TBehavior value)
         {
-            Evt = new Event<TA>();
+            Evt = new Event<TBehavior>();
             Value = value;
         }
 
-        public Behavior(Event<TA> evt, TA initValue)
+        public Behavior(Event<TBehavior> evt, TBehavior initValue)
         {
             Evt = evt;
             Value = initValue;
-            Transaction.Run(new BehaviorListenInvoker<TA>(this, evt));
+            var code = new BehaviorListenInvoker<TBehavior>(this, evt);
+            Transaction.Run(code);
         }
 
         /**
          * @return The value including any updates that have happened in this transaction.
          */
-        public TA NewValue()
+        public TBehavior NewValue()
         {
             return HasValueUpdate ? ValueUpdate : Value;
         }
@@ -103,7 +104,7 @@ namespace sodium
          * b.updates().listen(..) will capture the current value and any updates without risk
          * of missing any in between.
          */
-        public TA Sample()
+        public TBehavior Sample()
         {
             // Since pointers in Java are atomic, we don't need to explicitly create a
             // transaction.
@@ -114,7 +115,7 @@ namespace sodium
          * An evt that gives the updates for the behavior. If this behavior was created
          * with a hold, then updates() gives you an evt equivalent to the one that was held.
          */
-        public Event<TA> Updates()
+        public Event<TBehavior> Updates()
         {
             return Evt;
         }
@@ -124,124 +125,143 @@ namespace sodium
          * the current value of the behavior, and thereafter behaves like updates(),
          * firing for each update to the behavior's value.
          */
-        public Event<TA> GetValue()
+        public Event<TBehavior> GetValue()
         {
-            return Transaction.Apply(new GetBehaviorValueInvoker<TA>(this));
+            var code = new GetBehaviorValueInvoker<TBehavior>(this);
+            return Transaction.Apply<Event<TBehavior>>(code);
         }
 
-        public Event<TA> GetValue(Transaction trans1)
+        public Event<TBehavior> GetValue(Transaction transaction)
         {
-            var o = new GetBehaviorValueEventSink<TA>(this);
-            var l = Evt.Listen(o.Node, trans1,
-                new GetBehaviorValueTransactionHandler<TA>(o), false);
-            return o.AddCleanup(l)
-                .LastFiringOnly(trans1);  // Needed in case of an initial value and an update
-            // in the same transaction.
+            var o = new GetBehaviorValueEventSink<TBehavior>(this);
+            var action = new GetBehaviorValueTransactionHandler<TBehavior>(o);
+            var l = Evt.Listen(o.Node, transaction, action, false);
+            // Needed in case of an initial value and an update in the same transaction.
+            return o.AddCleanup(l).LastFiringOnly(transaction);  
         }
 
         /**
          * Transform the behavior's value according to the supplied function.
          */
-        public Behavior<TB> Map<TB>(ISingleParameterFunction<TA, TB> f)
+        public Behavior<TNewBehavior> Map<TNewBehavior>(IFunction<TBehavior, TNewBehavior> mapFunction)
         {
-            return Updates().Map(f).Hold(f.Apply(Sample()));
+            return Updates().Map(mapFunction).Hold(mapFunction.Apply(Sample()));
         }
 
         /**
          * Lift a binary function into behaviors.
          */
-        public Behavior<TC> Lift<TB, TC>(ITwoParameterFunction<TA, TB, TC> f, Behavior<TB> b)
+        public Behavior<TResult> Lift<TNewBehavior, TResult>(
+            IBinaryFunction<TBehavior, TNewBehavior, TResult> liftFunction, 
+            Behavior<TNewBehavior> behavior)
         {
-            var ffa = new BehaviorLifter2<TA, TB, TC>(f);
-		    var bf = Map(ffa);
-		    return Behavior<TB>.Apply(bf, b);
+            var behaviorLifter = new BehaviorLifter2<TBehavior, TNewBehavior, TResult>(liftFunction);
+		    var behaviorMap = Map(behaviorLifter);
+		    return Behavior<TNewBehavior>.Apply(behaviorMap, behavior);
         }
 
         /**
 	     * Lift a binary function into behaviors.
 	     */
-        public static Behavior<TC> Lift<TB, TC>(ITwoParameterFunction<TA, TB, TC> f, Behavior<TA> a, Behavior<TB> b)
+        public static Behavior<TResult> Lift<TNewBehavior, TResult>(
+            IBinaryFunction<TBehavior, TNewBehavior, TResult> liftFunction, 
+            Behavior<TBehavior> behavior1, 
+            Behavior<TNewBehavior> behavior2)
         {
-            return a.Lift(f, b);
+            return behavior1.Lift(liftFunction, behavior2);
         }
 
         /**
          * Lift a ternary function into behaviors.
          */
-        public Behavior<TD> Lift<TB, TC, TD>(IThreeParameterFunction<TA, TB, TC, TD> f, Behavior<TB> b, Behavior<TC> c)
+        public Behavior<TResult> Lift<TBehavior2, TBehavior3, TResult>(
+            ITernaryFunction<TBehavior, TBehavior2, TBehavior3, TResult> f, 
+            Behavior<TBehavior2> behavior2, 
+            Behavior<TBehavior3> behavior3)
         {
-            ISingleParameterFunction<TA, ISingleParameterFunction<TB, ISingleParameterFunction<TC, TD>>> ffa = new BehaviorLifter3<TA, TB, TC, TD>(f);
-		    var bf = Map(ffa);
-            var r1 = Behavior<TB>.Apply(bf, b);
-            var res = Behavior<TC>.Apply(r1, c);
-            return res;
+            var behaviorLifter = new BehaviorLifter3<TBehavior, TBehavior2, TBehavior3, TResult>(f);
+		    var mapFunction = Map(behaviorLifter);
+            var behaviorFunction = Behavior<TBehavior2>.Apply(mapFunction, behavior2);
+            return Behavior<TBehavior3>.Apply(behaviorFunction, behavior3);
         }
 
         /**
 	     * Lift a ternary function into behaviors.
 	     */
-        public static Behavior<TD> Lift<TB, TC, TD>(IThreeParameterFunction<TA, TB, TC, TD> f, Behavior<TA> a, Behavior<TB> b, Behavior<TC> c)
+        public static Behavior<TResult> Lift<TBehavior2, TBehavior3, TResult>(
+            ITernaryFunction<TBehavior, TBehavior2, TBehavior3, TResult> liftFunction, 
+            Behavior<TBehavior> behavior1, 
+            Behavior<TBehavior2> behavior2, 
+            Behavior<TBehavior3> behavior3)
         {
-            return a.Lift(f, b, c);
+            return behavior1.Lift(liftFunction, behavior2, behavior3);
         }
 
         /**
          * Apply a value inside a behavior to a function inside a behavior. This is the
          * primitive for all function lifting.
          */
-        public static Behavior<TB> Apply<TB>(Behavior<ISingleParameterFunction<TA, TB>> bf, Behavior<TA> ba)
+        public static Behavior<TNewBehavior> Apply<TNewBehavior>(
+            Behavior<IFunction<TBehavior, TNewBehavior>> behaviorFunction, 
+            Behavior<TBehavior> behavior)
         {
-            var o = new EventSink<TB>();
-            var h = new BehaviorPrioritizedInvoker<TA, TB>(o, bf, ba);
-            var l1 = bf.Updates().Listen(o.Node, new ApplyBehaviorTransactionHandler<TA, TB>(h));
-            var l2 = ba.Updates().Listen(o.Node, new ApplyBehaviorTransactionHandler2<TA, TB>(h));
-            return o.AddCleanup(l1).AddCleanup(l2).Hold(bf.Sample().Apply(ba.Sample()));
+            var sink = new EventSink<TNewBehavior>();
+            var invoker = new BehaviorPrioritizedInvoker<TBehavior, TNewBehavior>(sink, behaviorFunction, behavior);
+            var listener1 = behaviorFunction.Updates().Listen(sink.Node, new ApplyBehaviorTransactionHandler<TBehavior, TNewBehavior>(invoker));
+            var listener2 = behavior.Updates().Listen(sink.Node, new ApplyBehaviorTransactionHandler2<TBehavior, TNewBehavior>(invoker));
+            return sink.AddCleanup(listener1).AddCleanup(listener2).Hold(behaviorFunction.Sample().Apply(behavior.Sample()));
         }
 
         /**
 	     * Unwrap a behavior inside another behavior to give a time-varying behavior implementation.
 	     */
-        public static Behavior<TA> SwitchB(Behavior<Behavior<TA>> bba)
+        public static Behavior<TBehavior> SwitchB(Behavior<Behavior<TBehavior>> behaviorFunction)
         {
-            var za = bba.Sample().Sample();
-            var o = new EventSink<TA>();
-            var h = new SwitchToBehaviorTransactionHandler<TA>(o);
-            var l1 = bba.GetValue().Listen(o.Node, h);
-            return o.AddCleanup(l1).Hold(za);
+            var value = behaviorFunction.Sample().Sample();
+            var sink = new EventSink<TBehavior>();
+            var handler = new SwitchToBehaviorTransactionHandler<TBehavior>(sink);
+            var listener = behaviorFunction.GetValue().Listen(sink.Node, handler);
+            return sink.AddCleanup(listener).Hold(value);
         }
 
         /**
          * Unwrap an evt inside a behavior to give a time-varying evt implementation.
          */
-        public static Event<TA> SwitchE(Behavior<Event<TA>> bea)
+        public static Event<TBehavior> SwitchE(Behavior<Event<TBehavior>> behaviorFunction)
         {
-            return Transaction.Apply(new SwitchToEventInvoker<TA>(bea));
+            var code = new SwitchToEventInvoker<TBehavior>(behaviorFunction);
+            return Transaction.Apply(code);
         }
 
-        public static Event<TA> SwitchE(Transaction trans1, Behavior<Event<TA>> bea)
+        public static Event<TBehavior> SwitchE(Transaction transaction, Behavior<Event<TBehavior>> behaviorFunction)
         {
-            var o = new EventSink<TA>();
-            var h2 = new SwitchToEventTransactionHandler2<TA>(o);
-            var h1 = new SwitchToEventTransactionHandler<TA>(o, bea, trans1, h2);
-            var l1 = bea.Updates().Listen(o.Node, trans1, h1, false);
-            return o.AddCleanup(l1);
+            var sink = new EventSink<TBehavior>();
+            var handler2 = new SwitchToEventTransactionHandler2<TBehavior>(sink);
+            var handler1 = new SwitchToEventTransactionHandler<TBehavior>(sink, behaviorFunction, transaction, handler2);
+            var listener = behaviorFunction.Updates().Listen(sink.Node, transaction, handler1, false);
+            return sink.AddCleanup(listener);
         }
 
         /**
          * Transform a behavior with a generalized state loop (a mealy machine). The function
          * is passed the input and the old state and returns the new state and output value.
          */
-        public Behavior<TB> Collect<TB, TS>(TS initState, ITwoParameterFunction<TA, TS, Tuple2<TB, TS>> f)
+        public Behavior<TNewBehavior> Collect<TNewBehavior, TState>(
+            TState initState, 
+            IBinaryFunction<TBehavior, TState, Tuple2<TNewBehavior, TState>> melayMachineFunction)
         {
-            var ea = Updates().Coalesce(new TwoParameterFunction<TA, TA, TA>((a, b) => b));
-            var za = Sample();
-            var zbs = f.Apply(za, initState);
-            var ebs = new EventLoop<Tuple2<TB, TS>>();
-            var bbs = ebs.Hold(zbs);
-            var bs = bbs.Map(new SingleParameterFunction<Tuple2<TB, TS>, TS>((x) => x.Y));
-            var ebsOut = ea.Snapshot(bs, f);
-            ebs.Loop(ebsOut);
-            return bbs.Map(new SingleParameterFunction<Tuple2<TB, TS>, TB>((x) => x.X));
+            var combiningFunction = new BinaryFunction<TBehavior, TBehavior, TBehavior>((a, b) => b);
+            var evt = Updates().Coalesce(combiningFunction);
+            var value = Sample();
+            var zbs = melayMachineFunction.Apply(value, initState);
+            var loop = new EventLoop<Tuple2<TNewBehavior, TState>>();
+            var bbs = loop.Hold(zbs);
+            var mapFunction1 = new Function<Tuple2<TNewBehavior, TState>, TState>((x) => x.Y);
+            var bs = bbs.Map(mapFunction1);
+            var ebsOut = evt.Snapshot(bs, melayMachineFunction);
+            loop.Loop(ebsOut);
+            var mapFunction2 = new Function<Tuple2<TNewBehavior, TState>, TNewBehavior>((x) => x.X);
+            return bbs.Map(mapFunction2);
         }
 
         public void Dispose()

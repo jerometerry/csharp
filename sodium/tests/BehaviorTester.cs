@@ -37,7 +37,7 @@ namespace sodium.tests
             var o = new List<String>();
 
             var l = trigger
-                .Snapshot(b, new TwoParameterFunction<long, int, string>((x, y) => string.Format("{0} {1}", x, y)))
+                .Snapshot(b, new BinaryFunction<long, int, string>((x, y) => string.Format("{0} {1}", x, y)))
                 .Listen(new Handler<string>(o.Add));
 
             trigger.Send(100L);

@@ -3,10 +3,10 @@
     public class SnapshotTransactionHandler<TA, TB, TC> : ITransactionHandler<TA>
     {
         private readonly EventSink<TC> _o;
-        private readonly ITwoParameterFunction<TA, TB, TC> _f;
+        private readonly IBinaryFunction<TA, TB, TC> _f;
         private readonly Behavior<TB> _b;
 
-        public SnapshotTransactionHandler(EventSink<TC> o, ITwoParameterFunction<TA, TB, TC> f, Behavior<TB> b)
+        public SnapshotTransactionHandler(EventSink<TC> o, IBinaryFunction<TA, TB, TC> f, Behavior<TB> b)
         {
             _o = o;
             _f = f;

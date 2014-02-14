@@ -5,10 +5,10 @@
     public class SnapshotEventSink<TEvent, TB, TC> : EventSink<TC>
     {
         private readonly Event<TEvent> _ev;
-        private readonly ITwoParameterFunction<TEvent, TB, TC> _f;
+        private readonly IBinaryFunction<TEvent, TB, TC> _f;
         private readonly Behavior<TB> _b;
 
-        public SnapshotEventSink(Event<TEvent> ev, ITwoParameterFunction<TEvent, TB, TC> f, Behavior<TB> b)
+        public SnapshotEventSink(Event<TEvent> ev, IBinaryFunction<TEvent, TB, TC> f, Behavior<TB> b)
         {
             _ev = ev;
             _f = f;

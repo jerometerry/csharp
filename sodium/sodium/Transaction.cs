@@ -72,7 +72,7 @@ namespace sodium
             }
         }
 
-        public static TA Apply<TA>(ISingleParameterFunction<Transaction, TA> code)
+        public static TA Apply<TA>(IFunction<Transaction, TA> code)
         {
             lock (TransactionLock)
             {

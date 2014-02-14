@@ -2,11 +2,11 @@
 {
     using System;
 
-    public class SingleParameterFunction<TP, TR> : ISingleParameterFunction<TP, TR>
+    public class Function<TP, TR> : IFunction<TP, TR>
     {
         private readonly Func<TP, TR> _f;
 
-        public SingleParameterFunction(Func<TP, TR> f)
+        public Function(Func<TP, TR> f)
         {
             _f = f;
         }
