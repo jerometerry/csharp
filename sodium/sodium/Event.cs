@@ -34,26 +34,30 @@ namespace sodium
             return Transaction.Apply(new ListenerInvoker<TEvent>(this, target, action));
         }
 
-        public IListener Listen(Node target, Transaction trans, ITransactionHandler<TEvent> action, bool suppressEarlierFirings)
+        public IListener Listen(
+            Node target, 
+            Transaction transaction, 
+            ITransactionHandler<TEvent> action, 
+            bool suppressEarlierFirings)
         {
             lock (Transaction.ListenersLock)
             {
                 if (Node.LinkTo(target))
-                    trans.NeedToRegeneratePriorityQueue = true;
+                    transaction.NeedToRegeneratePriorityQueue = true;
                 Listeners.Add(action);
             }
             var aNow = SampleNow();
             if (aNow != null)
             {    // In cases like value(), we start with an initial value.
                 foreach (object t in aNow)
-                    action.Run(trans, (TEvent)t);  // <-- unchecked warning is here
+                    action.Run(transaction, (TEvent)t);  // <-- unchecked warning is here
             }
             if (!suppressEarlierFirings)
             {
                 // Anything sent already in this transaction must be sent now so that
                 // there's no order dependency between send and listen.
                 foreach (var a in Firings)
-                    action.Run(trans, a);
+                    action.Run(transaction, a);
             }
             return new Listener<TEvent>(this, action, target);
         }
@@ -99,10 +103,10 @@ namespace sodium
             Behavior<TBehavior> behavior, 
             IBinaryFunction<TEvent, TBehavior, TSnapshot> snapshotGenerator)
         {
-            var ev = this;
-            var o = new SnapshotEventSink<TEvent, TBehavior, TSnapshot>(ev, snapshotGenerator, behavior);
-            var l = Listen(o.Node, new SnapshotTransactionHandler<TEvent, TBehavior, TSnapshot>(o, snapshotGenerator, behavior));
-            return o.AddCleanup(l);
+            var evt = this;
+            var sink = new SnapshotEventSink<TEvent, TBehavior, TSnapshot>(evt, snapshotGenerator, behavior);
+            var listener = Listen(sink.Node, new SnapshotTransactionHandler<TEvent, TBehavior, TSnapshot>(sink, snapshotGenerator, behavior));
+            return sink.AddCleanup(listener);
         }
 
         /**
@@ -116,11 +120,11 @@ namespace sodium
          */
         public static Event<TEvent> Merge(Event<TEvent> event1, Event<TEvent> event2)
         {
-            var o = new MergeEventSink<TEvent>(event1, event2);
-            var h = new MergeTransactionHandler<TEvent>(o);
-            var l1 = event1.Listen(o.Node, h);
-            var l2 = event2.Listen(o.Node, h);
-            return o.AddCleanup(l1).AddCleanup(l2);
+            var sink = new MergeEventSink<TEvent>(event1, event2);
+            var handler = new MergeTransactionHandler<TEvent>(sink);
+            var listener1 = event1.Listen(sink.Node, handler);
+            var listener2 = event2.Listen(sink.Node, handler);
+            return sink.AddCleanup(listener1).AddCleanup(listener2);
         }
 
         /**
@@ -128,9 +132,9 @@ namespace sodium
 	     */
         public Event<TEvent> Delay()
         {
-            var o = new EventSink<TEvent>();
-            var l1 = Listen(o.Node, new DelayTransactionHandler<TEvent>(o));
-            return o.AddCleanup(l1);
+            var sink = new EventSink<TEvent>();
+            var listener = Listen(sink.Node, new DelayTransactionHandler<TEvent>(sink));
+            return sink.AddCleanup(listener);
         }
 
         /**
@@ -149,11 +153,11 @@ namespace sodium
 
         public Event<TEvent> Coalesce(Transaction transaction, IBinaryFunction<TEvent, TEvent, TEvent> combiningFunction)
         {
-            var ev = this;
-            var o = new CoalesceEventSink<TEvent>(ev, combiningFunction);
-            var h = new CoalesceHandler<TEvent>(combiningFunction, o);
-            var l = Listen(o.Node, transaction, h, false);
-            return o.AddCleanup(l);
+            var evt = this;
+            var sink = new CoalesceEventSink<TEvent>(evt, combiningFunction);
+            var handler = new CoalesceHandler<TEvent>(combiningFunction, sink);
+            var listener = Listen(sink.Node, transaction, handler, false);
+            return sink.AddCleanup(listener);
         }
 
         /**
@@ -183,10 +187,10 @@ namespace sodium
          */
         public Event<TEvent> Filter(IFunction<TEvent, Boolean> predicate)
         {
-            var ev = this;
-            var o = new FilterEventSink<TEvent>(ev, predicate);
-            var l = Listen(o.Node, new FilterTransactionHandler<TEvent>(predicate, o));
-            return o.AddCleanup(l);
+            var evt = this;
+            var sink = new FilterEventSink<TEvent>(evt, predicate);
+            var listener = Listen(sink.Node, new FilterTransactionHandler<TEvent>(predicate, sink));
+            return sink.AddCleanup(listener);
         }
 
         /**

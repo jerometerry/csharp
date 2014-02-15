@@ -1,15 +1,15 @@
 ﻿namespace sodium
 {
-    public class ActionInvoker<TA> : ITransactionHandler<TA>
+    public class ActionInvoker<TEvent> : ITransactionHandler<TEvent>
     {
-        private readonly IHandler<TA> _action;
+        private readonly IHandler<TEvent> _action;
 
-        public ActionInvoker(IHandler<TA> action)
+        public ActionInvoker(IHandler<TEvent> action)
         {
             _action = action;
         }
 
-        public void Run(Transaction trans, TA a)
+        public void Run(Transaction trans, TEvent a)
         {
             _action.Run(a);
         }
