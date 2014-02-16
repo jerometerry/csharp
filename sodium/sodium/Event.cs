@@ -225,8 +225,8 @@ namespace sodium
             var es = new EventLoop<TState>();
             var s = es.Hold(initState);
             var ebs = ea.Snapshot(s, melayMachineFunction);
-            var eb = ebs.Map(new Function<Tuple2<TNewEvent, TState>, TNewEvent>((bs) => bs.X));
-            var esOut = ebs.Map(new Function<Tuple2<TNewEvent, TState>, TState>((bs) => bs.Y));
+            var eb = ebs.Map(new Function<Tuple2<TNewEvent, TState>, TNewEvent>((bs) => bs.V1));
+            var esOut = ebs.Map(new Function<Tuple2<TNewEvent, TState>, TState>((bs) => bs.V2));
             es.Loop(esOut);
             return eb;
         }
