@@ -32,56 +32,61 @@ namespace sodium.tests
         [Test]
         public void TestSnapshot()
         {
-            var b = new BehaviorSink<Int32>(0);
-            var trigger = new EventSink<Int64>();
-            var o = new List<String>();
+            var behaviorSink = new BehaviorSink<Int32>(0);
+            var eventSink = new EventSink<Int64>();
+            var results = new List<String>();
+            var snapshotFunction = new BinaryFunction<long, int, string>(
+                (x, y) => string.Format("{0} {1}", x, y));
+            var handler = new Handler<string>(results.Add);
+            var listener = eventSink.Snapshot(behaviorSink, snapshotFunction).Listen(handler);
 
-            var l = trigger
-                .Snapshot(b, new BinaryFunction<long, int, string>((x, y) => string.Format("{0} {1}", x, y)))
-                .Listen(new Handler<string>(o.Add));
+            eventSink.Send(100L);
+            behaviorSink.Send(2);
+            eventSink.Send(200L);
+            behaviorSink.Send(9);
+            behaviorSink.Send(1);
+            eventSink.Send(300L);
+            listener.Unlisten();
+            AssertArraysEqual(Arrays<string>.asList("100 0", "200 2", "300 1"), results);
+        }
 
-            trigger.Send(100L);
+        
+        [Test]
+        public void TestValues() 
+        {
+            var behaviorSink = new BehaviorSink<Int32>(9);
+            var results = new List<Int32>();
+            var handler = new Handler<Int32>(x => { results.Add(x); });
+            var listener = behaviorSink.GetValue().Listen(handler);
+            behaviorSink.Send(2);
+            behaviorSink.Send(7);
+            listener.Unlisten();
+            AssertArraysEqual(Arrays<Int32>.asList(9, 2, 7), results);
+        }
+        
+        [Test]
+        public void TestConstantBehavior() 
+        {
+            var behaviorSink = new Behavior<Int32>(12);
+            var results = new List<Int32>();
+            var handler = new Handler<Int32>(x => { results.Add(x); });
+            var listener = behaviorSink.GetValue().Listen(handler);
+            listener.Unlisten();
+            AssertArraysEqual(Arrays<Int32>.asList(12), results);
+        }
+
+        [Test]
+        public void TestValuesThenMap() {
+            var b = new BehaviorSink<Int32>(9);
+            var results = new List<Int32>();
+            var map = new Function<Int32, Int32>((x) => { return x + 100; });
+            var handler = new Handler<Int32>(x => { results.Add(x); });
+            var l = b.GetValue().Map(map).Listen(handler);
             b.Send(2);
-            trigger.Send(200L);
-            b.Send(9);
-            b.Send(1);
-            trigger.Send(300L);
+            b.Send(7);
             l.Unlisten();
-            AssertArraysEqual(Arrays<string>.asList("100 0", "200 2", "300 1"), o);
+            AssertArraysEqual(Arrays<Int32>.asList(109, 102, 107), results);
         }
-
-        /*
-        [Test]
-        public void testValues() {
-            BehaviorSink<Int32> b = new BehaviorSink<Int32>(9);
-            List<Int32> o = new List<Int32>();
-            Listener l = b.value().listen(x => { o.add(x); });
-            b.send(2);
-            b.send(7);
-            l.unlisten();
-            Assert.AreEqual(Arrays.asList(9,2,7), o);
-        }
-	
-        [Test]
-        public void testConstantBehavior() {
-            Behavior<Int32> b = new Behavior<Int32>(12);
-            List<Int32> o = new List();
-            Listener l = b.value().listen(x => { o.add(x); });
-            l.unlisten();
-            Assert.AreEqual(Arrays.asList(12), o);
-        }
-
-        [Test]
-        public void testValuesThenMap() {
-            BehaviorSink<Int32> b = new BehaviorSink<Int32>(9);
-            List<Int32> o = new List<Int32>();
-            Listener l = b.value().map(x => x+100).listen(x => { o.add(x); });
-            b.send(2);
-            b.send(7);
-            l.unlisten();
-            Assert.AreEqual(Arrays.asList(109,102,107), o);
-        }
-        */
 
         /**
          * This is used for tests where value() produces a single initial value on listen,
