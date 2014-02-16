@@ -20,6 +20,12 @@ namespace sodium
 
         public virtual Object[] SampleNow() { return null; }
 
+        public IListener Listen(Action<TEvent> action)
+        {
+            var handler = new Handler<TEvent>(action);
+            return Listen(handler);
+        }
+
         /**
          * Listen for firings of this event. The returned Listener has an unlisten()
          * method to cause the listener to be removed. This is the observer pattern.
