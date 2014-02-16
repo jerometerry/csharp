@@ -1,9 +1,7 @@
 namespace sodium.tests
 {
     using NUnit.Framework;
-    using NUnit;
     using System;
-    using System.Threading;
     using System.Collections.Generic;
 
     [TestFixture]
@@ -12,21 +10,23 @@ namespace sodium.tests
         [TearDown]
         public void TearDown()
         {
-            GC.Collect();
-            Thread.Sleep(100);
+            // All tests are being run on a single thread.
+            // Is this really necessary?
+            //GC.Collect();
+            //Thread.Sleep(100);
         }
 
         [Test]
         public void TestHold()
         {
-            var e = new EventSink<Int32>();
-            var b = e.Hold(0);
-            var o = new List<Int32>();
-            var l = b.Updates().Listen(new Handler<Int32>(o.Add));
-            e.Send(2);
-            e.Send(9);
-            l.Unlisten();
-            AssertArraysEqual(Arrays<Int32>.asList(2, 9), o);
+            var eventSink = new EventSink<Int32>();
+            var behavior = eventSink.Hold(0);
+            var results = new List<Int32>();
+            var listener = behavior.Updates().Listen(new Handler<Int32>(results.Add));
+            eventSink.Send(2);
+            eventSink.Send(9);
+            listener.Unlisten();
+            AssertArraysEqual(Arrays<Int32>.AsList(2, 9), results);
         }
 
         [Test]
@@ -47,45 +47,45 @@ namespace sodium.tests
             behaviorSink.Send(1);
             eventSink.Send(300L);
             listener.Unlisten();
-            AssertArraysEqual(Arrays<string>.asList("100 0", "200 2", "300 1"), results);
-        }
-
-        
-        [Test]
-        public void TestValues() 
-        {
-            var behaviorSink = new BehaviorSink<Int32>(9);
-            var results = new List<Int32>();
-            var handler = new Handler<Int32>(x => { results.Add(x); });
-            var listener = behaviorSink.GetValue().Listen(handler);
-            behaviorSink.Send(2);
-            behaviorSink.Send(7);
-            listener.Unlisten();
-            AssertArraysEqual(Arrays<Int32>.asList(9, 2, 7), results);
-        }
-        
-        [Test]
-        public void TestConstantBehavior() 
-        {
-            var behaviorSink = new Behavior<Int32>(12);
-            var results = new List<Int32>();
-            var handler = new Handler<Int32>(x => { results.Add(x); });
-            var listener = behaviorSink.GetValue().Listen(handler);
-            listener.Unlisten();
-            AssertArraysEqual(Arrays<Int32>.asList(12), results);
+            AssertArraysEqual(Arrays<string>.AsList("100 0", "200 2", "300 1"), results);
         }
 
         [Test]
-        public void TestValuesThenMap() {
-            var b = new BehaviorSink<Int32>(9);
+        public void TestValues()
+        {
+            var sink = new BehaviorSink<Int32>(9);
+            var results = new List<Int32>();
+            var handler = new Handler<Int32>(x => { results.Add(x); });
+            var listener = sink.GetValue().Listen(handler);
+            sink.Send(2);
+            sink.Send(7);
+            listener.Unlisten();
+            AssertArraysEqual(Arrays<Int32>.AsList(9, 2, 7), results);
+        }
+
+        [Test]
+        public void TestConstantBehavior()
+        {
+            var sink = new Behavior<Int32>(12);
+            var results = new List<Int32>();
+            var handler = new Handler<Int32>(x => { results.Add(x); });
+            var listener = sink.GetValue().Listen(handler);
+            listener.Unlisten();
+            AssertArraysEqual(Arrays<Int32>.AsList(12), results);
+        }
+
+        [Test]
+        public void TestValuesThenMap()
+        {
+            var sink = new BehaviorSink<Int32>(9);
             var results = new List<Int32>();
             var map = new Function<Int32, Int32>((x) => { return x + 100; });
             var handler = new Handler<Int32>(x => { results.Add(x); });
-            var l = b.GetValue().Map(map).Listen(handler);
-            b.Send(2);
-            b.Send(7);
+            var l = sink.GetValue().Map(map).Listen(handler);
+            sink.Send(2);
+            sink.Send(7);
             l.Unlisten();
-            AssertArraysEqual(Arrays<Int32>.asList(109, 102, 107), results);
+            AssertArraysEqual(Arrays<Int32>.AsList(109, 102, 107), results);
         }
 
         /**
@@ -94,45 +94,55 @@ namespace sodium.tests
          * This needs testing separately, because the code must be done carefully to achieve
          * this.
          */
-        private static Event<Int32> doubleUp(Event<Int32> ev)
+        private static Event<Int32> DoubleUp(Event<Int32> ev)
         {
             return Event<Int32>.Merge(ev, ev);
         }
 
+        [Test]
+        public void TestValuesTwiceThenMap()
+        {
+            var behaviorSink = new BehaviorSink<Int32>(9);
+            var results = new List<Int32>();
+            var map = new Function<Int32, Int32>((x) => { return x + 100; });
+            var handler = new Handler<Int32>(x => { results.Add(x); });
+            var listener = DoubleUp(behaviorSink.GetValue()).Map(map).Listen(handler);
+            behaviorSink.Send(2);
+            behaviorSink.Send(7);
+            listener.Unlisten();
+            AssertArraysEqual(Arrays<Int32>.AsList(109, 109, 102, 102, 107, 107), results);
+        }
+
+
+        [Test]
+        public void TestValuesThenCoalesce()
+        {
+            var b = new BehaviorSink<Int32>(9);
+            var results = new List<Int32>();
+            var coaleseFunction = new BinaryFunction<Int32, Int32, Int32>((fst, snd) => snd);
+            var handler = new Handler<Int32>(x => { results.Add(x); });
+            var listener = b.GetValue().Coalesce(coaleseFunction).Listen(handler);
+            b.Send(2);
+            b.Send(7);
+            listener.Unlisten();
+            AssertArraysEqual(Arrays<Int32>.AsList(9, 2, 7), results);
+        }
+
+        
+        [Test]
+	    public void TestValuesTwiceThenCoalesce() 
+        {
+		    var sink = new BehaviorSink<Int32>(9);
+		    var results = new List<Int32>();
+            var coaleseFunction = new BinaryFunction<Int32, Int32, Int32>((fst, snd) => { return fst + snd; });
+            var handler = new Handler<Int32>(x => { results.Add(x); });
+            var listener = DoubleUp(sink.GetValue()).Coalesce(coaleseFunction).Listen(handler);
+		    sink.Send(2);
+		    sink.Send(7);
+		    listener.Unlisten();
+            AssertArraysEqual(Arrays<Int32>.AsList(18, 4, 14), results);
+	    }
         /*
-        [Test]
-	    public void testValuesTwiceThenMap() {
-		    BehaviorSink<Int32> b = new BehaviorSink<Int32>(9);
-		    List<Int32> o = new List<Int32>();
-		    Listener l = doubleUp(b.value()).map(x => x+100).listen(x => { o.add(x); });
-		    b.send(2);
-		    b.send(7);
-		    l.unlisten();
-		    Assert.AreEqual(Arrays.asList(109,109,102,102,107,107), o);
-	    }
-
-        [Test]
-	    public void testValuesThenCoalesce() {
-		    BehaviorSink<Int32> b = new BehaviorSink<Int32>(9);
-		    List<Int32> o = new List<Int32>();
-		    Listener l = b.value().coalesce((fst, snd) => snd).listen(x => { o.add(x); });
-		    b.send(2);
-		    b.send(7);
-		    l.unlisten();
-		    Assert.AreEqual(Arrays.asList(9,2,7), o);
-	    }
-
-        [Test]
-	    public void testValuesTwiceThenCoalesce() {
-		    BehaviorSink<Int32> b = new BehaviorSink<Int32>(9);
-		    List<Int32> o = new List<Int32>();
-		    Listener l = doubleUp(b.value()).coalesce((fst, snd) => fst+snd).listen(x => { o.add(x); });
-		    b.send(2);
-		    b.send(7);
-		    l.unlisten();
-		    Assert.AreEqual(Arrays.asList(18,4,14), o);
-	    }
-
         [Test]
 	    public void testValuesThenSnapshot() {
 		    BehaviorSink<Int32> bi = new BehaviorSink<Int32>(9);
@@ -456,7 +466,7 @@ namespace sodium.tests
 
         private static class Arrays<TA>
         {
-            public static List<TA> asList(params TA[] items)
+            public static List<TA> AsList(params TA[] items)
             {
                 return new List<TA>(items);
             }
