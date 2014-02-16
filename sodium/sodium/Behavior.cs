@@ -236,7 +236,7 @@ namespace sodium
         public static Event<TBehavior> SwitchE(Transaction transaction, Behavior<Event<TBehavior>> eventBehavior)
         {
             var sink = new EventSink<TBehavior>();
-            var handler2 = new SwitchToEventTransactionHandler2<TBehavior>(sink);
+            var handler2 = new EventSinkSender<TBehavior>(sink);
             var handler1 = new SwitchToEventTransactionHandler<TBehavior>(sink, eventBehavior, transaction, handler2);
             var listener = eventBehavior.Updates().Listen(sink.Node, transaction, handler1, false);
             return sink.AddCleanup(listener);

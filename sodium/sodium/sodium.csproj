@@ -104,7 +104,6 @@
     <Compile Include="MapEventSink.cs" />
     <Compile Include="MapTransactionHandler.cs" />
     <Compile Include="MergeEventSink.cs" />
-    <Compile Include="MergeTransactionHandler.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="OnceEventSink.cs" />
     <Compile Include="OnceTransactionHandler.cs" />
@@ -114,10 +113,9 @@
     <Compile Include="SnapshotEventSink.cs" />
     <Compile Include="SnapshotTransactionHandler.cs" />
     <Compile Include="SwitchToBehaviorTransactionHandler.cs" />
-    <Compile Include="SwitchToBehaviorTransactionHandler2.cs" />
+    <Compile Include="EventSinkSender.cs" />
     <Compile Include="SwitchToEventInvoker.cs" />
     <Compile Include="SwitchToEventTransactionHandler.cs" />
-    <Compile Include="SwitchToEventTransactionHandler2.cs" />
     <Compile Include="Transaction.cs" />
     <Compile Include="ITransactionHandler.cs" />
     <Compile Include="TransactionHandler.cs" />

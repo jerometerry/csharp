@@ -22,7 +22,7 @@ namespace sodium
             // that might have happened during this transaction will be suppressed.
             if (_currentListener != null)
                 _currentListener.Unlisten();
-            var handler = new SwitchToBehaviorTransactionHandler2<TBehavior>(_sink);
+            var handler = new EventSinkSender<TBehavior>(_sink);
             _currentListener = behavior.GetValue(transaction).Listen(_sink.Node, transaction, handler, false);
         }
 

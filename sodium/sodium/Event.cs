@@ -121,7 +121,7 @@ namespace sodium
         public static Event<TEvent> Merge(Event<TEvent> event1, Event<TEvent> event2)
         {
             var sink = new MergeEventSink<TEvent>(event1, event2);
-            var handler = new MergeTransactionHandler<TEvent>(sink);
+            var handler = new EventSinkSender<TEvent>(sink);
             var listener1 = event1.Listen(sink.Node, handler);
             var listener2 = event2.Listen(sink.Node, handler);
             return sink.AddCleanup(listener1).AddCleanup(listener2);
