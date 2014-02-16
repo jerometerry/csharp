@@ -3,6 +3,6 @@
     public interface IListener
     {
         void Unlisten();
-        IListener Append(IListener two);
+        IListener Append(IListener listener);
     }
 }

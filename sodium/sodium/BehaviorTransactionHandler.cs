@@ -1,24 +1,24 @@
 namespace sodium
 {
-    public sealed class BehaviorTransactionHandler<TA> : ITransactionHandler<TA>
+    public sealed class BehaviorTransactionHandler<TBehavior> : ITransactionHandler<TBehavior>
     {
-        private readonly Behavior<TA> _b;
+        private readonly Behavior<TBehavior> _behavior;
 
-        public BehaviorTransactionHandler(Behavior<TA> b)
+        public BehaviorTransactionHandler(Behavior<TBehavior> behavior)
         {
-            _b = b;
+            _behavior = behavior;
         }
 
-        public void Run(Transaction trans, TA a)
+        public void Run(Transaction transaction, TBehavior behavior)
         {
-            if (!_b.HasValueUpdate)
+            if (!_behavior.HasValueUpdate)
             {
-                trans.Last(new Runnable(() =>
+                transaction.Last(new Runnable(() =>
                 {
-                    _b.Value = _b.ValueUpdate;
-                    _b.ValueUpdate = default(TA);
+                    _behavior.Value = _behavior.ValueUpdate;
+                    _behavior.ValueUpdate = default(TBehavior);
                 }));
-                _b.ValueUpdate = a;
+                _behavior.ValueUpdate = behavior;
             }
         }
     }

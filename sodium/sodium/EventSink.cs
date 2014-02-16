@@ -4,26 +4,26 @@ namespace sodium
     using System.Collections.Generic;
     using System.Linq;
 
-    public class EventSink<TA> : Event<TA>
+    public class EventSink<TEvent> : Event<TEvent>
     {
-        public void Send(TA a)
+        public void Send(TEvent evt)
         {
-            Transaction.Run(new EventSinkRunner<TA>(this, a));
+            Transaction.Run(new EventSinkRunner<TEvent>(this, evt));
         }
 
-        public void Send(Transaction trans, TA a)
+        public void Send(Transaction transaction, TEvent evt)
         {
             if (!Firings.Any())
-                trans.Last(new Runnable(() => Firings.Clear()));
-            Firings.Add(a);
+                transaction.Last(new Runnable(() => Firings.Clear()));
+            Firings.Add(evt);
 
-            var listeners = new List<ITransactionHandler<TA>>(this.Listeners);
+            var listeners = new List<ITransactionHandler<TEvent>>(this.Listeners);
 
             foreach (var action in listeners)
             {
                 try
                 {
-                    action.Run(trans, a);
+                    action.Run(transaction, evt);
                 }
                 catch (Exception t)
                 {

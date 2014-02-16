@@ -1,17 +1,17 @@
 namespace sodium
 {
-    public class SwitchToEventInvoker<TA> : IFunction<Transaction, Event<TA>>
+    public class SwitchToEventInvoker<TBehavior> : IFunction<Transaction, Event<TBehavior>>
     {
-        private readonly Behavior<Event<TA>> _bea;
+        private readonly Behavior<Event<TBehavior>> _eventBehavior;
 
-        public SwitchToEventInvoker(Behavior<Event<TA>> bea)
+        public SwitchToEventInvoker(Behavior<Event<TBehavior>> eventBehavior)
         {
-            _bea = bea;
+            _eventBehavior = eventBehavior;
         }
 
-        public Event<TA> Apply(Transaction trans)
+        public Event<TBehavior> Apply(Transaction transaction)
         {
-            return Behavior<TA>.SwitchE(trans, _bea);
+            return Behavior<TBehavior>.SwitchE(transaction, _eventBehavior);
         }
     }
 }

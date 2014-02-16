@@ -4,16 +4,16 @@
 
     public class Function<TP, TR> : IFunction<TP, TR>
     {
-        private readonly Func<TP, TR> _f;
+        private readonly Func<TP, TR> _function;
 
-        public Function(Func<TP, TR> f)
+        public Function(Func<TP, TR> function)
         {
-            _f = f;
+            _function = function;
         }
 
-        public TR Apply(TP a)
+        public TR Apply(TP p)
         {
-            return _f(a);
+            return _function(p);
         }
     }
 }

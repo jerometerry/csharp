@@ -9,7 +9,7 @@ namespace sodium
 
         public void Send(TA a)
         {
-            ((EventSink<TA>)Evt).Send(a);
+            ((EventSink<TA>)Event).Send(a);
         }
     }
 }

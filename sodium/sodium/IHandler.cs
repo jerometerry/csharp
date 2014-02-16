@@ -2,6 +2,6 @@ namespace sodium
 {
     public interface IHandler<in TA>
     {
-        void Run(TA a);
+        void Run(TA p);
     }
 }

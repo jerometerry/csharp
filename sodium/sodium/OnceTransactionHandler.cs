@@ -1,23 +1,23 @@
 ﻿namespace sodium
 {
-    public class OnceTransactionHandler<TA> : ITransactionHandler<TA>
+    public class OnceTransactionHandler<TEvent> : ITransactionHandler<TEvent>
     {
-        private readonly EventSink<TA> _o;
-        private readonly IListener[] _la;
+        private readonly EventSink<TEvent> _sink;
+        private readonly IListener[] _listeners;
 
-        public OnceTransactionHandler(EventSink<TA> o, IListener[] la)
+        public OnceTransactionHandler(EventSink<TEvent> sink, IListener[] listeners)
         {
-            _o = o;
-            _la = la;
+            _sink = sink;
+            _listeners = listeners;
         }
 
-        public void Run(Transaction trans, TA a)
+        public void Run(Transaction transaction, TEvent evt)
         {
-            _o.Send(trans, a);
-            if (_la[0] != null)
+            _sink.Send(transaction, evt);
+            if (_listeners[0] != null)
             {
-                _la[0].Unlisten();
-                _la[0] = null;
+                _listeners[0].Unlisten();
+                _listeners[0] = null;
             }
         }
     }

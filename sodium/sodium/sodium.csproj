@@ -58,7 +58,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActionInvoker.cs" />
     <Compile Include="ApplyBehaviorEventSinkSender.cs" />
     <Compile Include="ApplyBehaviorTransactionHandler.cs" />
     <Compile Include="ApplyBehaviorTransactionHandler2.cs" />
@@ -66,7 +65,7 @@
     <Compile Include="BehaviorBuilder.cs" />
     <Compile Include="BehaviorLifter2.cs" />
     <Compile Include="BehaviorLifter3.cs" />
-    <Compile Include="BehaviorListenInvoker.cs" />
+    <Compile Include="EventToBehaviorConverter.cs" />
     <Compile Include="BehaviorLoop.cs" />
     <Compile Include="BehaviorPrioritizedInvoker.cs" />
     <Compile Include="BehaviorSink.cs" />

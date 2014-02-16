@@ -1,26 +1,28 @@
 ﻿namespace sodium
 {
-    public class CoalesceHandler<TA> : ITransactionHandler<TA>
+    public class CoalesceHandler<TEvent> : ITransactionHandler<TEvent>
     {
-        private readonly IBinaryFunction<TA, TA, TA> _f;
-        private readonly EventSink<TA> _o;
+        private readonly IBinaryFunction<TEvent, TEvent, TEvent> _combiningFunction;
+        private readonly EventSink<TEvent> _sink;
         public bool AccumValid = false;
-        public TA Accum;
+        public TEvent Accum;
 
-        public CoalesceHandler(IBinaryFunction<TA, TA, TA> f, EventSink<TA> o)
+        public CoalesceHandler(IBinaryFunction<TEvent, TEvent, TEvent> combiningFunction, EventSink<TEvent> sink)
         {
-            _f = f;
-            _o = o;
+            _combiningFunction = combiningFunction;
+            _sink = sink;
         }
 
-        public void Run(Transaction trans1, TA a)
+        public void Run(Transaction transaction, TEvent evt)
         {
             if (AccumValid)
-                Accum = _f.Apply(Accum, a);
+            {
+                Accum = _combiningFunction.Apply(Accum, evt);
+            }
             else
             {
-                trans1.Prioritized(_o.Node, new CoalesceTransactionHandler<TA>(this, _o));
-                Accum = a;
+                transaction.Prioritized(_sink.Node, new CoalesceTransactionHandler<TEvent>(this, _sink));
+                Accum = evt;
                 AccumValid = true;
             }
         }

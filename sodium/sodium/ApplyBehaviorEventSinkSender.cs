@@ -1,23 +1,27 @@
 namespace sodium
 {
-    public class ApplyBehaviorEventSinkSender<TA, TB> : IHandler<Transaction>
+    public class ApplyBehaviorEventSinkSender<TBehavior, TNewBehavior> : IHandler<Transaction>
     {
-        private readonly EventSink<TB> _o;
-        private readonly Behavior<IFunction<TA, TB>> _bf;
-        private readonly Behavior<TA> _ba;
-        private readonly BehaviorPrioritizedInvoker<TA, TB> _behaviorPrioritizedInvoker;
+        private readonly EventSink<TNewBehavior> _sink;
+        private readonly Behavior<IFunction<TBehavior, TNewBehavior>> _behaviorFunction;
+        private readonly Behavior<TBehavior> _behavior;
+        private readonly BehaviorPrioritizedInvoker<TBehavior, TNewBehavior> _behaviorPrioritizedInvoker;
 
-        public ApplyBehaviorEventSinkSender(EventSink<TB> o, Behavior<IFunction<TA, TB>> bf, Behavior<TA> ba, BehaviorPrioritizedInvoker<TA, TB> behaviorPrioritizedInvoker)
+        public ApplyBehaviorEventSinkSender(
+            EventSink<TNewBehavior> sink, 
+            Behavior<IFunction<TBehavior, TNewBehavior>> behaviorFunction, 
+            Behavior<TBehavior> behavior, 
+            BehaviorPrioritizedInvoker<TBehavior, TNewBehavior> behaviorPrioritizedInvoker)
         {
-            _o = o;
-            _bf = bf;
-            _ba = ba;
+            _sink = sink;
+            _behaviorFunction = behaviorFunction;
+            _behavior = behavior;
             _behaviorPrioritizedInvoker = behaviorPrioritizedInvoker;
         }
 
-        public void Run(Transaction trans)
+        public void Run(Transaction transaction)
         {
-            _o.Send(trans, _bf.NewValue().Apply(_ba.NewValue()));
+            _sink.Send(transaction, _behaviorFunction.NewValue().Apply(_behavior.NewValue()));
             _behaviorPrioritizedInvoker.Fired = false;
         }
     }

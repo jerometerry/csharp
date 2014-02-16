@@ -1,21 +1,24 @@
 ﻿namespace sodium
 {
-    public class SnapshotTransactionHandler<TA, TB, TC> : ITransactionHandler<TA>
+    public class SnapshotTransactionHandler<TEvent, TBehavior, TSnapshot> : ITransactionHandler<TEvent>
     {
-        private readonly EventSink<TC> _o;
-        private readonly IBinaryFunction<TA, TB, TC> _f;
-        private readonly Behavior<TB> _b;
+        private readonly EventSink<TSnapshot> _sink;
+        private readonly IBinaryFunction<TEvent, TBehavior, TSnapshot> _snapshotFunction;
+        private readonly Behavior<TBehavior> _behavior;
 
-        public SnapshotTransactionHandler(EventSink<TC> o, IBinaryFunction<TA, TB, TC> f, Behavior<TB> b)
+        public SnapshotTransactionHandler(
+            EventSink<TSnapshot> sink, 
+            IBinaryFunction<TEvent, TBehavior, TSnapshot> snapshotFunction, 
+            Behavior<TBehavior> behavior)
         {
-            _o = o;
-            _f = f;
-            _b = b;
+            _sink = sink;
+            _snapshotFunction = snapshotFunction;
+            _behavior = behavior;
         }
 
-        public void Run(Transaction trans, TA a)
+        public void Run(Transaction transaction, TEvent evt)
         {
-            _o.Send(trans, _f.Apply(a, _b.Sample()));
+            _sink.Send(transaction, _snapshotFunction.Apply(evt, _behavior.Sample()));
         }
     }
 }

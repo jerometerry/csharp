@@ -1,22 +1,22 @@
 ﻿namespace sodium
 {
-    public class DelayTransactionHandler<TA> : ITransactionHandler<TA>
+    public class DelayTransactionHandler<TEvent> : ITransactionHandler<TEvent>
     {
-        private readonly EventSink<TA> _o;
+        private readonly EventSink<TEvent> _sink;
 
-        public DelayTransactionHandler(EventSink<TA> o)
+        public DelayTransactionHandler(EventSink<TEvent> sink)
         {
-            _o = o;
+            _sink = sink;
         }
 
-        public void Run(Transaction trans, TA a)
+        public void Run(Transaction transaction, TEvent evt)
         {
-            trans.Post(new Runnable(() =>
+            transaction.Post(new Runnable(() =>
             {
                 var trans2 = new Transaction();
                 try
                 {
-                    _o.Send(trans2, a);
+                    _sink.Send(trans2, evt);
                 }
                 finally
                 {

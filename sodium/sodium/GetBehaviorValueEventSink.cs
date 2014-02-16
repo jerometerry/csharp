@@ -2,18 +2,18 @@ namespace sodium
 {
     using System;
 
-    public class GetBehaviorValueEventSink<TA> : EventSink<TA>
+    public class GetBehaviorValueEventSink<TBehavior> : EventSink<TBehavior>
     {
-        private readonly Behavior<TA> _b;
+        private readonly Behavior<TBehavior> _behavior;
 
-        public GetBehaviorValueEventSink(Behavior<TA> b)
+        public GetBehaviorValueEventSink(Behavior<TBehavior> behavior)
         {
-            _b = b;
+            _behavior = behavior;
         }
 
         public override Object[] SampleNow()
         {
-            return new Object[] { _b.Sample() };
+            return new Object[] { _behavior.Sample() };
         }
     }
 }

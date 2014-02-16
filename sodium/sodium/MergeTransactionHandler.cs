@@ -1,18 +1,18 @@
 ﻿
 namespace sodium
 {
-    public class MergeTransactionHandler<TA> : ITransactionHandler<TA>
+    public class MergeTransactionHandler<TEvent> : ITransactionHandler<TEvent>
     {
-        private readonly EventSink<TA> _o;
+        private readonly EventSink<TEvent> _sink;
 
-        public MergeTransactionHandler(EventSink<TA> o)
+        public MergeTransactionHandler(EventSink<TEvent> sink)
         {
-            _o = o;
+            _sink = sink;
         }
 
-        public void Run(Transaction trans, TA a)
+        public void Run(Transaction transaction, TEvent evt)
         {
-            _o.Send(trans, a);
+            _sink.Send(transaction, evt);
         }
     }
 }

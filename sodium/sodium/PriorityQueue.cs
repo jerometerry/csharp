@@ -7,11 +7,11 @@
     {
         private readonly List<T> _items = new List<T>();
 
-        public void Add(T t)
+        public void Add(T item)
         {
             lock(_items)
             {
-                _items.Add(t);
+                _items.Add(item);
                 _items.Sort();
             }
         }
@@ -24,11 +24,11 @@
             }
         }
 
-        public bool Remove(T t)
+        public bool Remove(T item)
         {
             lock(_items)
             {
-                return _items.Remove(t);
+                return _items.Remove(item);
             }
         }
 

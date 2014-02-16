@@ -1,17 +1,18 @@
 namespace sodium
 {
-    public class ApplyBehaviorTransactionHandler<TA, TB> : ITransactionHandler<IFunction<TA, TB>>
+    public class ApplyBehaviorTransactionHandler<TBehavior, TNewBehavior> : 
+        ITransactionHandler<IFunction<TBehavior, TNewBehavior>>
     {
-        private readonly IHandler<Transaction> _h;
+        private readonly IHandler<Transaction> _handler;
 
-        public ApplyBehaviorTransactionHandler(IHandler<Transaction> h)
+        public ApplyBehaviorTransactionHandler(IHandler<Transaction> handler)
         {
-            _h = h;
+            _handler = handler;
         }
 
-        public void Run(Transaction trans, IFunction<TA, TB> a)
+        public void Run(Transaction transaction, IFunction<TBehavior, TNewBehavior> behaviorFunction)
         {
-            _h.Run(trans);
+            _handler.Run(transaction);
         }
     }
 }

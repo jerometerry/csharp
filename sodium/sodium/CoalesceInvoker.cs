@@ -1,19 +1,19 @@
 namespace sodium
 {
-    public class CoalesceInvoker<TA> : IFunction<Transaction, Event<TA>>
+    public class CoalesceInvoker<TEvent> : IFunction<Transaction, Event<TEvent>>
     {
-        private readonly Event<TA> _evt;
-        private readonly IBinaryFunction<TA, TA, TA> _f;
+        private readonly Event<TEvent> _event;
+        private readonly IBinaryFunction<TEvent, TEvent, TEvent> _combiningFunction;
 
-        public CoalesceInvoker(Event<TA> evt, IBinaryFunction<TA, TA, TA> f)
+        public CoalesceInvoker(Event<TEvent> evt, IBinaryFunction<TEvent, TEvent, TEvent> combiningFunction)
         {
-            _evt = evt;
-            _f = f;
+            _event = evt;
+            _combiningFunction = combiningFunction;
         }
 
-        public Event<TA> Apply(Transaction trans)
+        public Event<TEvent> Apply(Transaction transaction)
         {
-            return _evt.Coalesce(trans, _f);
+            return _event.Coalesce(transaction, _combiningFunction);
         }
     }
 }

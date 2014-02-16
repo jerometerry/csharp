@@ -2,36 +2,36 @@
 {
     using System;
 
-    public class MergeEventSink<TA> : EventSink<TA>
+    public class MergeEventSink<TEvent> : EventSink<TEvent>
     {
-        private readonly Event<TA> _ea;
-        private readonly Event<TA> _eb;
+        private readonly Event<TEvent> _event1;
+        private readonly Event<TEvent> _event2;
 
-        public MergeEventSink(Event<TA> ea, Event<TA> eb)
+        public MergeEventSink(Event<TEvent> evt1, Event<TEvent> evt2)
         {
-            _ea = ea;
-            _eb = eb;
+            _event1 = evt1;
+            _event2 = evt2;
         }
 
         public override Object[] SampleNow()
         {
-            var oa = _ea.SampleNow();
-            var ob = _eb.SampleNow();
-            if (oa != null && ob != null)
+            var o1 = _event1.SampleNow();
+            var o2 = _event2.SampleNow();
+            if (o1 != null && o2 != null)
             {
-                var oo = new Object[oa.Length + ob.Length];
+                var oo = new Object[o1.Length + o2.Length];
                 int i = 0;
-                foreach (var t in oa)
+                foreach (var t in o1)
                     oo[i++] = t;
-                foreach (var t in ob)
+                foreach (var t in o2)
                     oo[i++] = t;
                 return oo;
             }
             else
-                if (oa != null)
-                    return oa;
+                if (o1 != null)
+                    return o1;
                 else
-                    return ob;
+                    return o2;
         }
     }
 }

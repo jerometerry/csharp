@@ -1,19 +1,19 @@
 namespace sodium
 {
-    public class MapTransactionHandler<TA, TB> : ITransactionHandler<TA>
+    public class MapTransactionHandler<TEvent, TNewEvent> : ITransactionHandler<TEvent>
     {
-        private readonly EventSink<TB> _o;
-        private readonly IFunction<TA, TB> _f;
+        private readonly EventSink<TNewEvent> _sink;
+        private readonly IFunction<TEvent, TNewEvent> _mapFunction;
 
-        public MapTransactionHandler(EventSink<TB> o, IFunction<TA, TB> f)
+        public MapTransactionHandler(EventSink<TNewEvent> sink, IFunction<TEvent, TNewEvent> mapFunction)
         {
-            _o = o;
-            _f = f;
+            _sink = sink;
+            _mapFunction = mapFunction;
         }
 
-        public void Run(Transaction trans, TA a)
+        public void Run(Transaction transaction, TEvent evt)
         {
-            _o.Send(trans, _f.Apply(a));
+            _sink.Send(transaction, _mapFunction.Apply(evt));
         }
     }
 }

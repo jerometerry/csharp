@@ -1,19 +1,19 @@
 namespace sodium
 {
-    public class EventSinkRunner<TA> : IHandler<Transaction>
+    public class EventSinkRunner<TEvent> : IHandler<Transaction>
     {
-        private readonly TA _a;
-        private readonly EventSink<TA> _sink;
+        private readonly TEvent _event;
+        private readonly EventSink<TEvent> _sink;
 
-        public EventSinkRunner(EventSink<TA> sink, TA a)
+        public EventSinkRunner(EventSink<TEvent> sink, TEvent evt)
         {
             _sink = sink;
-            _a = a;
+            _event = evt;
         }
 
-        public void Run(Transaction trans)
+        public void Run(Transaction transaction)
         {
-            _sink.Send(trans, _a);
+            _sink.Send(transaction, _event);
         }
     }
 }

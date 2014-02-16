@@ -4,16 +4,16 @@
 
     public class BinaryFunction<TP1, TP2, TR> : IBinaryFunction<TP1, TP2, TR>
     {
-        private readonly Func<TP1, TP2, TR> _f;
+        private readonly Func<TP1, TP2, TR> _function;
 
-        public BinaryFunction(Func<TP1, TP2, TR> f)
+        public BinaryFunction(Func<TP1, TP2, TR> function)
         {
-            _f = f;
+            _function = function;
         }
 
-        public TR Apply(TP1 a, TP2 b)
+        public TR Apply(TP1 p1, TP2 p2)
         {
-            return _f(a, b);
+            return _function(p1, p2);
         }
     }
 }

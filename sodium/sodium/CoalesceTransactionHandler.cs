@@ -1,21 +1,21 @@
 ﻿namespace sodium
 {
-    public class CoalesceTransactionHandler<TA> : IHandler<Transaction>
+    public class CoalesceTransactionHandler<TEvent> : IHandler<Transaction>
     {
-        private readonly CoalesceHandler<TA> _h;
-        private readonly EventSink<TA> _o;
+        private readonly CoalesceHandler<TEvent> _handler;
+        private readonly EventSink<TEvent> _sink;
 
-        public CoalesceTransactionHandler(CoalesceHandler<TA> h, EventSink<TA> o)
+        public CoalesceTransactionHandler(CoalesceHandler<TEvent> handler, EventSink<TEvent> sink)
         {
-            _h = h;
-            _o = o;
+            _handler = handler;
+            _sink = sink;
         }
 
-        public void Run(Transaction trans)
+        public void Run(Transaction transaction)
         {
-            _o.Send(trans, _h.Accum);
-            _h.AccumValid = false;
-            _h.Accum = default(TA);
+            _sink.Send(transaction, _handler.Accum);
+            _handler.AccumValid = false;
+            _handler.Accum = default(TEvent);
         }
     }
 }

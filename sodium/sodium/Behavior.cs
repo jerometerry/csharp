@@ -56,7 +56,7 @@ namespace sodium
             }
         }
 
-        public Event<TBehavior> Evt
+        public Event<TBehavior> Event
         {
             get
             {
@@ -73,16 +73,16 @@ namespace sodium
          */
         public Behavior(TBehavior value)
         {
-            Evt = new Event<TBehavior>();
+            Event = new Event<TBehavior>();
             Value = value;
         }
 
         public Behavior(Event<TBehavior> evt, TBehavior initValue)
         {
-            Evt = evt;
+            Event = evt;
             Value = initValue;
-            var code = new BehaviorListenInvoker<TBehavior>(this, evt);
-            Transaction.Run(code);
+            var converter = new EventToBehaviorConverter<TBehavior>(this, evt);
+            Transaction.Run(converter);
         }
 
         /**
@@ -112,16 +112,16 @@ namespace sodium
         }
 
         /**
-         * An evt that gives the updates for the behavior. If this behavior was created
+         * An event that gives the updates for the behavior. If this behavior was created
          * with a hold, then updates() gives you an evt equivalent to the one that was held.
          */
         public Event<TBehavior> Updates()
         {
-            return Evt;
+            return Event;
         }
 
         /**
-         * An evt that is guaranteed to fire once when you listen to it, giving
+         * An event that is guaranteed to fire once when you listen to it, giving
          * the current value of the behavior, and thereafter behaves like updates(),
          * firing for each update to the behavior's value.
          */
@@ -133,11 +133,11 @@ namespace sodium
 
         public Event<TBehavior> GetValue(Transaction transaction)
         {
-            var o = new GetBehaviorValueEventSink<TBehavior>(this);
-            var action = new GetBehaviorValueTransactionHandler<TBehavior>(o);
-            var l = Evt.Listen(o.Node, transaction, action, false);
+            var sink = new GetBehaviorValueEventSink<TBehavior>(this);
+            var action = new GetBehaviorValueTransactionHandler<TBehavior>(sink);
+            var listener = Event.Listen(sink.Node, transaction, action, false);
             // Needed in case of an initial value and an update in the same transaction.
-            return o.AddCleanup(l).LastFiringOnly(transaction);  
+            return sink.AddCleanup(listener).LastFiringOnly(transaction);  
         }
 
         /**
@@ -151,13 +151,13 @@ namespace sodium
         /**
          * Lift a binary function into behaviors.
          */
-        public Behavior<TResult> Lift<TNewBehavior, TResult>(
-            IBinaryFunction<TBehavior, TNewBehavior, TResult> liftFunction, 
-            Behavior<TNewBehavior> behavior)
+        public Behavior<TResultBehavior> Lift<TSecondBehavior, TResultBehavior>(
+            IBinaryFunction<TBehavior, TSecondBehavior, TResultBehavior> liftFunction, 
+            Behavior<TSecondBehavior> behavior)
         {
-            var behaviorLifter = new BehaviorLifter2<TBehavior, TNewBehavior, TResult>(liftFunction);
+            var behaviorLifter = new BehaviorLifter2<TBehavior, TSecondBehavior, TResultBehavior>(liftFunction);
 		    var behaviorMap = Map(behaviorLifter);
-		    return Behavior<TNewBehavior>.Apply(behaviorMap, behavior);
+		    return Behavior<TSecondBehavior>.Apply(behaviorMap, behavior);
         }
 
         /**
@@ -174,15 +174,15 @@ namespace sodium
         /**
          * Lift a ternary function into behaviors.
          */
-        public Behavior<TResult> Lift<TBehavior2, TBehavior3, TResult>(
-            ITernaryFunction<TBehavior, TBehavior2, TBehavior3, TResult> f, 
+        public Behavior<TResultBehavior> Lift<TBehavior2, TBehavior3, TResultBehavior>(
+            ITernaryFunction<TBehavior, TBehavior2, TBehavior3, TResultBehavior> behaviorFunction, 
             Behavior<TBehavior2> behavior2, 
             Behavior<TBehavior3> behavior3)
         {
-            var behaviorLifter = new BehaviorLifter3<TBehavior, TBehavior2, TBehavior3, TResult>(f);
+            var behaviorLifter = new BehaviorLifter3<TBehavior, TBehavior2, TBehavior3, TResultBehavior>(behaviorFunction);
 		    var mapFunction = Map(behaviorLifter);
-            var behaviorFunction = Behavior<TBehavior2>.Apply(mapFunction, behavior2);
-            return Behavior<TBehavior3>.Apply(behaviorFunction, behavior3);
+            var behaviorFunction2 = Behavior<TBehavior2>.Apply(mapFunction, behavior2);
+            return Behavior<TBehavior3>.Apply(behaviorFunction2, behavior3);
         }
 
         /**
@@ -227,18 +227,18 @@ namespace sodium
         /**
          * Unwrap an evt inside a behavior to give a time-varying evt implementation.
          */
-        public static Event<TBehavior> SwitchE(Behavior<Event<TBehavior>> behaviorFunction)
+        public static Event<TBehavior> SwitchE(Behavior<Event<TBehavior>> eventBehavior)
         {
-            var code = new SwitchToEventInvoker<TBehavior>(behaviorFunction);
+            var code = new SwitchToEventInvoker<TBehavior>(eventBehavior);
             return Transaction.Apply(code);
         }
 
-        public static Event<TBehavior> SwitchE(Transaction transaction, Behavior<Event<TBehavior>> behaviorFunction)
+        public static Event<TBehavior> SwitchE(Transaction transaction, Behavior<Event<TBehavior>> eventBehavior)
         {
             var sink = new EventSink<TBehavior>();
             var handler2 = new SwitchToEventTransactionHandler2<TBehavior>(sink);
-            var handler1 = new SwitchToEventTransactionHandler<TBehavior>(sink, behaviorFunction, transaction, handler2);
-            var listener = behaviorFunction.Updates().Listen(sink.Node, transaction, handler1, false);
+            var handler1 = new SwitchToEventTransactionHandler<TBehavior>(sink, eventBehavior, transaction, handler2);
+            var listener = eventBehavior.Updates().Listen(sink.Node, transaction, handler1, false);
             return sink.AddCleanup(listener);
         }
 
@@ -256,11 +256,11 @@ namespace sodium
             var zbs = melayMachineFunction.Apply(value, initState);
             var loop = new EventLoop<Tuple2<TNewBehavior, TState>>();
             var bbs = loop.Hold(zbs);
-            var mapFunction1 = new Function<Tuple2<TNewBehavior, TState>, TState>((x) => x.Y);
+            var mapFunction1 = new Function<Tuple2<TNewBehavior, TState>, TState>((x) => x.V2);
             var bs = bbs.Map(mapFunction1);
             var ebsOut = evt.Snapshot(bs, melayMachineFunction);
             loop.Loop(ebsOut);
-            var mapFunction2 = new Function<Tuple2<TNewBehavior, TState>, TNewBehavior>((x) => x.X);
+            var mapFunction2 = new Function<Tuple2<TNewBehavior, TState>, TNewBehavior>((x) => x.V1);
             return bbs.Map(mapFunction2);
         }
 

@@ -2,27 +2,30 @@
 {
     using System;
 
-    public class SnapshotEventSink<TEvent, TB, TC> : EventSink<TC>
+    public class SnapshotEventSink<TEvent, TBehavior, TSnapshot> : EventSink<TSnapshot>
     {
-        private readonly Event<TEvent> _ev;
-        private readonly IBinaryFunction<TEvent, TB, TC> _f;
-        private readonly Behavior<TB> _b;
+        private readonly Event<TEvent> _event;
+        private readonly IBinaryFunction<TEvent, TBehavior, TSnapshot> _snapshotFunction;
+        private readonly Behavior<TBehavior> _behavior;
 
-        public SnapshotEventSink(Event<TEvent> ev, IBinaryFunction<TEvent, TB, TC> f, Behavior<TB> b)
+        public SnapshotEventSink(
+            Event<TEvent> ev, 
+            IBinaryFunction<TEvent, TBehavior, TSnapshot> snapshotFunction, 
+            Behavior<TBehavior> behavior)
         {
-            _ev = ev;
-            _f = f;
-            _b = b;
+            _event = ev;
+            _snapshotFunction = snapshotFunction;
+            _behavior = behavior;
         }
 
         public override Object[] SampleNow()
         {
-            var oi = _ev.SampleNow();
+            var oi = _event.SampleNow();
             if (oi != null)
             {
                 var oo = new Object[oi.Length];
                 for (int i = 0; i < oo.Length; i++)
-                    oo[i] = _f.Apply((TEvent)oi[i], _b.Sample());
+                    oo[i] = _snapshotFunction.Apply((TEvent)oi[i], _behavior.Sample());
                 return oo;
             }
             else

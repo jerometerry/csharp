@@ -2,17 +2,17 @@ namespace sodium
 {
     using System;
 
-    public sealed class SwitchToBehaviorTransactionHandler<TA> : ITransactionHandler<Behavior<TA>>, IDisposable
+    public sealed class SwitchToBehaviorTransactionHandler<TBehavior> : ITransactionHandler<Behavior<TBehavior>>, IDisposable
     {
         private IListener _currentListener;
-        private readonly EventSink<TA> _o;
+        private readonly EventSink<TBehavior> _sink;
 
-        public SwitchToBehaviorTransactionHandler(EventSink<TA> o)
+        public SwitchToBehaviorTransactionHandler(EventSink<TBehavior> sink)
         {
-            _o = o;
+            _sink = sink;
         }
 
-        public void Run(Transaction trans, Behavior<TA> a)
+        public void Run(Transaction transaction, Behavior<TBehavior> behavior)
         {
             // Note: If any switch takes place during a transaction, then the
             // value().listen will always cause a sample to be fetched from the
@@ -22,7 +22,8 @@ namespace sodium
             // that might have happened during this transaction will be suppressed.
             if (_currentListener != null)
                 _currentListener.Unlisten();
-            _currentListener = a.GetValue(trans).Listen(_o.Node, trans, new SwitchToBehaviorTransactionHandler2<TA>(_o), false);
+            var handler = new SwitchToBehaviorTransactionHandler2<TBehavior>(_sink);
+            _currentListener = behavior.GetValue(transaction).Listen(_sink.Node, transaction, handler, false);
         }
 
         public void Dispose()

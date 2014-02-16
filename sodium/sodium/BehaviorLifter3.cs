@@ -1,51 +1,57 @@
 namespace sodium
 {
-    public class BehaviorLifter3<TA,TB,TC,TD> : IFunction<TA, IFunction<TB, IFunction<TC, TD>>>
+    public class BehaviorLifter3<TFirstBehavior,TSecondBehavior,TThirdBehavior,TResultBehavior> : 
+        IFunction<TFirstBehavior, IFunction<TSecondBehavior, IFunction<TThirdBehavior, TResultBehavior>>>
     {
-        private readonly ITernaryFunction<TA, TB, TC, TD> _f;
+        private readonly ITernaryFunction<TFirstBehavior, TSecondBehavior, TThirdBehavior, TResultBehavior> _behaviorFunction;
 
-        public BehaviorLifter3(ITernaryFunction<TA, TB, TC, TD> f)
+        public BehaviorLifter3(ITernaryFunction<TFirstBehavior, TSecondBehavior, TThirdBehavior, TResultBehavior> behaviorFunction)
         {
-            _f = f;
+            _behaviorFunction = behaviorFunction;
         }
 
-        public IFunction<TB, IFunction<TC, TD>> Apply(TA a)
+        public IFunction<TSecondBehavior, IFunction<TThirdBehavior, TResultBehavior>> Apply(TFirstBehavior behavior)
         {
-            return new Lifter1(_f, a);
+            return new Lifter1(_behaviorFunction, behavior);
         }
 
-        private class Lifter1 : IFunction<TB, IFunction<TC, TD>>
+        private class Lifter1 : IFunction<TSecondBehavior, IFunction<TThirdBehavior, TResultBehavior>>
         {
-            private readonly ITernaryFunction<TA, TB, TC, TD> _f;
-            private readonly TA _a;
+            private readonly ITernaryFunction<TFirstBehavior, TSecondBehavior, TThirdBehavior, TResultBehavior> _behaviorFunction;
+            private readonly TFirstBehavior _behavior;
 
-            public Lifter1(ITernaryFunction<TA, TB, TC, TD> f, TA a)
+            public Lifter1(
+                ITernaryFunction<TFirstBehavior, TSecondBehavior, TThirdBehavior, TResultBehavior> behaviorFunction, 
+                TFirstBehavior behavior)
             {
-                _f = f;
-                _a = a;
+                _behaviorFunction = behaviorFunction;
+                _behavior = behavior;
             }
 
-            public IFunction<TC, TD> Apply(TB b)
+            public IFunction<TThirdBehavior, TResultBehavior> Apply(TSecondBehavior behavior2)
             {
-                return new Lifter2(_f, _a, b);
+                return new Lifter2(_behaviorFunction, _behavior, behavior2);
             }
 
-            private class Lifter2 : IFunction<TC, TD>
+            private class Lifter2 : IFunction<TThirdBehavior, TResultBehavior>
             {
-                private readonly ITernaryFunction<TA, TB, TC, TD> _f;
-                private readonly TA _a;
-                private readonly TB _b;
+                private readonly ITernaryFunction<TFirstBehavior, TSecondBehavior, TThirdBehavior, TResultBehavior> _behaviorFunction;
+                private readonly TFirstBehavior _behavior1;
+                private readonly TSecondBehavior _behavior2;
 
-                public Lifter2(ITernaryFunction<TA, TB, TC, TD> f, TA a, TB b)
+                public Lifter2(
+                    ITernaryFunction<TFirstBehavior, TSecondBehavior, TThirdBehavior, TResultBehavior> behaviorFunction, 
+                    TFirstBehavior behavior1, 
+                    TSecondBehavior behavior2)
                 {
-                    _f = f;
-                    _a = a;
-                    _b = b;
+                    _behaviorFunction = behaviorFunction;
+                    _behavior1 = behavior1;
+                    _behavior2 = behavior2;
                 }
 
-                public TD Apply(TC c)
+                public TResultBehavior Apply(TThirdBehavior behavior3)
                 {
-                    return _f.Apply(_a, _b, c);
+                    return _behaviorFunction.Apply(_behavior1, _behavior2, behavior3);
                 }
             }
         }

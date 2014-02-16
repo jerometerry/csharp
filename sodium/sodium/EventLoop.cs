@@ -4,25 +4,25 @@ namespace sodium
     using System.Collections.Generic;
     using System.Linq;
 
-    public class EventLoop<TA> : Event<TA>
+    public class EventLoop<TEvent> : Event<TEvent>
     {
-        private Event<TA> _eaOut;
+        private Event<TEvent> _eaOut;
 
         // TO DO: Copy & paste from EventSink. Can we improve this?
-        public void Send(Transaction trans, TA a)
+        public void Send(Transaction transaction, TEvent a)
         {
             if (!Firings.Any())
-                trans.Last(new Runnable(() => Firings.Clear())
+                transaction.Last(new Runnable(() => Firings.Clear())
                 {
                 });
             Firings.Add(a);
 
-            var listeners = new List<ITransactionHandler<TA>>(this.Listeners);
+            var listeners = new List<ITransactionHandler<TEvent>>(this.Listeners);
             foreach (var action in listeners)
             {
                 try
                 {
-                    action.Run(trans, a);
+                    action.Run(transaction, a);
                 }
                 catch (Exception t)
                 {
@@ -31,13 +31,13 @@ namespace sodium
             }
         }
 
-        public void Loop(Event<TA> eaOut)
+        public void Loop(Event<TEvent> eaOut)
         {
             if (_eaOut != null)
                 throw new ApplicationException("EventLoop looped more than once");
             _eaOut = eaOut;
             var me = this;
-            var action = new EventLoopTransactionHandler<TA>(me);
+            var action = new EventLoopTransactionHandler<TEvent>(me);
             AddCleanup(eaOut.Listen(Node, action));
         }
     }

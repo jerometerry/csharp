@@ -2,26 +2,26 @@
 {
     using System;
 
-    public class FilterEventSink<TA> : EventSink<TA>
+    public class FilterEventSink<TEvent> : EventSink<TEvent>
     {
-        private readonly Event<TA> _ev;
-        private readonly IFunction<TA, Boolean> _f;
+        private readonly Event<TEvent> _event;
+        private readonly IFunction<TEvent, Boolean> _predicate;
 
-        public FilterEventSink(Event<TA> ev, IFunction<TA, Boolean> f)
+        public FilterEventSink(Event<TEvent> evt, IFunction<TEvent, Boolean> predicate)
         {
-            _ev = ev;
-            _f = f;
+            _event = evt;
+            _predicate = predicate;
         }
 
         public override Object[] SampleNow()
         {
-            var oi = _ev.SampleNow();
+            var oi = _event.SampleNow();
             if (oi != null)
             {
                 var oo = new Object[oi.Length];
                 var j = 0;
                 for (var i = 0; i < oi.Length; i++)
-                    if (_f.Apply((TA)oi[i]))
+                    if (_predicate.Apply((TEvent)oi[i]))
                         oo[j++] = oi[i];
                 if (j == 0)
                     oo = null;

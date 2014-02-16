@@ -2,19 +2,19 @@
 {
     using System;
 
-    public sealed class Listener<TA> : ListenerBase, IDisposable
+    public sealed class Listener<TEvent> : ListenerBase, IDisposable
     {
         /**
          * It's essential that we keep the listener alive while the caller holds
          * the Listener, so that the finalizer doesn't get triggered.
          */
-        private readonly Event<TA> _evt;
-        private readonly ITransactionHandler<TA> _action;
+        private readonly Event<TEvent> _event;
+        private readonly ITransactionHandler<TEvent> _action;
         private readonly Node _target;
 
-        public Listener(Event<TA> evt, ITransactionHandler<TA> action, Node target)
+        public Listener(Event<TEvent> evt, ITransactionHandler<TEvent> action, Node target)
         {
-            _evt = evt;
+            _event = evt;
             _action = action;
             _target = target;
         }
@@ -23,8 +23,8 @@
         {
             lock (Transaction.ListenersLock)
             {
-                _evt.Listeners.Remove(_action);
-                _evt.Node.UnlinkTo(_target);
+                _event.Listeners.Remove(_action);
+                _event.Node.UnlinkTo(_target);
             }
         }
 

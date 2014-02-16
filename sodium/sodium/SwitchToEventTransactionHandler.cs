@@ -2,26 +2,30 @@ namespace sodium
 {
     using System;
 
-    public sealed class SwitchToEventTransactionHandler<TA> : ITransactionHandler<Event<TA>>, IDisposable
+    public sealed class SwitchToEventTransactionHandler<TBehavior> : ITransactionHandler<Event<TBehavior>>, IDisposable
     {
-        private readonly EventSink<TA> _o;
+        private readonly EventSink<TBehavior> _sink;
         private IListener _currentListener;
-        private readonly ITransactionHandler<TA> _h2;
+        private readonly ITransactionHandler<TBehavior> _action;
 
-        public SwitchToEventTransactionHandler(EventSink<TA> o, Behavior<Event<TA>> bea, Transaction trans, ITransactionHandler<TA> h2)
+        public SwitchToEventTransactionHandler(
+            EventSink<TBehavior> sink, 
+            Behavior<Event<TBehavior>> eventBehavior, 
+            Transaction transaction, 
+            ITransactionHandler<TBehavior> action)
         {
-            _currentListener = bea.Sample().Listen(o.Node, trans, h2, false);
-            _h2 = h2;
-            _o = o;
+            _currentListener = eventBehavior.Sample().Listen(sink.Node, transaction, action, false);
+            _action = action;
+            _sink = sink;
         }
 
-        public void Run(Transaction trans, Event<TA> a)
+        public void Run(Transaction transaction, Event<TBehavior> evt)
         {
-            trans.Last(new Runnable(() =>
+            transaction.Last(new Runnable(() =>
             {
                 if (_currentListener != null)
                     _currentListener.Unlisten();
-                _currentListener = a.Listen(_o.Node, trans, _h2, true);
+                _currentListener = evt.Listen(_sink.Node, transaction, _action, true);
             }));
         }
 

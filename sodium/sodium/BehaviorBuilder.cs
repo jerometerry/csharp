@@ -1,19 +1,19 @@
 namespace sodium
 {
-    public class BehaviorBuilder<TA> : IFunction<Transaction, Behavior<TA>>
+    public class BehaviorBuilder<TEvent> : IFunction<Transaction, Behavior<TEvent>>
     {
-        private readonly Event<TA> _evt;
-        private readonly TA _initValue;
+        private readonly Event<TEvent> _event;
+        private readonly TEvent _initValue;
 
-        public BehaviorBuilder(Event<TA> evt, TA initValue)
+        public BehaviorBuilder(Event<TEvent> evt, TEvent initValue)
         {
-            _evt = evt;
+            _event = evt;
             _initValue = initValue;
         }
 
-        public Behavior<TA> Apply(Transaction trans)
+        public Behavior<TEvent> Apply(Transaction transaction)
         {
-            return new Behavior<TA>(_evt.LastFiringOnly(trans), _initValue);
+            return new Behavior<TEvent>(_event.LastFiringOnly(transaction), _initValue);
         }
     }
 }

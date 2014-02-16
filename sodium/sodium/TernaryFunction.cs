@@ -4,16 +4,16 @@
 
     public class TernaryFunction<TP1, TP2, TP3, TR> : ITernaryFunction<TP1, TP2, TP3, TR>
     {
-        private readonly Func<TP1, TP2, TP3, TR> _f;
+        private readonly Func<TP1, TP2, TP3, TR> _function;
 
-        public TernaryFunction(Func<TP1, TP2, TP3, TR> f)
+        public TernaryFunction(Func<TP1, TP2, TP3, TR> function)
         {
-            _f = f;
+            _function = function;
         }
 
-        public TR Apply(TP1 a, TP2 b, TP3 c)
+        public TR Apply(TP1 p1, TP2 p2, TP3 p3)
         {
-            return _f(a, b, c);
+            return _function(p1, p2, p3);
         }
     }
 }

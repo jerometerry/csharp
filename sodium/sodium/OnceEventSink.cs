@@ -2,29 +2,29 @@
 {
     using System;
 
-    public class OnceEventSink<TA> : EventSink<TA>
+    public class OnceEventSink<TEvent> : EventSink<TEvent>
     {
-        private readonly Event<TA> _ev;
-        private readonly IListener[] _la;
+        private readonly Event<TEvent> _event;
+        private readonly IListener[] _listeners;
 
-        public OnceEventSink(Event<TA> ev, IListener[] la)
+        public OnceEventSink(Event<TEvent> ev, IListener[] listeners)
         {
-            _ev = ev;
-            _la = la;
+            _event = ev;
+            _listeners = listeners;
         }
 
         public override Object[] SampleNow()
         {
-            var oi = _ev.SampleNow();
+            var oi = _event.SampleNow();
             var oo = oi;
             if (oo != null)
             {
                 if (oo.Length > 1)
                     oo = new Object[] { oi[0] };
-                if (_la[0] != null)
+                if (_listeners[0] != null)
                 {
-                    _la[0].Unlisten();
-                    _la[0] = null;
+                    _listeners[0].Unlisten();
+                    _listeners[0] = null;
                 }
             }
             return oo;

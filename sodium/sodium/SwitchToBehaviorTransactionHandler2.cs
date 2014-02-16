@@ -1,17 +1,17 @@
 namespace sodium
 {
-    public class SwitchToBehaviorTransactionHandler2<TA> : ITransactionHandler<TA>
+    public class SwitchToBehaviorTransactionHandler2<TBehavior> : ITransactionHandler<TBehavior>
     {
-        private readonly EventSink<TA> _o;
+        private readonly EventSink<TBehavior> _sink;
 
-        public SwitchToBehaviorTransactionHandler2(EventSink<TA> o)
+        public SwitchToBehaviorTransactionHandler2(EventSink<TBehavior> sink)
         {
-            _o = o;
+            _sink = sink;
         }
 
-        public void Run(Transaction trans, TA a)
+        public void Run(Transaction transaction, TBehavior behavior)
         {
-            _o.Send(trans, a);
+            _sink.Send(transaction, behavior);
         }
     }
 }

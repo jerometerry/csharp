@@ -1,17 +1,17 @@
 namespace sodium
 {
-    public class EventLoopTransactionHandler<TA> : ITransactionHandler<TA>
+    public class EventLoopTransactionHandler<TEvent> : ITransactionHandler<TEvent>
     {
-        private readonly EventLoop<TA> _me;
+        private readonly EventLoop<TEvent> _loop;
 
-        public EventLoopTransactionHandler(EventLoop<TA> me)
+        public EventLoopTransactionHandler(EventLoop<TEvent> loop)
         {
-            _me = me;
+            _loop = loop;
         }
 
-        public void Run(Transaction trans, TA a)
+        public void Run(Transaction transaction, TEvent evt)
         {
-            _me.Send(trans, a);
+            _loop.Send(transaction, evt);
         }
     }
 }

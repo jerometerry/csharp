@@ -2,25 +2,25 @@ namespace sodium
 {
     using System;
 
-    public class MapEventSink<TA, TB> : EventSink<TB>
+    public class MapEventSink<TEvent, TNewEvent> : EventSink<TNewEvent>
     {
-        private readonly Event<TA> _ev;
-        private readonly IFunction<TA, TB> _f;
+        private readonly Event<TEvent> _event;
+        private readonly IFunction<TEvent, TNewEvent> _mapFunction;
 
-        public MapEventSink(Event<TA> ev, IFunction<TA, TB> f)
+        public MapEventSink(Event<TEvent> evt, IFunction<TEvent, TNewEvent> mapFunction)
         {
-            _ev = ev;
-            _f = f;
+            _event = evt;
+            _mapFunction = mapFunction;
         }
 
         public override Object[] SampleNow()
         {
-            var oi = _ev.SampleNow();
+            var oi = _event.SampleNow();
             if (oi != null)
             {
                 var oo = new Object[oi.Length];
                 for (var i = 0; i < oo.Length; i++)
-                    oo[i] = _f.Apply((TA)oi[i]);
+                    oo[i] = _mapFunction.Apply((TEvent)oi[i]);
                 return oo;
             }
             else

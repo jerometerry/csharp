@@ -9,7 +9,7 @@ namespace sodium
 
         public void Loop(Behavior<TA> aOut)
         {
-            ((EventLoop<TA>)Evt).Loop(aOut.Updates());
+            ((EventLoop<TA>)Event).Loop(aOut.Updates());
             Value = aOut.Sample();
         }
     }

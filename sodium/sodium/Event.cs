@@ -26,7 +26,7 @@ namespace sodium
          */
         public IListener Listen(IHandler<TEvent> action)
         {
-            return Listen(Node.Null, new ActionInvoker<TEvent>(action));
+            return Listen(Node.Null, new TransactionHandler<TEvent>(action));
         }
 
         public IListener Listen(Node target, ITransactionHandler<TEvent> action)
@@ -50,14 +50,14 @@ namespace sodium
             if (aNow != null)
             {    // In cases like value(), we start with an initial value.
                 foreach (object t in aNow)
-                    action.Run(transaction, (TEvent)t);  // <-- unchecked warning is here
+                    action.Run(transaction, (TEvent)t); 
             }
             if (!suppressEarlierFirings)
             {
                 // Anything sent already in this transaction must be sent now so that
                 // there's no order dependency between send and listen.
-                foreach (var a in Firings)
-                    action.Run(transaction, a);
+                foreach (var firing in Firings)
+                    action.Run(transaction, firing);
             }
             return new Listener<TEvent>(this, action, target);
         }
@@ -101,11 +101,11 @@ namespace sodium
          */
         public Event<TSnapshot> Snapshot<TBehavior, TSnapshot>(
             Behavior<TBehavior> behavior, 
-            IBinaryFunction<TEvent, TBehavior, TSnapshot> snapshotGenerator)
+            IBinaryFunction<TEvent, TBehavior, TSnapshot> snapshotFunction)
         {
             var evt = this;
-            var sink = new SnapshotEventSink<TEvent, TBehavior, TSnapshot>(evt, snapshotGenerator, behavior);
-            var listener = Listen(sink.Node, new SnapshotTransactionHandler<TEvent, TBehavior, TSnapshot>(sink, snapshotGenerator, behavior));
+            var sink = new SnapshotEventSink<TEvent, TBehavior, TSnapshot>(evt, snapshotFunction, behavior);
+            var listener = Listen(sink.Node, new SnapshotTransactionHandler<TEvent, TBehavior, TSnapshot>(sink, snapshotFunction, behavior));
             return sink.AddCleanup(listener);
         }
 
@@ -225,8 +225,8 @@ namespace sodium
             var es = new EventLoop<TState>();
             var s = es.Hold(initState);
             var ebs = ea.Snapshot(s, melayMachineFunction);
-            var eb = ebs.Map(new Function<Tuple2<TNewEvent, TState>, TNewEvent>((bs) => bs.X));
-            var esOut = ebs.Map(new Function<Tuple2<TNewEvent, TState>, TState>((bs) => bs.Y));
+            var eb = ebs.Map(new Function<Tuple2<TNewEvent, TState>, TNewEvent>((bs) => bs.V1));
+            var esOut = ebs.Map(new Function<Tuple2<TNewEvent, TState>, TState>((bs) => bs.V2));
             es.Loop(esOut);
             return eb;
         }

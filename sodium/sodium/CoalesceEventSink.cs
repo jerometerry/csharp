@@ -2,25 +2,25 @@
 {
     using System;
 
-    public class CoalesceEventSink<TA> : EventSink<TA>
+    public class CoalesceEventSink<TEvent> : EventSink<TEvent>
     {
-        private readonly Event<TA> _ev;
-        private readonly IBinaryFunction<TA, TA, TA> _f;
+        private readonly Event<TEvent> _event;
+        private readonly IBinaryFunction<TEvent, TEvent, TEvent> _combiningFunction;
 
-        public CoalesceEventSink(Event<TA> ev, IBinaryFunction<TA, TA, TA> f)
+        public CoalesceEventSink(Event<TEvent> evt, IBinaryFunction<TEvent, TEvent, TEvent> combiningFunction)
         {
-            _ev = ev;
-            _f = f;
+            _event = evt;
+            _combiningFunction = combiningFunction;
         }
 
         public override Object[] SampleNow()
         {
-            var oi = _ev.SampleNow();
+            var oi = _event.SampleNow();
             if (oi != null)
             {
-                var o = (TA)oi[0];
+                var o = (TEvent)oi[0];
                 for (var i = 1; i < oi.Length; i++)
-                    o = _f.Apply(o, (TA)oi[i]);
+                    o = _combiningFunction.Apply(o, (TEvent)oi[i]);
                 return new Object[] { o };
             }
             else

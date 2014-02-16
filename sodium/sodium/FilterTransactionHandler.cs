@@ -2,20 +2,20 @@
 {
     using System;
 
-    public class FilterTransactionHandler<TA> : ITransactionHandler<TA>
+    public class FilterTransactionHandler<TEvent> : ITransactionHandler<TEvent>
     {
-        private readonly IFunction<TA, Boolean> _f;
-        private readonly EventSink<TA> _o;
+        private readonly IFunction<TEvent, Boolean> _predicate;
+        private readonly EventSink<TEvent> _sink;
 
-        public FilterTransactionHandler(IFunction<TA, Boolean> f, EventSink<TA> o)
+        public FilterTransactionHandler(IFunction<TEvent, Boolean> predicate, EventSink<TEvent> sink)
         {
-            _f = f;
-            _o = o;
+            _predicate = predicate;
+            _sink = sink;
         }
 
-        public void Run(Transaction trans, TA a)
+        public void Run(Transaction transaction, TEvent evt)
         {
-            if (_f.Apply(a)) _o.Send(trans, a);
+            if (_predicate.Apply(evt)) _sink.Send(transaction, evt);
         }
     }
 }

@@ -1,33 +1,36 @@
 namespace sodium
 {
-    public class BehaviorLifter2<TA, TB,TC> : IFunction<TA, IFunction<TB, TC>>
+    public class BehaviorLifter2<TFirstBehavior,TSecondBehavior,TResultBehavior> : 
+        IFunction<TFirstBehavior, IFunction<TSecondBehavior, TResultBehavior>>
     {
-        private readonly IBinaryFunction<TA, TB, TC> _f;
+        private readonly IBinaryFunction<TFirstBehavior, TSecondBehavior, TResultBehavior> _behaviorFunction;
 
-        public BehaviorLifter2(IBinaryFunction<TA, TB, TC> f)
+        public BehaviorLifter2(IBinaryFunction<TFirstBehavior, TSecondBehavior, TResultBehavior> behaviorFunction)
         {
-            _f = f;
+            _behaviorFunction = behaviorFunction;
         }
 
-        public IFunction<TB, TC> Apply(TA a)
+        public IFunction<TSecondBehavior, TResultBehavior> Apply(TFirstBehavior behavior)
         {
-            return new Lifter(_f, a);
+            return new Lifter(_behaviorFunction, behavior);
         }
 
-        private class Lifter : IFunction<TB, TC>
+        private class Lifter : IFunction<TSecondBehavior, TResultBehavior>
         {
-            private readonly TA _a;
-            private readonly IBinaryFunction<TA, TB, TC> _f;
+            private readonly TFirstBehavior _behavior;
+            private readonly IBinaryFunction<TFirstBehavior, TSecondBehavior, TResultBehavior> _behaviorFunction;
 
-            public Lifter(IBinaryFunction<TA, TB, TC> f, TA a)
+            public Lifter(
+                IBinaryFunction<TFirstBehavior, TSecondBehavior, TResultBehavior> behaviorFunction, 
+                TFirstBehavior behavior)
             {
-                _f = f;
-                _a = a;
+                _behaviorFunction = behaviorFunction;
+                _behavior = behavior;
             }
 
-            public TC Apply(TB b)
+            public TResultBehavior Apply(TSecondBehavior behavior2)
             {
-                return _f.Apply(_a, b);
+                return _behaviorFunction.Apply(_behavior, behavior2);
             }
         }
     }
