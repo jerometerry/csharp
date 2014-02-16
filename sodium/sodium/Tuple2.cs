@@ -2,13 +2,13 @@ namespace sodium
 {
     public sealed class Tuple2<TA, TB>
     {
-        public TA V1;
-        public TB V2;
+        public TA X;
+        public TB Y;
 
-        public Tuple2(TA v1, TB v2)
+        public Tuple2(TA x, TB y)
         {
-            V1 = v1;
-            V2 = v2;
+            X = x;
+            Y = y;
         }
     }
 }
