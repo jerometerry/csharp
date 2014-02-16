@@ -134,7 +134,7 @@ namespace sodium
         public Event<TBehavior> GetValue(Transaction transaction)
         {
             var sink = new GetBehaviorValueEventSink<TBehavior>(this);
-            var action = new GetBehaviorValueTransactionHandler<TBehavior>(sink);
+            var action = new EventSinkSender<TBehavior>(sink);
             var listener = Event.Listen(sink.Node, transaction, action, false);
             // Needed in case of an initial value and an update in the same transaction.
             return sink.AddCleanup(listener).LastFiringOnly(transaction);  
@@ -219,7 +219,7 @@ namespace sodium
         {
             var value = behaviorFunction.Sample().Sample();
             var sink = new EventSink<TBehavior>();
-            var handler = new SwitchToBehaviorTransactionHandler<TBehavior>(sink);
+            var handler = new BehaviorUnwrapper<TBehavior>(sink);
             var listener = behaviorFunction.GetValue().Listen(sink.Node, handler);
             return sink.AddCleanup(listener).Hold(value);
         }

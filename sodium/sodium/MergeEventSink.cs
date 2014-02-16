@@ -15,23 +15,25 @@
 
         public override Object[] SampleNow()
         {
-            var o1 = _event1.SampleNow();
-            var o2 = _event2.SampleNow();
-            if (o1 != null && o2 != null)
+            var output1 = _event1.SampleNow();
+            var output2 = _event2.SampleNow();
+            if (output1 != null && output2 != null)
             {
-                var oo = new Object[o1.Length + o2.Length];
+                var outputs = new Object[output1.Length + output2.Length];
                 int i = 0;
-                foreach (var t in o1)
-                    oo[i++] = t;
-                foreach (var t in o2)
-                    oo[i++] = t;
-                return oo;
+                foreach (var t in output1)
+                    outputs[i++] = t;
+                foreach (var t in output2)
+                    outputs[i++] = t;
+                return outputs;
             }
             else
-                if (o1 != null)
-                    return o1;
+            { 
+                if (output1 != null)
+                    return output1;
                 else
-                    return o2;
+                    return output2;
+                }
         }
     }
 }

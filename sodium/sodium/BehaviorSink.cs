@@ -1,15 +1,16 @@
 namespace sodium
 {
-    public sealed class BehaviorSink<TA> : Behavior<TA>
+    public sealed class BehaviorSink<TBehavior> : Behavior<TBehavior>
     {
-        public BehaviorSink(TA initValue)
-            : base(new EventSink<TA>(), initValue)
+        public BehaviorSink(TBehavior initValue)
+            : base(new EventSink<TBehavior>(), initValue)
         {
         }
 
-        public void Send(TA a)
+        public void Send(TBehavior behavior)
         {
-            ((EventSink<TA>)Event).Send(a);
+            var sink = (EventSink<TBehavior>)Event;
+            sink.Send(behavior);
         }
     }
 }

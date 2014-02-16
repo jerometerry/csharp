@@ -68,8 +68,8 @@ namespace sodium
         public Event<TNewEvent> Map<TNewEvent>(IFunction<TEvent, TNewEvent> mapFunction)
         {
             var ev = this;
-            var o = new MapEventSink<TEvent, TNewEvent>(ev, mapFunction);
-            var l = Listen(o.Node, new MapTransactionHandler<TEvent, TNewEvent>(o, mapFunction));
+            var o = new MappedEventSink<TEvent, TNewEvent>(ev, mapFunction);
+            var l = Listen(o.Node, new MapSinkSender<TEvent, TNewEvent>(o, mapFunction));
             return o.AddCleanup(l);
         }
 
@@ -105,7 +105,7 @@ namespace sodium
         {
             var evt = this;
             var sink = new SnapshotEventSink<TEvent, TBehavior, TSnapshot>(evt, snapshotFunction, behavior);
-            var listener = Listen(sink.Node, new SnapshotTransactionHandler<TEvent, TBehavior, TSnapshot>(sink, snapshotFunction, behavior));
+            var listener = Listen(sink.Node, new SnapshotSinkSender<TEvent, TBehavior, TSnapshot>(sink, snapshotFunction, behavior));
             return sink.AddCleanup(listener);
         }
 
@@ -188,8 +188,8 @@ namespace sodium
         public Event<TEvent> Filter(IFunction<TEvent, Boolean> predicate)
         {
             var evt = this;
-            var sink = new FilterEventSink<TEvent>(evt, predicate);
-            var listener = Listen(sink.Node, new FilterTransactionHandler<TEvent>(predicate, sink));
+            var sink = new FilteredEventSink<TEvent>(evt, predicate);
+            var listener = Listen(sink.Node, new FilteredEventSinkSender<TEvent>(predicate, sink));
             return sink.AddCleanup(listener);
         }
 
@@ -254,7 +254,7 @@ namespace sodium
             var ev = this;
             var la = new IListener[1];
             var o = new OnceEventSink<TEvent>(ev, la);
-            la[0] = ev.Listen(o.Node, new OnceTransactionHandler<TEvent>(o, la));
+            la[0] = ev.Listen(o.Node, new OnceSinkSender<TEvent>(o, la));
             return o.AddCleanup(la[0]);
         }
 

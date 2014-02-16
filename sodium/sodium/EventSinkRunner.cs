@@ -1,5 +1,9 @@
 namespace sodium
 {
+    /// <summary>
+    /// TODO - codesmell. Looks ver similar to EventSinkSender
+    /// </summary>
+    /// <typeparam name="TEvent"></typeparam>
     public class EventSinkRunner<TEvent> : IHandler<Transaction>
     {
         private readonly TEvent _event;

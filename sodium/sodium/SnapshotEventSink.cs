@@ -20,16 +20,20 @@
 
         public override Object[] SampleNow()
         {
-            var oi = _event.SampleNow();
-            if (oi != null)
+            var inputs = _event.SampleNow();
+            if (inputs == null)
             {
-                var oo = new Object[oi.Length];
-                for (int i = 0; i < oo.Length; i++)
-                    oo[i] = _snapshotFunction.Apply((TEvent)oi[i], _behavior.Sample());
-                return oo;
-            }
-            else
                 return null;
+            }
+
+            var outputs = new Object[inputs.Length];
+            for (int i = 0; i < outputs.Length; i++)
+            { 
+                var evt = (TEvent)inputs[i];
+                var snapshot = _behavior.Sample();
+                outputs[i] = _snapshotFunction.Apply(evt, snapshot);
+            }
+            return outputs;
         }
     }
 }

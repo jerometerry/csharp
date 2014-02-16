@@ -15,19 +15,19 @@
 
         public override Object[] SampleNow()
         {
-            var oi = _event.SampleNow();
-            var oo = oi;
-            if (oo != null)
+            var inputs = _event.SampleNow();
+            var outputs = inputs;
+            if (outputs != null)
             {
-                if (oo.Length > 1)
-                    oo = new Object[] { oi[0] };
+                if (outputs.Length > 1)
+                    outputs = new Object[] { inputs[0] };
                 if (_listeners[0] != null)
                 {
                     _listeners[0].Unlisten();
                     _listeners[0] = null;
                 }
             }
-            return oo;
+            return outputs;
         }
     }
 }

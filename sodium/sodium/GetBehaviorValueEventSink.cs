@@ -13,7 +13,10 @@ namespace sodium
 
         public override Object[] SampleNow()
         {
-            return new Object[] { _behavior.Sample() };
+            return new Object[] 
+            { 
+                _behavior.Sample() 
+            };
         }
     }
 }

@@ -2,12 +2,12 @@ namespace sodium
 {
     using System;
 
-    public class MapEventSink<TEvent, TNewEvent> : EventSink<TNewEvent>
+    public class MappedEventSink<TEvent, TNewEvent> : EventSink<TNewEvent>
     {
         private readonly Event<TEvent> _event;
         private readonly IFunction<TEvent, TNewEvent> _mapFunction;
 
-        public MapEventSink(Event<TEvent> evt, IFunction<TEvent, TNewEvent> mapFunction)
+        public MappedEventSink(Event<TEvent> evt, IFunction<TEvent, TNewEvent> mapFunction)
         {
             _event = evt;
             _mapFunction = mapFunction;

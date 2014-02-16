@@ -6,7 +6,7 @@ namespace sodium
 
     public class EventLoop<TEvent> : Event<TEvent>
     {
-        private Event<TEvent> _eaOut;
+        private Event<TEvent> _event;
 
         // TO DO: Copy & paste from EventSink. Can we improve this?
         public void Send(Transaction transaction, TEvent a)
@@ -31,14 +31,13 @@ namespace sodium
             }
         }
 
-        public void Loop(Event<TEvent> eaOut)
+        public void Loop(Event<TEvent> evt)
         {
-            if (_eaOut != null)
+            if (_event != null)
                 throw new ApplicationException("EventLoop looped more than once");
-            _eaOut = eaOut;
-            var me = this;
-            var action = new EventLoopTransactionHandler<TEvent>(me);
-            AddCleanup(eaOut.Listen(Node, action));
+            _event = evt;
+            var action = new EventLoopSender<TEvent>(this);
+            AddCleanup(evt.Listen(Node, action));
         }
     }
 }
