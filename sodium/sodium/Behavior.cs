@@ -8,13 +8,10 @@ namespace sodium
         private TBehavior _value;
         private TBehavior _valueUpdate;
         private bool _valueUpdated = false;
-
-        
-
         private IListener _cleanup;
         private bool _disposed;
 
-        public TBehavior Value
+        public TBehavior Val
         {
             get
             {
@@ -74,20 +71,20 @@ namespace sodium
         public Behavior(TBehavior value)
         {
             Event = new Event<TBehavior>();
-            Value = value;
+            Val = value;
         }
 
         public Behavior(Event<TBehavior> evt, TBehavior initValue)
         {
             Event = evt;
-            Value = initValue;
+            Val = initValue;
             var converter = new EventToBehaviorConverter<TBehavior>(this, evt);
             Transaction.Run(converter);
         }
 
-        public void Reset()
+        public void ResetValue()
         {
-            this.Value = this.ValueUpdate;
+            this.Val = this.ValueUpdate;
             this.ValueUpdate = default(TBehavior);
             this._valueUpdated = false;
         }
@@ -97,7 +94,7 @@ namespace sodium
          */
         public TBehavior NewValue()
         {
-            return ValueUpdated ? ValueUpdate : Value;
+            return ValueUpdated ? ValueUpdate : Val;
         }
 
         /**
@@ -115,7 +112,7 @@ namespace sodium
         {
             // Since pointers in Java are atomic, we don't need to explicitly create a
             // transaction.
-            return Value;
+            return Val;
         }
 
         /**
@@ -132,7 +129,7 @@ namespace sodium
          * the current value of the behavior, and thereafter behaves like updates(),
          * firing for each update to the behavior's value.
          */
-        public Event<TBehavior> GetValue()
+        public Event<TBehavior> Value()
         {
             var code = new GetBehaviorValueInvoker<TBehavior>(this);
             return Transaction.Apply<Event<TBehavior>>(code);
@@ -264,7 +261,7 @@ namespace sodium
             var value = behaviorFunction.Sample().Sample();
             var sink = new EventSink<TBehavior>();
             var handler = new BehaviorUnwrapper<TBehavior>(sink);
-            var listener = behaviorFunction.GetValue().Listen(sink.Node, handler);
+            var listener = behaviorFunction.Value().Listen(sink.Node, handler);
             return sink.AddCleanup(listener).Hold(value);
         }
 

@@ -54,7 +54,7 @@ namespace sodium.tests
         {
             var behavior = new BehaviorSink<Int32>(9);
             var results = new List<Int32>();
-            var listener = behavior.GetValue().Listen(x => { results.Add(x); });
+            var listener = behavior.Value().Listen(x => { results.Add(x); });
             behavior.Send(2);
             behavior.Send(7);
             listener.Unlisten();
@@ -66,7 +66,7 @@ namespace sodium.tests
         {
             var behavior = new Behavior<Int32>(12);
             var results = new List<Int32>();
-            var listener = behavior.GetValue().Listen(x => { results.Add(x); });
+            var listener = behavior.Value().Listen(x => { results.Add(x); });
             listener.Unlisten();
             AssertArraysEqual(Arrays<Int32>.AsList(12), results);
         }
@@ -77,7 +77,7 @@ namespace sodium.tests
             var behavior = new BehaviorSink<Int32>(9);
             var results = new List<Int32>();
             var map = new Function<Int32, Int32>((x) => { return x + 100; });
-            var l = behavior.GetValue().Map(map).Listen(x => { results.Add(x); });
+            var l = behavior.Value().Map(map).Listen(x => { results.Add(x); });
             behavior.Send(2);
             behavior.Send(7);
             l.Unlisten();
@@ -90,7 +90,7 @@ namespace sodium.tests
             var behavior = new BehaviorSink<Int32>(9);
             var results = new List<Int32>();
             var map = new Function<Int32, Int32>((x) => { return x + 100; });
-            var listener = DoubleUp(behavior.GetValue()).Map(map).Listen(x => { results.Add(x); });
+            var listener = DoubleUp(behavior.Value()).Map(map).Listen(x => { results.Add(x); });
             behavior.Send(2);
             behavior.Send(7);
             listener.Unlisten();
@@ -104,7 +104,7 @@ namespace sodium.tests
             var behavior = new BehaviorSink<Int32>(9);
             var results = new List<Int32>();
             var coaleseFunction = new BinaryFunction<Int32, Int32, Int32>((fst, snd) => snd);
-            var listener = behavior.GetValue().Coalesce(coaleseFunction).Listen(x => { results.Add(x); });
+            var listener = behavior.Value().Coalesce(coaleseFunction).Listen(x => { results.Add(x); });
             behavior.Send(2);
             behavior.Send(7);
             listener.Unlisten();
@@ -118,7 +118,7 @@ namespace sodium.tests
 		    var behavior = new BehaviorSink<Int32>(9);
 		    var results = new List<Int32>();
             var coaleseFunction = new BinaryFunction<Int32, Int32, Int32>((fst, snd) => { return fst + snd; });
-            var listener = DoubleUp(behavior.GetValue()).Coalesce(coaleseFunction).Listen(x => { results.Add(x); });
+            var listener = DoubleUp(behavior.Value()).Coalesce(coaleseFunction).Listen(x => { results.Add(x); });
 		    behavior.Send(2);
 		    behavior.Send(7);
 		    listener.Unlisten();
@@ -131,7 +131,7 @@ namespace sodium.tests
 		    var behaviorInt32 = new BehaviorSink<Int32>(9);
 		    var behaviorChar = new BehaviorSink<char>('a');
 		    var results = new List<char>();
-            var listener = behaviorInt32.GetValue().Snapshot(behaviorChar).Listen(x => { results.Add(x); });
+            var listener = behaviorInt32.Value().Snapshot(behaviorChar).Listen(x => { results.Add(x); });
 		    behaviorChar.Send('b');
 		    behaviorInt32.Send(2);
 		    behaviorChar.Send('c');
@@ -146,7 +146,7 @@ namespace sodium.tests
 		    var behaviorInt32 = new BehaviorSink<Int32>(9);
 		    var behaviorChar = new BehaviorSink<char>('a');
 		    var results = new List<char>();
-            var listener = DoubleUp(behaviorInt32.GetValue()).Snapshot(behaviorChar).Listen(x => { results.Add(x); });
+            var listener = DoubleUp(behaviorInt32.Value()).Snapshot(behaviorChar).Listen(x => { results.Add(x); });
 		    behaviorChar.Send('b');
 		    behaviorInt32.Send(2);
 		    behaviorChar.Send('c');
@@ -163,7 +163,7 @@ namespace sodium.tests
 		    var behavior2 = new BehaviorSink<Int32>(2);
 		    var results = new List<Int32>();
             var combiningFunction = new BinaryFunction<Int32, Int32, Int32>((x, y) => x+y);
-            var listener = Event<Int32>.MergeWith(combiningFunction, behavior1.GetValue(), behavior2.GetValue()).Listen(x => { results.Add(x); });
+            var listener = Event<Int32>.MergeWith(combiningFunction, behavior1.Value(), behavior2.Value()).Listen(x => { results.Add(x); });
 		    behavior1.Send(1);
 		    behavior2.Send(4);
 		    listener.Unlisten();
@@ -176,7 +176,7 @@ namespace sodium.tests
 		    var behavior = new BehaviorSink<Int32>(9);
 		    var results = new List<Int32>();
             var predicate = new Function<int, bool>(a => true);
-            var listener = behavior.GetValue().Filter(predicate).Listen(x => { results.Add(x); });
+            var listener = behavior.Value().Filter(predicate).Listen(x => { results.Add(x); });
 		    behavior.Send(2);
 		    behavior.Send(7);
 		    listener.Unlisten();
@@ -189,7 +189,7 @@ namespace sodium.tests
 		    var behavior = new BehaviorSink<Int32>(9);
 		    var results = new List<Int32>();
             var predicate = new Function<Int32, bool>(a => true);
-            var listener = DoubleUp(behavior.GetValue()).Filter(predicate).Listen(x => { results.Add(x); });
+            var listener = DoubleUp(behavior.Value()).Filter(predicate).Listen(x => { results.Add(x); });
 		    behavior.Send(2);
 		    behavior.Send(7);
 		    listener.Unlisten();
@@ -201,7 +201,7 @@ namespace sodium.tests
         {
 		    var behavior = new BehaviorSink<Int32>(9);
 		    var results = new List<Int32>();
-            var listener = behavior.GetValue().Once().Listen(x => { results.Add(x); });
+            var listener = behavior.Value().Once().Listen(x => { results.Add(x); });
 		    behavior.Send(2);
 		    behavior.Send(7);
 		    listener.Unlisten();
@@ -213,7 +213,7 @@ namespace sodium.tests
         {
 		    var behavior = new BehaviorSink<Int32>(9);
 		    var results = new List<Int32>();
-            var listener = DoubleUp(behavior.GetValue()).Once().Listen(x => { results.Add(x); });
+            var listener = DoubleUp(behavior.Value()).Once().Listen(x => { results.Add(x); });
 		    behavior.Send(2);
 		    behavior.Send(7);
 		    listener.Unlisten();
@@ -225,7 +225,7 @@ namespace sodium.tests
         {
 		    var behavior = new BehaviorSink<Int32>(9);
 		    var results = new List<Int32>();
-		    var value = behavior.GetValue();
+		    var value = behavior.Value();
 		    behavior.Send(8);
 		    var listener = value.Listen(x => { results.Add(x); });
 		    behavior.Send(2);
@@ -238,7 +238,7 @@ namespace sodium.tests
         {
 		    var behavior = new BehaviorSink<Int32>(6);
 		    var results = new List<String>();
-		    var listener = behavior.Map(x => x.ToString()).GetValue().Listen(x => { results.Add(x); });
+		    var listener = behavior.Map(x => x.ToString()).Value().Listen(x => { results.Add(x); });
 		    behavior.Send(8);
 		    listener.Unlisten();
 		    AssertArraysEqual(Arrays<string>.AsList("6", "8"), results);
@@ -251,7 +251,7 @@ namespace sodium.tests
 		    var results = new List<String>();
 		    var map = behavior.Map(x => x.ToString());
 		    behavior.Send(2);
-		    var listener = map.GetValue().Listen(x => { results.Add(x); });
+		    var listener = map.Value().Listen(x => { results.Add(x); });
 		    behavior.Send(8);
 		    listener.Unlisten();
 		    AssertArraysEqual(Arrays<string>.AsList("2", "8"), results);
@@ -272,7 +272,7 @@ namespace sodium.tests
 		    var ba = new BehaviorSink<Int64>(5L);
 		    var results = new List<String>();
 		    var listener = Behavior<Int64>.Apply<string>(bf,ba)
-                .GetValue().Listen(x => { results.Add(x); });
+                .Value().Listen(x => { results.Add(x); });
 		    bf.Send(new Function<Int64, String>((b) => "12 "+b));
 		    ba.Send(6L);
             listener.Unlisten();
@@ -286,7 +286,7 @@ namespace sodium.tests
 		    var behavior2 = new BehaviorSink<Int64>(5L);
 		    var results = new List<String>();
 		    var listener = Behavior<Int32>.Lift((x, y) => x + " " + y, behavior1, behavior2)
-                .GetValue().Listen((String x) => { results.Add(x); });
+                .Value().Listen((String x) => { results.Add(x); });
 		    behavior1.Send(12);
 		    behavior2.Send(6L);
             listener.Unlisten();
@@ -301,7 +301,7 @@ namespace sodium.tests
 		    var behavior2 = behavior.Map(x => x * 5);
 		    var behavior3 = Behavior<Int32>.Lift((x, y) => x + " " + y, behavior1, behavior2);
 		    var results = new List<String>();
-		    var listener = behavior3.GetValue().Listen((x) => { results.Add(x); });
+		    var listener = behavior3.Value().Listen((x) => { results.Add(x); });
 		    behavior.Send(2);
 		    listener.Unlisten();
 		    AssertArraysEqual(Arrays<string>.AsList("3 5", "6 10"), results);
@@ -329,14 +329,10 @@ namespace sodium.tests
 	        // single transaction.
 	        var ba = esb.Map(s => s.a).FilterNotNull().Hold('A');
 	        var bb = esb.Map(s => s.b).FilterNotNull().Hold('a');
-
-            var v1 = ba.Value;
-            var v2 = bb.Value;
-
 	        var bsw = esb.Map(s => s.sw).FilterNotNull().Hold(ba);
 	        var bo = Behavior<char?>.SwitchB(bsw);
 		    var o = new List<char>();
-	        var l = bo.GetValue().Listen(c => { o.Add(c.Value); });
+	        var l = bo.Value().Listen(c => { o.Add(c.Value); });
 	        esb.Send(new SB('B','b',null));
 	        esb.Send(new SB('C','c',bb));
 	        esb.Send(new SB('D','d',null));
@@ -382,7 +378,7 @@ namespace sodium.tests
             var sum_out = ea.Snapshot(sum, (x, y) => x+y).Hold(0);
             sum.Loop(sum_out);
             var o = new List<Int32>();
-            var l = sum_out.GetValue().Listen(x => { o.Add(x); });
+            var l = sum_out.Value().Listen(x => { o.Add(x); });
             ea.Send(2);
             ea.Send(3);
             ea.Send(1);
@@ -403,7 +399,7 @@ namespace sodium.tests
                     return new Tuple2<Int32, Int32>(a + s, a + s);
                 })
             );
-            var l = sum.GetValue().Listen((x) => { o.Add(x); });
+            var l = sum.Value().Listen((x) => { o.Add(x); });
             ea.Send(5);
             ea.Send(7);
             ea.Send(1);
@@ -419,7 +415,7 @@ namespace sodium.tests
             var ea = new EventSink<Int32>();
             var o = new List<Int32>();
             var sum = ea.Accumulate(100, (a,s)=>a+s);
-            var l = sum.GetValue().Listen((x) => { o.Add(x); });
+            var l = sum.Value().Listen((x) => { o.Add(x); });
             ea.Send(5);
             ea.Send(7);
             ea.Send(1);

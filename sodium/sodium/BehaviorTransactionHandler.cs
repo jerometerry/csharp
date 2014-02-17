@@ -15,7 +15,7 @@ namespace sodium
             {
                 transaction.Last(new Runnable(() =>
                 {
-                    _behavior.Reset();
+                    _behavior.ResetValue();
                 }));
                 _behavior.ValueUpdate = behavior;
             }

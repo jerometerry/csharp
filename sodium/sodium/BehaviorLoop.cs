@@ -12,7 +12,7 @@ namespace sodium
             var updates = behavior.Updates();
             var eventLoop = ((EventLoop<TBehavior>)Event);
             eventLoop.Loop(updates);
-            Value = behavior.Sample();
+            Val = behavior.Sample();
         }
     }
 }
