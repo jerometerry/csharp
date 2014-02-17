@@ -1,195 +1,189 @@
-package sodium;
+namespace sodium.tests
+{
+    using NUnit.Framework;
+    using System;
+    using System.Collections.Generic;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import junit.framework.TestCase;
-
-public class EventTester extends TestCase {
-	@Override
-	protected void tearDown() throws Exception {
-		System.gc();
-		Thread.sleep(100);
-	}
-
-	public void testSendEvent()
+    [TestFixture]
+    public class EventTester : SodiumTestCase
     {
-        EventSink<Integer> e = new EventSink();
-        List<Integer> out = new ArrayList();
-        Listener l = e.listen(x -> { out.add(x); });
-        e.send(5);
-        l.unlisten();
-        assertEquals(Arrays.asList(5), out);
-        e.send(6);
-        assertEquals(Arrays.asList(5), out);
+        public void TestSendEvent()
+        {
+            EventSink<Int32> e = new EventSink<Int32>();
+            List<Int32> o = new List<Int32>();
+            IListener l = e.Listen(x => { o.Add(x); });
+            e.Send(5);
+            l.Unlisten();
+            AssertArraysEqual(Arrays<Int32>.AsList(5), o);
+            e.Send(6);
+            AssertArraysEqual(Arrays<Int32>.AsList(5), o);
+        }
+
+        public void TestMap()
+        {
+            EventSink<Int32> e = new EventSink<Int32>();
+            Event<String> m = e.Map(x => x.ToString());
+            List<String> o = new List<String>();
+            IListener l = m.Listen((String x) => { o.Add(x); });
+            e.Send(5);
+            l.Unlisten();
+            AssertArraysEqual(Arrays<string>.AsList("5"), o);
+        }
+
+        public void TestMergeNonSimultaneous()
+        {
+            EventSink<Int32> e1 = new EventSink<Int32>();
+            EventSink<Int32> e2 = new EventSink<Int32>();
+            List<Int32> o = new List<Int32>();
+            IListener l = Event<Int32>.Merge(e1, e2).Listen(x => { o.Add(x); });
+            e1.Send(7);
+            e2.Send(9);
+            e1.Send(8);
+            l.Unlisten();
+            AssertArraysEqual(Arrays<Int32>.AsList(7, 9, 8), o);
+        }
+
+        public void TestMergeSimultaneous()
+        {
+            EventSink<Int32> e = new EventSink<Int32>();
+            List<Int32> o = new List<Int32>();
+            IListener l = Event<Int32>.Merge(e, e).Listen(x => { o.Add(x); });
+            e.Send(7);
+            e.Send(9);
+            l.Unlisten();
+            AssertArraysEqual(Arrays<Int32>.AsList(7, 7, 9, 9), o);
+        }
+
+        public void TestCoalesce()
+        {
+            EventSink<Int32> e1 = new EventSink<Int32>();
+            EventSink<Int32> e2 = new EventSink<Int32>();
+            List<Int32> o = new List<Int32>();
+            IListener l =
+                 Event<Int32>.Merge(e1, Event<Int32>.Merge(e1.Map(x => x * 100), e2))
+                .Coalesce((Int32 a, Int32 b) => a + b)
+                .Listen((Int32 x) => { o.Add(x); });
+            e1.Send(2);
+            e1.Send(8);
+            e2.Send(40);
+            l.Unlisten();
+            AssertArraysEqual(Arrays<Int32>.AsList(202, 808, 40), o);
+        }
+
+        public void TestFilter()
+        {
+            EventSink<char> e = new EventSink<char>();
+            List<char> o = new List<char>();
+            IListener l = e.Filter((char c) => char.IsUpper(c)).Listen((char c) => { o.Add(c); });
+            e.Send('H');
+            e.Send('o');
+            e.Send('I');
+            l.Unlisten();
+            AssertArraysEqual(Arrays<char>.AsList('H', 'I'), o);
+        }
+
+        public void TestFilterNotNull()
+        {
+            EventSink<String> e = new EventSink<String>();
+            List<String> o = new List<String>();
+            IListener l = e.FilterNotNull().Listen(s => { o.Add(s); });
+            e.Send("tomato");
+            e.Send(null);
+            e.Send("peach");
+            l.Unlisten();
+            AssertArraysEqual(Arrays<String>.AsList("tomato", "peach"), o);
+        }
+
+        public void TestLoopEvent()
+        {
+            EventSink<Int32> ea = new EventSink<Int32>();
+            EventLoop<Int32> eb = new EventLoop<Int32>();
+            Event<Int32> ec = Event<Int32>.MergeWith((x, y) => x + y, ea.Map(x => x % 10), eb);
+            Event<Int32> eb_o = ea.Map(x => x / 10).Filter(x => x != 0);
+            eb.Loop(eb_o);
+            List<Int32> o = new List<Int32>();
+            IListener l = ec.Listen(x => { o.Add(x); });
+            ea.Send(2);
+            ea.Send(52);
+            l.Unlisten();
+            AssertArraysEqual(Arrays<Int32>.AsList(2, 7), o);
+        }
+
+        public void TestGate()
+        {
+            EventSink<char> ec = new EventSink<char>();
+            BehaviorSink<Boolean> epred = new BehaviorSink<Boolean>(true);
+            List<char> o = new List<char>();
+            IListener l = ec.Gate(epred).Listen(x => { o.Add(x); });
+            ec.Send('H');
+            epred.Send(false);
+            ec.Send('O');
+            epred.Send(true);
+            ec.Send('I');
+            l.Unlisten();
+            AssertArraysEqual(Arrays<char>.AsList('H', 'I'), o);
+        }
+
+        public void TestCollect()
+        {
+            EventSink<Int32> ea = new EventSink<Int32>();
+            List<Int32> o = new List<Int32>();
+            Event<Int32> sum = ea.Collect(100,
+                //(a,s) => new Tuple2(a+s, a+s)
+                new BinaryFunction<Int32, Int32, Tuple2<Int32, Int32>>((a, s) =>
+                {
+                    return new Tuple2<Int32, Int32>(a + s, a + s);
+                })
+            );
+            IListener l = sum.Listen((x) => { o.Add(x); });
+            ea.Send(5);
+            ea.Send(7);
+            ea.Send(1);
+            ea.Send(2);
+            ea.Send(3);
+            l.Unlisten();
+            AssertArraysEqual(Arrays<Int32>.AsList(105, 112, 113, 115, 118), o);
+        }
+
+        public void TestAccum()
+        {
+            EventSink<Int32> ea = new EventSink<Int32>();
+            List<Int32> o = new List<Int32>();
+            Behavior<Int32> sum = ea.Accumulate(100, (a, s) => a + s);
+            IListener l = sum.Updates().Listen((x) => { o.Add(x); });
+            ea.Send(5);
+            ea.Send(7);
+            ea.Send(1);
+            ea.Send(2);
+            ea.Send(3);
+            l.Unlisten();
+            AssertArraysEqual(Arrays<Int32>.AsList(105, 112, 113, 115, 118), o);
+        }
+
+        public void TestOnce()
+        {
+            EventSink<char> e = new EventSink<char>();
+            List<char> o = new List<char>();
+            IListener l = e.Once().Listen((x) => { o.Add(x); });
+            e.Send('A');
+            e.Send('B');
+            e.Send('C');
+            l.Unlisten();
+            AssertArraysEqual(Arrays<char>.AsList('A'), o);
+        }
+
+        public void TestDelay()
+        {
+            EventSink<char> e = new EventSink<char>();
+            Behavior<char> b = e.Hold(' ');
+            List<char> o = new List<char>();
+            IListener l = e.Delay().Snapshot(b).Listen((x) => { o.Add(x); });
+            e.Send('C');
+            e.Send('B');
+            e.Send('A');
+            l.Unlisten();
+            AssertArraysEqual(Arrays<char>.AsList('C', 'B', 'A'), o);
+        }
     }
 
-	public void testMap()
-    {
-        EventSink<Integer> e = new EventSink();
-        Event<String> m = e.map(x -> Integer.toString(x));
-        List<String> out = new ArrayList();
-        Listener l = m.listen((String x) -> { out.add(x); });
-        e.send(5);
-        l.unlisten();
-        assertEquals(Arrays.asList("5"), out);
-    }
-
-    public void testMergeNonSimultaneous()
-    {
-        EventSink<Integer> e1 = new EventSink();
-        EventSink<Integer> e2 = new EventSink();
-        List<Integer> out = new ArrayList();
-        Listener l = Event.merge(e1,e2).listen(x -> { out.add(x); });
-        e1.send(7);
-        e2.send(9);
-        e1.send(8);
-        l.unlisten();
-        assertEquals(Arrays.asList(7,9,8), out);
-    }
-
-    public void testMergeSimultaneous()
-    {
-        EventSink<Integer> e = new EventSink();
-        List<Integer> out = new ArrayList();
-        Listener l = Event.merge(e,e).listen(x -> { out.add(x); });
-        e.send(7);
-        e.send(9);
-        l.unlisten();
-        assertEquals(Arrays.asList(7,7,9,9), out);
-    }
-
-    public void testCoalesce()
-    {
-        EventSink<Integer> e1 = new EventSink();
-        EventSink<Integer> e2 = new EventSink();
-        List<Integer> out = new ArrayList();
-        Listener l =
-             Event.merge(e1,Event.merge(e1.map(x -> x * 100), e2))
-            .coalesce((Integer a, Integer b) -> a+b)
-            .listen((Integer x) -> { out.add(x); });
-        e1.send(2);
-        e1.send(8);
-        e2.send(40);
-        l.unlisten();
-        assertEquals(Arrays.asList(202, 808, 40), out);
-    }
-    
-    public void testFilter()
-    {
-        EventSink<Character> e = new EventSink();
-        List<Character> out = new ArrayList();
-        Listener l = e.filter((Character c) -> Character.isUpperCase(c)).listen((Character c) -> { out.add(c); });
-        e.send('H');
-        e.send('o');
-        e.send('I');
-        l.unlisten();
-        assertEquals(Arrays.asList('H','I'), out);
-    }
-
-    public void testFilterNotNull()
-    {
-        EventSink<String> e = new EventSink();
-        List<String> out = new ArrayList();
-        Listener l = e.filterNotNull().listen(s -> { out.add(s); });
-        e.send("tomato");
-        e.send(null);
-        e.send("peach");
-        l.unlisten();
-        assertEquals(Arrays.asList("tomato","peach"), out);
-    }
-
-    public void testLoopEvent()
-    {
-        final EventSink<Integer> ea = new EventSink();
-        EventLoop<Integer> eb = new EventLoop<Integer>();
-        Event<Integer> ec = Event.mergeWith((x, y) -> x+y, ea.map(x -> x % 10), eb);
-        Event<Integer> eb_out = ea.map(x -> x / 10).filter(x -> x != 0);
-        eb.loop(eb_out);
-        List<Integer> out = new ArrayList();
-        Listener l = ec.listen(x -> { out.add(x); });
-        ea.send(2);
-        ea.send(52);
-        l.unlisten();
-        assertEquals(Arrays.asList(2,7), out);
-    }
-
-    public void testGate()
-    {
-        EventSink<Character> ec = new EventSink();
-        BehaviorSink<Boolean> epred = new BehaviorSink(true);
-        List<Character> out = new ArrayList();
-        Listener l = ec.gate(epred).listen(x -> { out.add(x); });
-        ec.send('H');
-        epred.send(false);
-        ec.send('O');
-        epred.send(true);
-        ec.send('I');
-        l.unlisten();
-        assertEquals(Arrays.asList('H','I'), out);
-    }
-
-    public void testCollect()
-    {
-        EventSink<Integer> ea = new EventSink();
-        List<Integer> out = new ArrayList();
-        Event<Integer> sum = ea.collect(100,
-            //(a,s) -> new Tuple2(a+s, a+s)
-            new Lambda2<Integer, Integer, Tuple2<Integer,Integer>>() {
-                public Tuple2<Integer,Integer> apply(Integer a, Integer s) {
-                    return new Tuple2<Integer,Integer>(a+s, a+s);
-                }
-            }
-        );
-        Listener l = sum.listen((x) -> { out.add(x); });
-        ea.send(5);
-        ea.send(7);
-        ea.send(1);
-        ea.send(2);
-        ea.send(3);
-        l.unlisten();
-        assertEquals(Arrays.asList(105,112,113,115,118), out);
-    }
-
-    public void testAccum()
-    {
-        EventSink<Integer> ea = new EventSink();
-        List<Integer> out = new ArrayList();
-        Behavior<Integer> sum = ea.accum(100, (a,s)->a+s);
-        Listener l = sum.updates().listen((x) -> { out.add(x); });
-        ea.send(5);
-        ea.send(7);
-        ea.send(1);
-        ea.send(2);
-        ea.send(3);
-        l.unlisten();
-        assertEquals(Arrays.asList(105,112,113,115,118), out);
-    }
-
-    public void testOnce()
-    {
-        EventSink<Character> e = new EventSink();
-        List<Character> out = new ArrayList();
-        Listener l = e.once().listen((x) -> { out.add(x); });
-        e.send('A');
-        e.send('B');
-        e.send('C');
-        l.unlisten();
-        assertEquals(Arrays.asList('A'), out);
-    }
-
-    public void testDelay()
-    {
-        EventSink<Character> e = new EventSink();
-        Behavior<Character> b = e.hold(' ');
-        List<Character> out = new ArrayList();
-        Listener l = e.delay().snapshot(b).listen((x) -> { out.add(x); });
-        e.send('C');
-        e.send('B');
-        e.send('A');
-        l.unlisten();
-        assertEquals(Arrays.asList('C','B','A'), out);
-    }
 }
-
