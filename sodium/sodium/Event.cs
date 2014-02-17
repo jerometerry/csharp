@@ -18,7 +18,10 @@ namespace sodium
         {
         }
 
-        public virtual Object[] SampleNow() { return null; }
+        public virtual Object[] SampleNow() 
+        { 
+            return null; 
+        }
 
         public IListener Listen(Action<TEvent> action)
         {
