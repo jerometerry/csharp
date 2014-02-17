@@ -23,7 +23,7 @@ namespace sodium
         }
         
         /// <summary>
-        /// method to cause the listener to be removed. This is the observer pattern.
+        /// Method to cause the listener to be removed. This is the observer pattern.
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
@@ -71,18 +71,18 @@ namespace sodium
         /// <summary>
         /// Transform the event's value according to the supplied function.
         /// </summary>
-        /// <param name="mapFunction"></param>
+        /// <param name="f"></param>
         /// <returns></returns>
-        public Event<TNewEvent> Map<TNewEvent>(IFunction<TEvent, TNewEvent> mapFunction)
+        public Event<TResultEvent> Map<TResultEvent>(IFunction<TEvent, TResultEvent> f)
         {
-            var sink = new MappedEventSink<TEvent, TNewEvent>(this, mapFunction);
-            var listener = Listen(sink.Node, new MapSinkSender<TEvent, TNewEvent>(sink, mapFunction));
+            var sink = new MappedEventSink<TEvent, TResultEvent>(this, f);
+            var listener = Listen(sink.Node, new MapSinkSender<TEvent, TResultEvent>(sink, f));
             return sink.RegisterListener(listener);
         }
 
-        public Event<TNewEvent> Map<TNewEvent>(Func<TEvent, TNewEvent> mapFunction)
+        public Event<TResultEvent> Map<TResultEvent>(Func<TEvent, TResultEvent> f)
         {
-            return Map(new Function<TEvent, TNewEvent>(mapFunction));
+            return Map(new Function<TEvent, TResultEvent>(f));
         }
 
         /// <summary>
@@ -104,9 +104,9 @@ namespace sodium
         /// </summary>
         /// <param name="behavior"></param>
         /// <returns></returns>
-        public Event<TNewEvent> Snapshot<TNewEvent>(Behavior<TNewEvent> behavior)
+        public Event<TResultEvent> Snapshot<TResultEvent>(Behavior<TResultEvent> behavior)
         {
-            var snapshotGenerator = new BinaryFunction<TEvent, TNewEvent, TNewEvent>((a,b) => b);
+            var snapshotGenerator = new BinaryFunction<TEvent, TResultEvent, TResultEvent>((a,b) => b);
             return Snapshot(behavior, snapshotGenerator);
         }
 
@@ -116,22 +116,22 @@ namespace sodium
         /// before any state changes of the current transaction are applied through 'hold's.
         /// </summary>
         /// <param name="behavior"></param>
-        /// <param name="snapshotFunction"></param>
+        /// <param name="f"></param>
         /// <returns></returns>
         public Event<TSnapshot> Snapshot<TBehavior, TSnapshot>(
             Behavior<TBehavior> behavior, 
-            IBinaryFunction<TEvent, TBehavior, TSnapshot> snapshotFunction)
+            IBinaryFunction<TEvent, TBehavior, TSnapshot> f)
         {
-            var sink = new SnapshotEventSink<TEvent, TBehavior, TSnapshot>(this, snapshotFunction, behavior);
-            var listener = Listen(sink.Node, new SnapshotSinkSender<TEvent, TBehavior, TSnapshot>(sink, snapshotFunction, behavior));
+            var sink = new SnapshotEventSink<TEvent, TBehavior, TSnapshot>(this, f, behavior);
+            var listener = Listen(sink.Node, new SnapshotSinkSender<TEvent, TBehavior, TSnapshot>(sink, f, behavior));
             return sink.RegisterListener(listener);
         }
 
         public Event<TSnapshot> Snapshot<TBehavior, TSnapshot>(
             Behavior<TBehavior> behavior,
-            Func<TEvent, TBehavior, TSnapshot> snapshotFunction)
+            Func<TEvent, TBehavior, TSnapshot> f)
         {
-            return Snapshot(behavior, new BinaryFunction<TEvent, TBehavior, TSnapshot>(snapshotFunction));
+            return Snapshot(behavior, new BinaryFunction<TEvent, TBehavior, TSnapshot>(f));
         }
 
         /// <summary>
@@ -175,22 +175,22 @@ namespace sodium
         /// make any assumptions about the ordering, and the combining function would
         /// ideally be commutative.
         /// </summary>
-        /// <param name="combiningFunction"></param>
+        /// <param name="f"></param>
         /// <returns></returns>
-        public Event<TEvent> Coalesce(IBinaryFunction<TEvent, TEvent, TEvent> combiningFunction)
+        public Event<TEvent> Coalesce(IBinaryFunction<TEvent, TEvent, TEvent> f)
         {
-            return Transaction.Apply(new CoalesceInvoker<TEvent>(this, combiningFunction));
+            return Transaction.Apply(new CoalesceInvoker<TEvent>(this, f));
         }
 
-        public Event<TEvent> Coalesce(Func<TEvent, TEvent, TEvent> combiningFunction)
+        public Event<TEvent> Coalesce(Func<TEvent, TEvent, TEvent> f)
         {
-            return Coalesce(new BinaryFunction<TEvent, TEvent, TEvent>(combiningFunction));
+            return Coalesce(new BinaryFunction<TEvent, TEvent, TEvent>(f));
         }
 
-        public Event<TEvent> Coalesce(Transaction transaction, IBinaryFunction<TEvent, TEvent, TEvent> combiningFunction)
+        public Event<TEvent> Coalesce(Transaction transaction, IBinaryFunction<TEvent, TEvent, TEvent> f)
         {
-            var sink = new CoalesceEventSink<TEvent>(this, combiningFunction);
-            var handler = new CoalesceHandler<TEvent>(combiningFunction, sink);
+            var sink = new CoalesceEventSink<TEvent>(this, f);
+            var handler = new CoalesceHandler<TEvent>(f, sink);
             var listener = Listen(sink.Node, transaction, handler, false);
             return sink.RegisterListener(listener);
         }
@@ -214,23 +214,24 @@ namespace sodium
         /// within the same transaction), they are combined using the same logic as
         /// 'coalesce'.
         /// </summary>
-        /// <param name="combiningFunction"></param>
+        /// <param name="f"></param>
         /// <param name="event1"></param>
         /// <param name="event2"></param>
         /// <returns></returns>
         public static Event<TEvent> MergeWith(
-            IBinaryFunction<TEvent, TEvent, TEvent> combiningFunction, 
+            IBinaryFunction<TEvent, TEvent, TEvent> f, 
             Event<TEvent> event1, 
             Event<TEvent> event2)
         {
-            return Merge(event1, event2).Coalesce(combiningFunction);
+            return Merge(event1, event2).Coalesce(f);
         }
 
         public static Event<TEvent> MergeWith(
-            Func<TEvent, TEvent, TEvent> combiningFunction,
-            Event<TEvent> event1, Event<TEvent> event2)
+            Func<TEvent, TEvent, TEvent> f,
+            Event<TEvent> event1, 
+            Event<TEvent> event2)
         {
-            return MergeWith(new BinaryFunction<TEvent, TEvent, TEvent>(combiningFunction), event1, event2);
+            return MergeWith(new BinaryFunction<TEvent, TEvent, TEvent>(f), event1, event2);
         }
 
         /// <summary>
@@ -280,26 +281,26 @@ namespace sodium
         /// is passed the input and the old state and returns the new state and output value.
         /// </summary>
         /// <param name="initState"></param>
-        /// <param name="melayMachineFunction"></param>
+        /// <param name="f"></param>
         /// <returns></returns>
-        public Event<TNewEvent> Collect<TNewEvent, TState>(
+        public Event<TResultEvent> Collect<TResultEvent, TState>(
             TState initState, 
-            IBinaryFunction<TEvent, TState, Tuple2<TNewEvent, TState>> melayMachineFunction)
+            IBinaryFunction<TEvent, TState, Tuple2<TResultEvent, TState>> f)
         {
             var loop = new EventLoop<TState>();
             var behavior = loop.Hold(initState);
-            var snapshot = Snapshot(behavior, melayMachineFunction);
-            var event1 = snapshot.Map(new Function<Tuple2<TNewEvent, TState>, TNewEvent>(bs => bs.V1));
-            var event2 = snapshot.Map(new Function<Tuple2<TNewEvent, TState>, TState>(bs => bs.V2));
+            var snapshot = Snapshot(behavior, f);
+            var event1 = snapshot.Map(new Function<Tuple2<TResultEvent, TState>, TResultEvent>(bs => bs.V1));
+            var event2 = snapshot.Map(new Function<Tuple2<TResultEvent, TState>, TState>(bs => bs.V2));
             loop.Loop(event2);
             return event1;
         }
 
-        public Event<TNewEvent> Collect<TNewEvent, TState>(
+        public Event<TResultEvent> Collect<TResultEvent, TState>(
             TState initState,
-            Func<TEvent, TState, Tuple2<TNewEvent, TState>> melayMachineFunction)
+            Func<TEvent, TState, Tuple2<TResultEvent, TState>> f)
         {
-            var function = new BinaryFunction<TEvent, TState, Tuple2<TNewEvent, TState>>(melayMachineFunction);
+            var function = new BinaryFunction<TEvent, TState, Tuple2<TResultEvent, TState>>(f);
             return Collect(initState, function);
         }
 
@@ -307,22 +308,22 @@ namespace sodium
         /// Accumulate on input event, outputting the new state each time.
         /// </summary>
         /// <param name="initState"></param>
-        /// <param name="snapshotGenerator"></param>
+        /// <param name="f"></param>
         /// <returns></returns>
         public Behavior<TState> Accum<TState>(
             TState initState, 
-            IBinaryFunction<TEvent, TState, TState> snapshotGenerator)
+            IBinaryFunction<TEvent, TState, TState> f)
         {
             var loop = new EventLoop<TState>();
             var behavior = loop.Hold(initState);
-            var snapshot = Snapshot(behavior, snapshotGenerator);
+            var snapshot = Snapshot(behavior, f);
             loop.Loop(snapshot);
             return snapshot.Hold(initState);
         }
 
-        public Behavior<TState> Accum<TState>(TState initState, Func<TEvent, TState, TState> snapshotGenerator)
+        public Behavior<TState> Accum<TState>(TState initState, Func<TEvent, TState, TState> f)
         {
-            return Accum(initState, new BinaryFunction<TEvent, TState, TState>(snapshotGenerator));
+            return Accum(initState, new BinaryFunction<TEvent, TState, TState>(f));
         }
 
         /// <summary>

@@ -127,14 +127,14 @@ namespace sodium
         /// <param name="f"></param>
         /// <returns>
         /// </returns>
-        public Behavior<TNewBehavior> Map<TNewBehavior>(IFunction<TBehavior, TNewBehavior> f)
+        public Behavior<TResultBehavior> Map<TResultBehavior>(IFunction<TBehavior, TResultBehavior> f)
         {
             return Updates().Map(f).Hold(f.Apply(Sample()));
         }
 
-        public Behavior<TNewBehavior> Map<TNewBehavior>(Func<TBehavior, TNewBehavior> f)
+        public Behavior<TResultBehavior> Map<TResultBehavior>(Func<TBehavior, TResultBehavior> f)
         {
-            return Map(new Function<TBehavior, TNewBehavior>(f));
+            return Map(new Function<TBehavior, TResultBehavior>(f));
         }
 
         /// <summary>
@@ -143,20 +143,20 @@ namespace sodium
         /// <param name="f"></param>
         /// <param name="behavior"></param>
         /// <returns></returns>
-        public Behavior<TResultBehavior> Lift<TSecondBehavior, TResultBehavior>(
-            IBinaryFunction<TBehavior, TSecondBehavior, TResultBehavior> f, 
-            Behavior<TSecondBehavior> behavior)
+        public Behavior<TResultBehavior> Lift<TBehavior2, TResultBehavior>(
+            IBinaryFunction<TBehavior, TBehavior2, TResultBehavior> f, 
+            Behavior<TBehavior2> behavior)
         {
-            var behaviorLifter = new BinaryBehaviorLifter<TBehavior, TSecondBehavior, TResultBehavior>(f);
+            var behaviorLifter = new BinaryBehaviorLifter<TBehavior, TBehavior2, TResultBehavior>(f);
 		    var behaviorMap = Map(behaviorLifter);
-		    return Behavior<TSecondBehavior>.Apply(behaviorMap, behavior);
+		    return Behavior<TBehavior2>.Apply(behaviorMap, behavior);
         }
 
-        public Behavior<TResultBehavior> Lift<TSecondBehavior, TResultBehavior>(
-            Func<TBehavior, TSecondBehavior, TResultBehavior> f,
-            Behavior<TSecondBehavior> behavior)
+        public Behavior<TResultBehavior> Lift<TBehavior2, TResultBehavior>(
+            Func<TBehavior, TBehavior2, TResultBehavior> f,
+            Behavior<TBehavior2> behavior)
         {
-            return Lift(new BinaryFunction<TBehavior, TSecondBehavior, TResultBehavior>(f), behavior);
+            return Lift(new BinaryFunction<TBehavior, TBehavior2, TResultBehavior>(f), behavior);
         }
        
         /// <summary>
@@ -166,20 +166,20 @@ namespace sodium
         /// <param name="behavior1"></param>
         /// <param name="behavior2"></param>
         /// <returns></returns>
-        public static Behavior<TResultBehavior> Lift<TSecondBehavior, TResultBehavior>(
-            IBinaryFunction<TBehavior, TSecondBehavior, TResultBehavior> f, 
+        public static Behavior<TResultBehavior> Lift<TBehavior2, TResultBehavior>(
+            IBinaryFunction<TBehavior, TBehavior2, TResultBehavior> f, 
             Behavior<TBehavior> behavior1, 
-            Behavior<TSecondBehavior> behavior2)
+            Behavior<TBehavior2> behavior2)
         {
             return behavior1.Lift(f, behavior2);
         }
 
-        public static Behavior<TResult> Lift<TNewBehavior, TResult>(
-            Func<TBehavior, TNewBehavior, TResult> f,
+        public static Behavior<TResultBehavior> Lift<TBehavior2, TResultBehavior>(
+            Func<TBehavior, TBehavior2, TResultBehavior> f,
             Behavior<TBehavior> behavior1,
-            Behavior<TNewBehavior> behavior2)
+            Behavior<TBehavior2> behavior2)
         {
-            return Lift(new BinaryFunction<TBehavior, TNewBehavior, TResult>(f), behavior1, behavior2);
+            return Lift(new BinaryFunction<TBehavior, TBehavior2, TResultBehavior>(f), behavior1, behavior2);
         }
         
         /// <summary>
@@ -216,8 +216,8 @@ namespace sodium
         /// <param name="behavior2"></param>
         /// <param name="behavior3"></param>
         /// <returns></returns>
-        public static Behavior<TResult> Lift<TBehavior2, TBehavior3, TResult>(
-            ITernaryFunction<TBehavior, TBehavior2, TBehavior3, TResult> f, 
+        public static Behavior<TResultBehavior> Lift<TBehavior2, TBehavior3, TResultBehavior>(
+            ITernaryFunction<TBehavior, TBehavior2, TBehavior3, TResultBehavior> f, 
             Behavior<TBehavior> behavior1, 
             Behavior<TBehavior2> behavior2, 
             Behavior<TBehavior3> behavior3)
@@ -225,13 +225,13 @@ namespace sodium
             return behavior1.Lift(f, behavior2, behavior3);
         }
 
-        public static Behavior<TResult> Lift<TBehavior2, TBehavior3, TResult>(
-            Func<TBehavior, TBehavior2, TBehavior3, TResult> toLift,
+        public static Behavior<TResultBehavior> Lift<TBehavior2, TBehavior3, TResultBehavior>(
+            Func<TBehavior, TBehavior2, TBehavior3, TResultBehavior> f,
             Behavior<TBehavior> behavior1,
             Behavior<TBehavior2> behavior2,
             Behavior<TBehavior3> behavior3)
         {
-            return behavior1.Lift(toLift, behavior2, behavior3);
+            return behavior1.Lift(f, behavior2, behavior3);
         }
 
         /// <summary>
@@ -241,13 +241,13 @@ namespace sodium
         /// <param name="f"></param>
         /// <param name="behavior"></param>
         /// <returns></returns>
-        public static Behavior<TNewBehavior> Apply<TNewBehavior>(
-            Behavior<IFunction<TBehavior, TNewBehavior>> f, 
+        public static Behavior<TResultBehavior> Apply<TResultBehavior>(
+            Behavior<IFunction<TBehavior, TResultBehavior>> f, 
             Behavior<TBehavior> behavior)
         {
-            var sink = new EventSink<TNewBehavior>();
-            var invoker = new BehaviorPrioritizedInvoker<TBehavior, TNewBehavior>(sink, f, behavior);
-            var handler1 = new BehaviorFunctionUpdateHandler<TBehavior, TNewBehavior>(invoker);
+            var sink = new EventSink<TResultBehavior>();
+            var invoker = new BehaviorPrioritizedInvoker<TBehavior, TResultBehavior>(sink, f, behavior);
+            var handler1 = new BehaviorFunctionUpdateHandler<TBehavior, TResultBehavior>(invoker);
             var listener1 = f.Updates().Listen(sink.Node, handler1);
             var handler2 = new BehaviorUpdateHandler<TBehavior>(invoker);
             var listener2 = behavior.Updates().Listen(sink.Node, handler2);
@@ -296,29 +296,29 @@ namespace sodium
         /// <param name="initState"></param>
         /// <param name="f"></param>
         /// <returns></returns>
-        public Behavior<TNewBehavior> Collect<TNewBehavior, TState>(
+        public Behavior<TResultBehavior> Collect<TResultBehavior, TState>(
             TState initState, 
-            IBinaryFunction<TBehavior, TState, Tuple2<TNewBehavior, TState>> f)
+            IBinaryFunction<TBehavior, TState, Tuple2<TResultBehavior, TState>> f)
         {
             var combiningFunction = new BinaryFunction<TBehavior, TBehavior, TBehavior>((a, b) => b);
             var evt = Updates().Coalesce(combiningFunction);
             var value = Sample();
             var zbs = f.Apply(value, initState);
-            var loop = new EventLoop<Tuple2<TNewBehavior, TState>>();
+            var loop = new EventLoop<Tuple2<TResultBehavior, TState>>();
             var bbs = loop.Hold(zbs);
-            var mapFunction1 = new Function<Tuple2<TNewBehavior, TState>, TState>(x => x.V2);
+            var mapFunction1 = new Function<Tuple2<TResultBehavior, TState>, TState>(x => x.V2);
             var bs = bbs.Map(mapFunction1);
             var ebsOut = evt.Snapshot(bs, f);
             loop.Loop(ebsOut);
-            var mapFunction2 = new Function<Tuple2<TNewBehavior, TState>, TNewBehavior>(x => x.V1);
+            var mapFunction2 = new Function<Tuple2<TResultBehavior, TState>, TResultBehavior>(x => x.V1);
             return bbs.Map(mapFunction2);
         }
 
-        public Behavior<TNewBehavior> Collect<TNewBehavior, TState>(
+        public Behavior<TResultBehavior> Collect<TResultBehavior, TState>(
             TState initState,
-            Func<TBehavior, TState, Tuple2<TNewBehavior, TState>> f)
+            Func<TBehavior, TState, Tuple2<TResultBehavior, TState>> f)
         {
-            return Collect(initState, new BinaryFunction<TBehavior, TState, Tuple2<TNewBehavior, TState>>(f));
+            return Collect(initState, new BinaryFunction<TBehavior, TState, Tuple2<TResultBehavior, TState>>(f));
         }
 
         public void Dispose()
