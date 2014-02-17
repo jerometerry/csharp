@@ -270,8 +270,6 @@ namespace sodium
         /// <returns></returns>
         public Event<TEvent> Gate(Behavior<Boolean> behaviorPredicate)
         {
-            // TODO - default(TEvent) isn't correct for value types such as char, int, etc.
-            // To fix this, we would need to use something like the Maybe monad
             var f = new BinaryFunction<TEvent, bool, Maybe<TEvent>>((a,pred) => pred ? new Maybe<TEvent>(a) : null);
             return Snapshot<Boolean, Maybe<TEvent>>(behaviorPredicate, f).FilterNotNull().Map<TEvent>(a => a.Value);
         }

@@ -4,12 +4,12 @@ namespace sodium
 
     public class Behavior<TBehavior> : IDisposable
     {
-        private Maybe<TBehavior> _valueUpdate;
+        private TBehavior _valueUpdate;
         private bool _disposed;
 
-        public Maybe<TBehavior> Val { get; set; }
+        public TBehavior Val { get; set; }
 
-        public Maybe<TBehavior> ValueUpdate
+        public TBehavior ValueUpdate
         {
             get
             {
@@ -36,7 +36,7 @@ namespace sodium
         {
             Event = new Event<TBehavior>();
             Val = value;
-            ValueUpdate = Maybe<TBehavior>.Null;
+            _valueUpdate = default(TBehavior);
         }
 
         public Behavior(Event<TBehavior> evt, TBehavior initValue)
@@ -50,7 +50,7 @@ namespace sodium
         public void ResetValue()
         {
             Val = ValueUpdate;
-            ValueUpdate = Maybe<TBehavior>.Null;
+            _valueUpdate = default(TBehavior);
             ValueUpdated = false;
         }
 
