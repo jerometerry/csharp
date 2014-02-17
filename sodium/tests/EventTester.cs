@@ -163,7 +163,7 @@ namespace sodium.tests
         {
             EventSink<Int32> ea = new EventSink<Int32>();
             List<Int32> o = new List<Int32>();
-            Behavior<Int32> sum = ea.Accumulate(100, (a, s) => a + s);
+            Behavior<Int32> sum = ea.Accum(100, (a, s) => a + s);
             IListener l = sum.Updates().Listen((x) => { o.Add(x); });
             ea.Send(5);
             ea.Send(7);

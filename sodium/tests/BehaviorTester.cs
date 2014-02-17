@@ -405,7 +405,7 @@ namespace sodium.tests
         {
             var ea = new EventSink<Int32>();
             var o = new List<Int32>();
-            var sum = ea.Accumulate(100, (a,s)=>a+s);
+            var sum = ea.Accum(100, (a,s)=>a+s);
             var l = sum.Value().Listen((x) => { o.Add(x); });
             ea.Send(5);
             ea.Send(7);

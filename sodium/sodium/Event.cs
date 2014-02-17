@@ -11,13 +11,6 @@ namespace sodium
         protected readonly List<TEvent> Firings = new List<TEvent>();
         private bool _disposed;
 
-        /// <summary>
-        /// An event that never fires.
-        /// </summary>
-        public Event()
-        {
-        }
-
         public virtual Object[] SampleNow() 
         { 
             return null; 
@@ -89,7 +82,7 @@ namespace sodium
 
         public Event<TNewEvent> Map<TNewEvent>(Func<TEvent, TNewEvent> mapFunction)
         {
-            return Map<TNewEvent>(new Function<TEvent, TNewEvent>(mapFunction));
+            return Map(new Function<TEvent, TNewEvent>(mapFunction));
         }
 
         /// <summary>
@@ -138,7 +131,7 @@ namespace sodium
             Behavior<TBehavior> behavior,
             Func<TEvent, TBehavior, TSnapshot> snapshotFunction)
         {
-            return Snapshot<TBehavior, TSnapshot>(behavior, new BinaryFunction<TEvent, TBehavior, TSnapshot>(snapshotFunction));
+            return Snapshot(behavior, new BinaryFunction<TEvent, TBehavior, TSnapshot>(snapshotFunction));
         }
 
         /// <summary>
@@ -209,7 +202,7 @@ namespace sodium
         /// <returns></returns>
         public Event<TEvent> LastFiringOnly(Transaction transaction)
         {
-            var combiningFunction = new BinaryFunction<TEvent, TEvent, TEvent>((first, second) => { return second; });
+            var combiningFunction = new BinaryFunction<TEvent, TEvent, TEvent>((first, second) => second);
             return Coalesce(transaction, combiningFunction);
         }
 
@@ -296,8 +289,8 @@ namespace sodium
             var loop = new EventLoop<TState>();
             var behavior = loop.Hold(initState);
             var snapshot = Snapshot(behavior, melayMachineFunction);
-            var event1 = snapshot.Map(new Function<Tuple2<TNewEvent, TState>, TNewEvent>((bs) => bs.V1));
-            var event2 = snapshot.Map(new Function<Tuple2<TNewEvent, TState>, TState>((bs) => bs.V2));
+            var event1 = snapshot.Map(new Function<Tuple2<TNewEvent, TState>, TNewEvent>(bs => bs.V1));
+            var event2 = snapshot.Map(new Function<Tuple2<TNewEvent, TState>, TState>(bs => bs.V2));
             loop.Loop(event2);
             return event1;
         }
@@ -307,7 +300,7 @@ namespace sodium
             Func<TEvent, TState, Tuple2<TNewEvent, TState>> melayMachineFunction)
         {
             var function = new BinaryFunction<TEvent, TState, Tuple2<TNewEvent, TState>>(melayMachineFunction);
-            return Collect<TNewEvent, TState>(initState, function);
+            return Collect(initState, function);
         }
 
         /// <summary>
@@ -316,7 +309,7 @@ namespace sodium
         /// <param name="initState"></param>
         /// <param name="snapshotGenerator"></param>
         /// <returns></returns>
-        public Behavior<TState> Accumulate<TState>(
+        public Behavior<TState> Accum<TState>(
             TState initState, 
             IBinaryFunction<TEvent, TState, TState> snapshotGenerator)
         {
@@ -327,9 +320,9 @@ namespace sodium
             return snapshot.Hold(initState);
         }
 
-        public Behavior<TState> Accumulate<TState>(TState initState, Func<TEvent, TState, TState> snapshotGenerator)
+        public Behavior<TState> Accum<TState>(TState initState, Func<TEvent, TState, TState> snapshotGenerator)
         {
-            return Accumulate<TState>(initState, new BinaryFunction<TEvent, TState, TState>(snapshotGenerator));
+            return Accum(initState, new BinaryFunction<TEvent, TState, TState>(snapshotGenerator));
         }
 
         /// <summary>
