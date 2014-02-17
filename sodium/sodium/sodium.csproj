@@ -59,8 +59,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplyBehaviorEventSinkSender.cs" />
-    <Compile Include="ApplyBehaviorTransactionHandler.cs" />
-    <Compile Include="ApplyBehaviorTransactionHandler2.cs" />
+    <Compile Include="BehaviorFunctionUpdateHandler.cs" />
+    <Compile Include="BehaviorUpdateHandler.cs" />
     <Compile Include="Behavior.cs" />
     <Compile Include="BehaviorBuilder.cs" />
     <Compile Include="BehaviorLifter2.cs" />

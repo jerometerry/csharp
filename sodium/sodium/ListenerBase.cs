@@ -1,6 +1,6 @@
 namespace sodium
 {
-    public abstract class ListenerBase : IListener
+    abstract class ListenerBase : IListener
     {
         public abstract void Unlisten();
 

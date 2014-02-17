@@ -3,7 +3,7 @@
     using System;
     using System.Collections.Generic;
 
-    public class FilteredEventSink<TEvent> : EventSink<TEvent>
+    class FilteredEventSink<TEvent> : EventSink<TEvent>
     {
         private readonly Event<TEvent> _event;
         private readonly IFunction<TEvent, Boolean> _predicate;

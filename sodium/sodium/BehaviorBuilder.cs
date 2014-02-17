@@ -1,6 +1,6 @@
 namespace sodium
 {
-    public class BehaviorBuilder<TEvent> : IFunction<Transaction, Behavior<TEvent>>
+    class BehaviorBuilder<TEvent> : IFunction<Transaction, Behavior<TEvent>>
     {
         private readonly Event<TEvent> _event;
         private readonly TEvent _initValue;

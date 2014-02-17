@@ -1,6 +1,6 @@
 ﻿namespace sodium
 {
-    public class CoalesceTransactionHandler<TEvent> : IHandler<Transaction>
+    class CoalesceTransactionHandler<TEvent> : IHandler<Transaction>
     {
         private readonly CoalesceHandler<TEvent> _handler;
         private readonly EventSink<TEvent> _sink;

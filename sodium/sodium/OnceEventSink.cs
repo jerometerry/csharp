@@ -2,7 +2,7 @@
 {
     using System;
 
-    public class OnceEventSink<TEvent> : EventSink<TEvent>
+    class OnceEventSink<TEvent> : EventSink<TEvent>
     {
         private readonly Event<TEvent> _event;
         private readonly IListener[] _listeners;

@@ -6,7 +6,7 @@
     /// TODO - codesmell. Looks very similar to EventSinkRunner and EventSinkSender
     /// </summary>
     /// <typeparam name="TEvent"></typeparam>
-    public class FilteredEventSinkSender<TEvent> : ITransactionHandler<TEvent>
+    class FilteredEventSinkSender<TEvent> : ITransactionHandler<TEvent>
     {
         private readonly IFunction<TEvent, Boolean> _predicate;
         private readonly EventSink<TEvent> _sink;

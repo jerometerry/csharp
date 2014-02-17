@@ -247,9 +247,9 @@ namespace sodium
         {
             var sink = new EventSink<TNewBehavior>();
             var invoker = new BehaviorPrioritizedInvoker<TBehavior, TNewBehavior>(sink, f, behavior);
-            var handler1 = new ApplyBehaviorTransactionHandler<TBehavior, TNewBehavior>(invoker);
+            var handler1 = new BehaviorFunctionUpdateHandler<TBehavior, TNewBehavior>(invoker);
             var listener1 = f.Updates().Listen(sink.Node, handler1);
-            var handler2 = new ApplyBehaviorTransactionHandler2<TBehavior, TNewBehavior>(invoker);
+            var handler2 = new BehaviorUpdateHandler<TBehavior>(invoker);
             var listener2 = behavior.Updates().Listen(sink.Node, handler2);
             var initValue = f.Sample().Apply(behavior.Sample());
             return sink.RegisterListener(listener1).RegisterListener(listener2).Hold(initValue);

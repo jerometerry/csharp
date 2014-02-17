@@ -1,6 +1,6 @@
 ﻿namespace sodium
 {
-    public class DelayTransactionHandler<TEvent> : ITransactionHandler<TEvent>
+    class DelayTransactionHandler<TEvent> : ITransactionHandler<TEvent>
     {
         private readonly EventSink<TEvent> _sink;
 

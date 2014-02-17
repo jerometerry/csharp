@@ -1,6 +1,6 @@
 namespace sodium
 {
-    public class EventToBehaviorConverter<TBehavior> : IHandler<Transaction>
+    class EventToBehaviorConverter<TBehavior> : IHandler<Transaction>
     {
         private readonly Behavior<TBehavior> _behavior;
         private readonly Event<TBehavior> _event;

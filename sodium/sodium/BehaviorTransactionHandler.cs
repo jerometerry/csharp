@@ -1,6 +1,6 @@
 namespace sodium
 {
-    public sealed class BehaviorTransactionHandler<TBehavior> : ITransactionHandler<TBehavior>
+    sealed class BehaviorTransactionHandler<TBehavior> : ITransactionHandler<TBehavior>
     {
         private readonly Behavior<TBehavior> _behavior;
 
@@ -13,10 +13,7 @@ namespace sodium
         {
             if (!_behavior.ValueUpdated)
             {
-                transaction.Last(new Runnable(() =>
-                {
-                    _behavior.ResetValue();
-                }));
+                transaction.Last(new Runnable(() => _behavior.ResetValue()));
                 _behavior.ValueUpdate = behavior;
             }
         }

@@ -1,6 +1,6 @@
 namespace sodium
 {
-    public class GetBehaviorValueInvoker<TBehavior> : IFunction<Transaction, Event<TBehavior>>
+    class GetBehaviorValueInvoker<TBehavior> : IFunction<Transaction, Event<TBehavior>>
     {
         private readonly Behavior<TBehavior> _behavior;
 

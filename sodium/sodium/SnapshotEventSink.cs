@@ -2,7 +2,7 @@
 {
     using System;
 
-    public class SnapshotEventSink<TEvent, TBehavior, TSnapshot> : EventSink<TSnapshot>
+    class SnapshotEventSink<TEvent, TBehavior, TSnapshot> : EventSink<TSnapshot>
     {
         private readonly Event<TEvent> _event;
         private readonly IBinaryFunction<TEvent, TBehavior, TSnapshot> _snapshotFunction;

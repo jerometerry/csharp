@@ -1,6 +1,6 @@
 ﻿namespace sodium
 {
-    public class DualListener : ListenerBase
+    class DualListener : ListenerBase
     {
         private readonly IListener _listener1;
         private readonly IListener _listener2;

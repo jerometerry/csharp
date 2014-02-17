@@ -2,7 +2,7 @@ namespace sodium
 {
     using System;
 
-    public class MappedEventSink<TEvent, TNewEvent> : EventSink<TNewEvent>
+    class MappedEventSink<TEvent, TNewEvent> : EventSink<TNewEvent>
     {
         private readonly Event<TEvent> _event;
         private readonly IFunction<TEvent, TNewEvent> _mapFunction;

@@ -2,7 +2,7 @@
 {
     using System;
 
-    public class CoalesceEventSink<TEvent> : EventSink<TEvent>
+    class CoalesceEventSink<TEvent> : EventSink<TEvent>
     {
         private readonly Event<TEvent> _event;
         private readonly IBinaryFunction<TEvent, TEvent, TEvent> _combiningFunction;

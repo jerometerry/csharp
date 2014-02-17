@@ -1,6 +1,6 @@
 namespace sodium
 {
-    public class EventLoopSender<TEvent> : ITransactionHandler<TEvent>
+    class EventLoopSender<TEvent> : ITransactionHandler<TEvent>
     {
         private readonly EventLoop<TEvent> _loop;
 

@@ -2,7 +2,7 @@
 {
     using System;
 
-    public sealed class Listener<TEvent> : ListenerBase, IDisposable
+    sealed class Listener<TEvent> : ListenerBase, IDisposable
     {
         /**
          * It's essential that we keep the listener alive while the caller holds

@@ -1,6 +1,6 @@
 ﻿namespace sodium
 {
-    public class ListenerInvoker<TEvent> : IFunction<Transaction, IListener>
+    class ListenerInvoker<TEvent> : IFunction<Transaction, IListener>
     {
         private readonly Event<TEvent> _listener;
         private readonly Node _target;

@@ -2,7 +2,7 @@
 {
     using System;
 
-    public class MergeEventSink<TEvent> : EventSink<TEvent>
+    class MergeEventSink<TEvent> : EventSink<TEvent>
     {
         private readonly Event<TEvent> _event1;
         private readonly Event<TEvent> _event2;

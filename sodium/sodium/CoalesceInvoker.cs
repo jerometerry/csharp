@@ -1,6 +1,6 @@
 namespace sodium
 {
-    public class CoalesceInvoker<TEvent> : IFunction<Transaction, Event<TEvent>>
+    class CoalesceInvoker<TEvent> : IFunction<Transaction, Event<TEvent>>
     {
         private readonly Event<TEvent> _event;
         private readonly IBinaryFunction<TEvent, TEvent, TEvent> _combiningFunction;

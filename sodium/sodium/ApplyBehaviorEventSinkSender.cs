@@ -1,6 +1,6 @@
 namespace sodium
 {
-    public class ApplyBehaviorEventSinkSender<TBehavior, TNewBehavior> : IHandler<Transaction>
+    class ApplyBehaviorEventSinkSender<TBehavior, TNewBehavior> : IHandler<Transaction>
     {
         private readonly EventSink<TNewBehavior> _sink;
         private readonly Behavior<IFunction<TBehavior, TNewBehavior>> _behaviorFunction;

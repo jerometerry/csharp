@@ -1,6 +1,6 @@
 ﻿namespace sodium
 {
-    public class SnapshotSinkSender<TEvent, TBehavior, TSnapshot> : ITransactionHandler<TEvent>
+    class SnapshotSinkSender<TEvent, TBehavior, TSnapshot> : ITransactionHandler<TEvent>
     {
         private readonly EventSink<TSnapshot> _sink;
         private readonly IBinaryFunction<TEvent, TBehavior, TSnapshot> _snapshotFunction;

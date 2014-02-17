@@ -2,7 +2,7 @@
 {
     using System;
 
-    public class Entry : IComparable<Entry>
+    class Entry : IComparable<Entry>
     {
         private readonly Node _rank;
         public readonly IHandler<Transaction> Action;

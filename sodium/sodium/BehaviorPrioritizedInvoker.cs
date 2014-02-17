@@ -1,6 +1,6 @@
 namespace sodium
 {
-    public class BehaviorPrioritizedInvoker<TBehavior, TNewBehavior> : IHandler<Transaction>
+    class BehaviorPrioritizedInvoker<TBehavior, TNewBehavior> : IHandler<Transaction>
     {
         public bool Fired = false;
         private readonly EventSink<TNewBehavior> _sink;

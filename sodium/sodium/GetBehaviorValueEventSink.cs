@@ -2,7 +2,7 @@ namespace sodium
 {
     using System;
 
-    public class GetBehaviorValueEventSink<TBehavior> : EventSink<TBehavior>
+    class GetBehaviorValueEventSink<TBehavior> : EventSink<TBehavior>
     {
         private readonly Behavior<TBehavior> _behavior;
 

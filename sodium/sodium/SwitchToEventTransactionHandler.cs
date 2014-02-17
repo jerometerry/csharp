@@ -2,7 +2,7 @@ namespace sodium
 {
     using System;
 
-    public sealed class SwitchToEventTransactionHandler<TBehavior> : ITransactionHandler<Event<TBehavior>>, IDisposable
+    sealed class SwitchToEventTransactionHandler<TBehavior> : ITransactionHandler<Event<TBehavior>>, IDisposable
     {
         private readonly EventSink<TBehavior> _sink;
         private IListener _currentListener;

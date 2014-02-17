@@ -1,6 +1,6 @@
 ﻿namespace sodium
 {
-    public class OnceSinkSender<TEvent> : ITransactionHandler<TEvent>
+    class OnceSinkSender<TEvent> : ITransactionHandler<TEvent>
     {
         private readonly EventSink<TEvent> _sink;
         private readonly IListener[] _listeners;

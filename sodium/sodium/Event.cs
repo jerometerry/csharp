@@ -7,7 +7,7 @@ namespace sodium
     {
         protected readonly List<ITransactionHandler<TEvent>> Actions = new List<ITransactionHandler<TEvent>>();
         protected readonly List<IListener> Listeners = new List<IListener>();
-        public Node Node = new Node(0L);
+        internal Node Node = new Node(0L);
         protected readonly List<TEvent> Firings = new List<TEvent>();
         private bool _disposed;
 

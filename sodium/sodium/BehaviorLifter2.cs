@@ -1,6 +1,6 @@
 namespace sodium
 {
-    public class BehaviorLifter2<TFirstBehavior,TSecondBehavior,TResultBehavior> : 
+    class BehaviorLifter2<TFirstBehavior,TSecondBehavior,TResultBehavior> : 
         IFunction<TFirstBehavior, IFunction<TSecondBehavior, TResultBehavior>>
     {
         private readonly IBinaryFunction<TFirstBehavior, TSecondBehavior, TResultBehavior> _behaviorFunction;
