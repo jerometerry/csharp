@@ -1,5 +1,10 @@
 namespace sodium
 {
+    /// <summary>
+    /// TODO - codesmell. Class name ending with a number 
+    /// </summary>
+    /// <typeparam name="TBehavior"></typeparam>
+    /// <typeparam name="TNewBehavior"></typeparam>
     public class ApplyBehaviorTransactionHandler2<TBehavior, TNewBehavior> : 
         ITransactionHandler<TBehavior>
     {
