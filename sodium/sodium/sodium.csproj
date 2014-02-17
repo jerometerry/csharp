@@ -69,7 +69,7 @@
     <Compile Include="BehaviorLoop.cs" />
     <Compile Include="BehaviorPrioritizedInvoker.cs" />
     <Compile Include="BehaviorSink.cs" />
-    <Compile Include="BehaviorTransactionHandler.cs" />
+    <Compile Include="BehaviorEventListener.cs" />
     <Compile Include="CoalesceEventSink.cs" />
     <Compile Include="CoalesceHandler.cs" />
     <Compile Include="CoalesceInvoker.cs" />

@@ -24,7 +24,7 @@ namespace sodium
 
         public bool ValueUpdated { get; private set; }
 
-        public IListener Cleanup { get; set; }
+        internal IListener EventListener { get; set; }
 
         public Event<TBehavior> Event { get; set; }
 
@@ -334,8 +334,8 @@ namespace sodium
             {
                 if (disposing)
                 {
-                    if (Cleanup != null)
-                        Cleanup.Unlisten();
+                    if (EventListener != null)
+                        EventListener.Unlisten();
                 }
 
                 // Indicate that the instance has been disposed.

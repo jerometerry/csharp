@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Arrays.cs" />
+    <Compile Include="BehaviorSinkTests.cs" />
     <Compile Include="BehaviorTester.cs" />
     <Compile Include="EventTester.cs" />
     <Compile Include="MemoryTest1.cs" />

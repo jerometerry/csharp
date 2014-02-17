@@ -13,8 +13,8 @@ namespace sodium
 
         public void Run(Transaction transaction)
         {
-            var handler = new BehaviorTransactionHandler<TBehavior>(_behavior);
-            _behavior.Cleanup = _event.Listen(Node.Null, transaction, handler, false);
+            var handler = new BehaviorEventListener<TBehavior>(_behavior);
+            _behavior.EventListener = _event.Listen(Node.Null, transaction, handler, false);
         }
     }
 }

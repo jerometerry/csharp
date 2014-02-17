@@ -1,10 +1,10 @@
 namespace sodium
 {
-    sealed class BehaviorTransactionHandler<TBehavior> : ITransactionHandler<TBehavior>
+    sealed class BehaviorEventListener<TBehavior> : ITransactionHandler<TBehavior>
     {
         private readonly Behavior<TBehavior> _behavior;
 
-        public BehaviorTransactionHandler(Behavior<TBehavior> behavior)
+        public BehaviorEventListener(Behavior<TBehavior> behavior)
         {
             _behavior = behavior;
         }
