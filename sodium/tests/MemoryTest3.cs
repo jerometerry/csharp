@@ -1,39 +1,40 @@
-package sodium;
-
-import sodium.*;
-
-public class MemoryTest3
+namespace sodium.tests
 {
-    public static void main(String[] args)
-    {
-        new Thread() {
-            public void run()
-            {
-                try {
-                    while (true) {
-                        System.out.println("memory "+Runtime.getRuntime().totalMemory());
-                        Thread.sleep(5000);
-                    }
-                }
-                catch (InterruptedException e) {
-                    System.out.println(e.toString());
-                }
-            }
-        }.start();
+    using System;
 
-        EventSink<Integer> et = new EventSink<Integer>();
-        Behavior<Integer> t = et.hold(0);
-        EventSink<Integer> eChange = new EventSink<Integer>();
-        Behavior<Behavior<Integer>> oout = eChange.map(x -> t).hold(t);
-        Behavior<Integer> out = Behavior.switchB(oout);
-        Listener l = out.value().listen(tt -> {
-            //System.out.println(tt)
-        });
-        int i = 0;
-        while (i < 1000000000) {
-            eChange.send(i);
-            i++;
+    public class MemoryTest3
+    {
+        public static void main(String[] args)
+        {
+            //new Thread() {
+            //    public void run()
+            //    {
+            //        try {
+            //            while (true) {
+            //                System.out.println("memory "+Runtime.getRuntime().totalMemory());
+            //                Thread.sleep(5000);
+            //            }
+            //        }
+            //        catch (InterruptedException e) {
+            //            System.out.println(e.toString());
+            //        }
+            //    }
+            //}.start();
+
+            EventSink<Int32> et = new EventSink<Int32>();
+            Behavior<Int32> t = et.Hold(0);
+            EventSink<Int32> eChange = new EventSink<Int32>();
+            Behavior<Behavior<Int32>> oout = eChange.Map(x => t).Hold(t);
+            Behavior<Int32> o = Behavior<Int32>.SwitchB(oout);
+            IListener l = o.Value().Listen(tt => {
+                //System.out.println(tt)
+            });
+            int i = 0;
+            while (i < 1000000000) {
+                eChange.Send(i);
+                i++;
+            }
+            l.Unlisten();
         }
-        l.unlisten();
     }
 }

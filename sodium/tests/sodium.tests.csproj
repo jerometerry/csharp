@@ -45,6 +45,10 @@
     <Compile Include="Arrays.cs" />
     <Compile Include="BehaviorTester.cs" />
     <Compile Include="EventTester.cs" />
+    <Compile Include="MemoryTest1.cs" />
+    <Compile Include="MemoryTest3.cs" />
+    <Compile Include="MemoryTest4.cs" />
+    <Compile Include="MemoryTest5.cs" />
     <Compile Include="NodeTester.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SodiumTestCase.cs" />
