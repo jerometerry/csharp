@@ -148,6 +148,11 @@ namespace sodium
             return Updates().Map(mapFunction).Hold(mapFunction.Apply(Sample()));
         }
 
+        public Behavior<TNewBehavior> Map<TNewBehavior>(Func<TBehavior, TNewBehavior> mapFunction)
+        {
+            return Map<TNewBehavior>(new Function<TBehavior, TNewBehavior>(mapFunction));
+        }
+
         /**
          * Lift a binary function into behaviors.
          */
@@ -160,15 +165,30 @@ namespace sodium
 		    return Behavior<TSecondBehavior>.Apply(behaviorMap, behavior);
         }
 
+        public Behavior<TResultBehavior> Lift<TSecondBehavior, TResultBehavior>(
+            Func<TBehavior, TSecondBehavior, TResultBehavior> liftFunction,
+            Behavior<TSecondBehavior> behavior)
+        {
+            return Lift<TSecondBehavior, TResultBehavior>(new BinaryFunction<TBehavior, TSecondBehavior, TResultBehavior>(liftFunction), behavior);
+        }
+
         /**
 	     * Lift a binary function into behaviors.
 	     */
-        public static Behavior<TResult> Lift<TNewBehavior, TResult>(
-            IBinaryFunction<TBehavior, TNewBehavior, TResult> liftFunction, 
+        public static Behavior<TResultBehavior> Lift<TSecondBehavior, TResultBehavior>(
+            IBinaryFunction<TBehavior, TSecondBehavior, TResultBehavior> liftFunction, 
             Behavior<TBehavior> behavior1, 
-            Behavior<TNewBehavior> behavior2)
+            Behavior<TSecondBehavior> behavior2)
         {
             return behavior1.Lift(liftFunction, behavior2);
+        }
+
+        public static Behavior<TResult> Lift<TNewBehavior, TResult>(
+            Func<TBehavior, TNewBehavior, TResult> liftFunction,
+            Behavior<TBehavior> behavior1,
+            Behavior<TNewBehavior> behavior2)
+        {
+            return Lift(new BinaryFunction<TBehavior, TNewBehavior, TResult>(liftFunction), behavior1, behavior2);
         }
 
         /**
@@ -185,6 +205,14 @@ namespace sodium
             return Behavior<TBehavior3>.Apply(behaviorFunction2, behavior3);
         }
 
+        public Behavior<TResultBehavior> Lift<TBehavior2, TBehavior3, TResultBehavior>(
+            Func<TBehavior, TBehavior2, TBehavior3, TResultBehavior> behaviorFunction,
+            Behavior<TBehavior2> behavior2,
+            Behavior<TBehavior3> behavior3)
+        {
+            return Lift(new TernaryFunction<TBehavior, TBehavior2, TBehavior3, TResultBehavior>(behaviorFunction), behavior2, behavior3);
+        }
+
         /**
 	     * Lift a ternary function into behaviors.
 	     */
@@ -192,6 +220,15 @@ namespace sodium
             ITernaryFunction<TBehavior, TBehavior2, TBehavior3, TResult> liftFunction, 
             Behavior<TBehavior> behavior1, 
             Behavior<TBehavior2> behavior2, 
+            Behavior<TBehavior3> behavior3)
+        {
+            return behavior1.Lift(liftFunction, behavior2, behavior3);
+        }
+
+        public static Behavior<TResult> Lift<TBehavior2, TBehavior3, TResult>(
+            Func<TBehavior, TBehavior2, TBehavior3, TResult> liftFunction,
+            Behavior<TBehavior> behavior1,
+            Behavior<TBehavior2> behavior2,
             Behavior<TBehavior3> behavior3)
         {
             return behavior1.Lift(liftFunction, behavior2, behavior3);
@@ -262,6 +299,13 @@ namespace sodium
             loop.Loop(ebsOut);
             var mapFunction2 = new Function<Tuple2<TNewBehavior, TState>, TNewBehavior>((x) => x.V1);
             return bbs.Map(mapFunction2);
+        }
+
+        public Behavior<TNewBehavior> Collect<TNewBehavior, TState>(
+            TState initState,
+            Func<TBehavior, TState, Tuple2<TNewBehavior, TState>> melayMachineFunction)
+        {
+            return Collect(initState, new BinaryFunction<TBehavior, TState, Tuple2<TNewBehavior, TState>>(melayMachineFunction));
         }
 
         public void Dispose()

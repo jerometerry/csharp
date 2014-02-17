@@ -79,6 +79,11 @@ namespace sodium
             return o.AddCleanup(l);
         }
 
+        public Event<TNewEvent> Map<TNewEvent>(Func<TEvent, TNewEvent> mapFunction)
+        {
+            return Map<TNewEvent>(new Function<TEvent, TNewEvent>(mapFunction));
+        }
+
         /**
          * Create a behavior with the specified initial value, that gets updated
          * by the values coming through the event. The 'current value' of the behavior
@@ -113,6 +118,13 @@ namespace sodium
             var sink = new SnapshotEventSink<TEvent, TBehavior, TSnapshot>(evt, snapshotFunction, behavior);
             var listener = Listen(sink.Node, new SnapshotSinkSender<TEvent, TBehavior, TSnapshot>(sink, snapshotFunction, behavior));
             return sink.AddCleanup(listener);
+        }
+
+        public Event<TSnapshot> Snapshot<TBehavior, TSnapshot>(
+            Behavior<TBehavior> behavior,
+            Func<TEvent, TBehavior, TSnapshot> snapshotFunction)
+        {
+            return Snapshot<TBehavior, TSnapshot>(behavior, new BinaryFunction<TEvent, TBehavior, TSnapshot>(snapshotFunction));
         }
 
         /**
@@ -157,6 +169,11 @@ namespace sodium
             return Transaction.Apply(new CoalesceInvoker<TEvent>(this, combiningFunction));
         }
 
+        public Event<TEvent> Coalesce(Func<TEvent, TEvent, TEvent> combiningFunction)
+        {
+            return Coalesce(new BinaryFunction<TEvent, TEvent, TEvent>(combiningFunction));
+        }
+
         public Event<TEvent> Coalesce(Transaction transaction, IBinaryFunction<TEvent, TEvent, TEvent> combiningFunction)
         {
             var evt = this;
@@ -183,9 +200,18 @@ namespace sodium
          * within the same transaction), they are combined using the same logic as
          * 'coalesce'.
          */
-        public static Event<TEvent> MergeWith(IBinaryFunction<TEvent, TEvent, TEvent> combiningFunction, Event<TEvent> event1, Event<TEvent> event2)
+        public static Event<TEvent> MergeWith(
+            IBinaryFunction<TEvent, TEvent, TEvent> combiningFunction, 
+            Event<TEvent> event1, Event<TEvent> event2)
         {
             return Merge(event1, event2).Coalesce(combiningFunction);
+        }
+
+        public static Event<TEvent> MergeWith(
+            Func<TEvent, TEvent, TEvent> combiningFunction,
+            Event<TEvent> event1, Event<TEvent> event2)
+        {
+            return MergeWith(new BinaryFunction<TEvent, TEvent, TEvent>(combiningFunction), event1, event2);
         }
 
         /**
@@ -197,6 +223,11 @@ namespace sodium
             var sink = new FilteredEventSink<TEvent>(evt, predicate);
             var listener = Listen(sink.Node, new FilteredEventSinkSender<TEvent>(predicate, sink));
             return sink.AddCleanup(listener);
+        }
+
+        public Event<TEvent> Filter(Func<TEvent, Boolean> predicate)
+        {
+            return Filter(new Function<TEvent, Boolean>(predicate));
         }
 
         /**
@@ -237,6 +268,13 @@ namespace sodium
             return eb;
         }
 
+        public Event<TNewEvent> Collect<TNewEvent, TState>(
+            TState initState,
+            Func<TEvent, TState, Tuple2<TNewEvent, TState>> melayMachineFunction)
+        {
+            return Collect<TNewEvent, TState>(initState, new BinaryFunction<TEvent, TState, Tuple2<TNewEvent, TState>>(melayMachineFunction));
+        }
+
         /**
          * Accumulate on input event, outputting the new state each time.
          */
@@ -248,6 +286,11 @@ namespace sodium
             var esOut = ea.Snapshot(s, snapshotGenerator);
             es.Loop(esOut);
             return esOut.Hold(initState);
+        }
+
+        public Behavior<TState> Accumulate<TState>(TState initState, Func<TEvent, TState, TState> snapshotGenerator)
+        {
+            return Accumulate<TState>(initState, new BinaryFunction<TEvent, TState, TState>(snapshotGenerator));
         }
 
         /**

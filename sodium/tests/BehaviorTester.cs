@@ -220,168 +220,146 @@ namespace sodium.tests
             AssertArraysEqual(Arrays<Int32>.AsList(9), results);
 	    }
 
-        /*
         [Test]
-	    public void testValuesLateListen() {
+	    public void TestValuesLateListen() 
+        {
 		    BehaviorSink<Int32> b = new BehaviorSink<Int32>(9);
 		    List<Int32> o = new List<Int32>();
 		    Event<Int32> value = b.GetValue();
 		    b.Send(8);
-		    Listener l = value.Listen(x => { o.add(x); });
+		    IListener l = value.Listen(x => { o.Add(x); });
 		    b.Send(2);
 		    l.Unlisten();
-		    Assert.AreEqual(Arrays.asList(8,2), o);
+            AssertArraysEqual(Arrays<Int32>.AsList(8, 2), o);
 	    }
 	
         [Test]
-	    public void testMapB() {
+	    public void TestMapB() 
+        {
 		    BehaviorSink<Int32> b = new BehaviorSink<Int32>(6);
 		    List<String> o = new List<String>();
-		    Listener l = b.map(x => x.toString())
-				    .GetValue().Listen(x => { o.add(x); });
+		    IListener l = b.Map(x => x.ToString()).GetValue().Listen(x => { o.Add(x); });
 		    b.Send(8);
 		    l.Unlisten();
-		    Assert.AreEqual(Arrays.asList("6", "8"), o);
+		    AssertArraysEqual(Arrays<string>.AsList("6", "8"), o);
 	    }
 	
         [Test]
-	    public void testMapBLateListen() {
+	    public void TestMapBLateListen() 
+        {
 		    BehaviorSink<Int32> b = new BehaviorSink<Int32>(6);
 		    List<String> o = new List<String>();
-		    Behavior<String> bm = b.map(x => x.toString());
+		    Behavior<String> bm = b.Map(x => x.ToString());
 		    b.Send(2);
-		    Listener l = bm.GetValue().Listen(x => { o.add(x); });
+		    IListener l = bm.GetValue().Listen(x => { o.Add(x); });
 		    b.Send(8);
 		    l.Unlisten();
-		    Assert.AreEqual(Arrays.asList("2", "8"), o);
+		    AssertArraysEqual(Arrays<string>.AsList("2", "8"), o);
 	    }
 	
         [Test]
-	    public void testTransaction() {
-		    bool[] calledBack = new bool[1];
-	        Transaction.run((Transaction trans) => {
-	    	    trans.prioritized(Node.NULL, trans2 => { calledBack[0] = true; });
-	        });
-	        Assert.AreEqual(true, calledBack[0]);
+	    public void TestTransaction() 
+        {
+            bool[] calledBack = new bool[1];
+            Transaction.Run((trans) => { trans.Prioritized(Node.Null, (trans2) => { calledBack[0] = true; }); });
+           Assert.AreEqual(true, calledBack[0]);
 	    }
 
         [Test]
-	    public void testApply() {
-		    BehaviorSink<Lambda1<Int64, String>> bf = new BehaviorSink<Lambda1<Int64, String>>(
-				    (Int64 b) => "1 "+b);
+	    public void TestApply() 
+        {
+		    BehaviorSink<IFunction<Int64, String>> bf = new BehaviorSink<IFunction<Int64, String>>(
+				    new Function<Int64, String>((Int64 b) => "1 "+b));
 		    BehaviorSink<Int64> ba = new BehaviorSink<Int64>(5L);
 		    List<String> o = new List<String>();
-		    Listener l = Behavior.apply(bf,ba).GetValue().Listen(x => { o.add(x); });
-		    bf.Send((Int64 b) => "12 "+b);
+		    IListener l = Behavior<Int64>.Apply<string>(bf,ba).GetValue().Listen(x => { o.Add(x); });
+		    bf.Send(new Function<Int64, String>((Int64 b) => "12 "+b));
 		    ba.Send(6L);
             l.Unlisten();
-            Assert.AreEqual(Arrays.asList("1 5", "12 5", "12 6"), o);
+            AssertArraysEqual(Arrays<string>.AsList("1 5", "12 5", "12 6"), o);
 	    }
 
         [Test]
-	    public void testLift() {
+	    public void TestLift() 
+        {
 		    BehaviorSink<Int32> a = new BehaviorSink<Int32>(1);
 		    BehaviorSink<Int64> b = new BehaviorSink<Int64>(5L);
 		    List<String> o = new List<String>();
-		    Listener l = Behavior.lift(
+		    IListener l = Behavior<Int32>.Lift(
 			    (x, y) => x + " " + y,
 			    a,
 			    b
-		    ).GetValue().Listen((String x) => { o.add(x); });
+		    ).GetValue().Listen((String x) => { o.Add(x); });
 		    a.Send(12);
 		    b.Send(6L);
             l.Unlisten();
-            Assert.AreEqual(Arrays.asList("1 5", "12 5", "12 6"), o);
+            AssertArraysEqual(Arrays<string>.AsList("1 5", "12 5", "12 6"), o);
 	    }
 	
         [Test]
-	    public void testLiftGlitch() {
+	    public void TestLiftGlitch() 
+        {
 		    BehaviorSink<Int32> a = new BehaviorSink<Int32>(1);
-		    Behavior<Int32> a3 = a.map((Int32 x) => x * 3);
-		    Behavior<Int32> a5 = a.map((Int32 x) => x * 5);
-		    Behavior<String> b = Behavior.lift((x, y) => x + " " + y, a3, a5);
+		    Behavior<Int32> a3 = a.Map((Int32 x) => x * 3);
+		    Behavior<Int32> a5 = a.Map((Int32 x) => x * 5);
+		    Behavior<String> b = Behavior<Int32>.Lift((x, y) => x + " " + y, a3, a5);
 		    List<String> o = new List<String>();
-		    Listener l = b.GetValue().Listen((String x) => { o.add(x); });
+		    IListener l = b.GetValue().Listen((String x) => { o.Add(x); });
 		    a.Send(2);
 		    l.Unlisten();
-		    Assert.AreEqual(Arrays.asList("3 5", "6 10"), o);
+		    AssertArraysEqual(Arrays<string>.AsList("3 5", "6 10"), o);
 	    }
 
         [Test]
-	    public void testHoldIsDelayed() {
+	    public void TestHoldIsDelayed() 
+        {
 	        EventSink<Int32> e = new EventSink<Int32>();
-	        Behavior<Int32> h = e.hold(0);
-	        Event<String> pair = e.snapshot(h, (a, b) => a + " " + b);
+	        Behavior<Int32> h = e.Hold(0);
+	        Event<String> pair = e.Snapshot(h, (a, b) => a + " " + b);
 		    List<String> o = new List<String>();
-		    Listener l = pair.Listen((String x) => { o.add(x); });
+		    IListener l = pair.Listen((String x) => { o.Add(x); });
 		    e.Send(2);
 		    e.Send(3);
 		    l.Unlisten();
-		    Assert.AreEqual(Arrays.asList("2 0", "3 2"), o);
-	    }
-
-	    static class SB
-	    {
-	        SB(char a, char b, Behavior<char> sw)
-	        {
-	            this.a = a;
-	            this.b = b;
-	            this.sw = sw;
-	        }
-	        char a;
-	        char b;
-	        Behavior<char> sw;
+		    AssertArraysEqual(Arrays<string>.AsList("2 0", "3 2"), o);
 	    }
 
         [Test]
-	    public void testSwitchB()
+	    public void TestSwitchB()
 	    {
-	        EventSink<SB> esb = new EventSink();
-	         Split each field o of SB so we can update multiple behaviours in a
-	         single transaction.
-	        Behavior<char> ba = esb.map(s => s.a).filterNotNull().hold('A');
-	        Behavior<char> bb = esb.map(s => s.b).filterNotNull().hold('a');
-	        Behavior<Behavior<char>> bsw = esb.map(s => s.sw).filterNotNull().hold(ba);
-	        Behavior<char> bo = Behavior.switchB(bsw);
+	        EventSink<SB> esb = new EventSink<SB>();
+	        // Split each field o of SB so we can update multiple behaviours in a
+	        // single transaction.
+	        Behavior<char> ba = esb.Map(s => s.a).FilterNotNull().Hold('A');
+	        Behavior<char> bb = esb.Map(s => s.b).FilterNotNull().Hold('a');
+	        Behavior<Behavior<char>> bsw = esb.Map(s => s.sw).FilterNotNull().Hold(ba);
+	        Behavior<char> bo = Behavior<char>.SwitchB(bsw);
 		    List<char> o = new List<char>();
-	        Listener l = bo.GetValue().Listen(c => { o.add(c); });
+	        IListener l = bo.GetValue().Listen(c => { o.Add(c); });
 	        esb.Send(new SB('B','b',null));
 	        esb.Send(new SB('C','c',bb));
 	        esb.Send(new SB('D','d',null));
 	        esb.Send(new SB('E','e',ba));
 	        esb.Send(new SB('F','f',null));
-	        esb.Send(new SB(null,null,bb));
-	        esb.Send(new SB(null,null,ba));
+	        //esb.Send(new SB(null,null,bb));
+	        //esb.Send(new SB(null,null,ba));
 	        esb.Send(new SB('G','g',bb));
 	        esb.Send(new SB('H','h',ba));
 	        esb.Send(new SB('I','i',ba));
 	        l.Unlisten();
-	        Assert.AreEqual(Arrays.asList('A','B','c','d','E','F','f','F','g','H','I'), o);
-	    }
-
-	    static class SE
-	    {
-	        SE(char a, char b, Event<char> sw)
-	        {
-	            this.a = a;
-	            this.b = b;
-	            this.sw = sw;
-	        }
-	        char a;
-	        char b;
-	        Event<char> sw;
+	        AssertArraysEqual(Arrays<char>.AsList('A','B','c','d','E','F','f','F','g','H','I'), o);
 	    }
 
         [Test]
-        public void testSwitchE()
+        public void TestSwitchE()
         {
-            EventSink<SE> ese = new EventSink();
-            Event<char> ea = ese.map(s => s.a).filterNotNull();
-            Event<char> eb = ese.map(s => s.b).filterNotNull();
-            Behavior<Event<char>> bsw = ese.map(s => s.sw).filterNotNull().hold(ea);
-            List<char> o = new List();
-            Event<char> eo = Behavior.switchE(bsw);
-	        Listener l = eo.Listen(c => { o.add(c); });
+            EventSink<SE> ese = new EventSink<SE>();
+            Event<char> ea = ese.Map(s => s.a).FilterNotNull();
+            Event<char> eb = ese.Map(s => s.b).FilterNotNull();
+            Behavior<Event<char>> bsw = ese.Map(s => s.sw).FilterNotNull().Hold(ea);
+            List<char> o = new List<char>();
+            Event<char> eo = Behavior<char>.SwitchE(bsw);
+	        IListener l = eo.Listen(c => { o.Add(c); });
 	        ese.Send(new SE('A','a',null));
 	        ese.Send(new SE('B','b',null));
 	        ese.Send(new SE('C','c',eb));
@@ -392,65 +370,65 @@ namespace sodium.tests
 	        ese.Send(new SE('H','h',ea));
 	        ese.Send(new SE('I','i',ea));
 	        l.Unlisten();
-	        Assert.AreEqual(Arrays.asList('A','B','C','d','e','F','G','h','I'), o);
+	        AssertArraysEqual(Arrays<char>.AsList('A','B','C','d','e','F','G','h','I'), o);
         }
 
         [Test]
-        public void testLoopBehavior()
+        public void TestLoopBehavior()
         {
-            EventSink<Int32> ea = new EventSink();
+            EventSink<Int32> ea = new EventSink<Int32>();
             BehaviorLoop<Int32> sum = new BehaviorLoop<Int32>();
-            Behavior<Int32> sum_out = ea.snapshot(sum, (x, y) => x+y).hold(0);
-            sum.loop(sum_out);
-            List<Int32> o = new List();
-            Listener l = sum_out.GetValue().Listen(x => { o.add(x); });
+            Behavior<Int32> sum_out = ea.Snapshot(sum, (x, y) => x+y).Hold(0);
+            sum.Loop(sum_out);
+            List<Int32> o = new List<Int32>();
+            IListener l = sum_out.GetValue().Listen(x => { o.Add(x); });
             ea.Send(2);
             ea.Send(3);
             ea.Send(1);
             l.Unlisten();
-            Assert.AreEqual(Arrays.asList(0,2,5,6), o);
-            Assert.AreEqual((int)6, (int)sum.sample());
+            AssertArraysEqual(Arrays<Int32>.AsList(0,2,5,6), o);
+            Assert.AreEqual((int)6, (int)sum.Sample());
         }
 
         [Test]
-        public void testCollect()
+        public void TestCollect()
         {
-            EventSink<Int32> ea = new EventSink();
-            List<Int32> o = new List();
-            Behavior<Int32> sum = ea.hold(100).collect(0,
-                (a,s) => new Tuple2(a+s, a+s)
-                new Lambda2<Int32, Int32, Tuple2<Int32,Int32>>() {
-                    public Tuple2<Int32,Int32> apply(Int32 a, Int32 s) {
-                        return new Tuple2<Int32,Int32>(a+s, a+s);
-                    }
-                }
-            );
-            Listener l = sum.GetValue().Listen((x) => { o.add(x); });
+            EventSink<Int32> ea = new EventSink<Int32>();
+            List<Int32> o = new List<Int32>();
+            Behavior<Int32> sum = null; // TODO
+            //Behavior<Int32> sum = ea.Hold(100).Collect(0,
+            //    (a,s) => new Tuple2(a+s, a+s)
+            //    new Lambda2<Int32, Int32, Tuple2<Int32,Int32>>() {
+            //        public Tuple2<Int32,Int32> apply(Int32 a, Int32 s) {
+            //            return new Tuple2<Int32,Int32>(a+s, a+s);
+            //        }
+            //    }
+            //);
+            IListener l = sum.GetValue().Listen((x) => { o.Add(x); });
             ea.Send(5);
             ea.Send(7);
             ea.Send(1);
             ea.Send(2);
             ea.Send(3);
             l.Unlisten();
-            Assert.AreEqual(Arrays.asList(100,105,112,113,115,118), o);
+            AssertArraysEqual(Arrays<Int32>.AsList(100,105,112,113,115,118), o);
         }
 
         [Test]
-        public void testAccum()
+        public void TestAccum()
         {
-            EventSink<Int32> ea = new EventSink();
-            List<Int32> o = new List();
-            Behavior<Int32> sum = ea.accum(100, (a,s)=>a+s);
-            Listener l = sum.GetValue().Listen((x) => { o.add(x); });
+            EventSink<Int32> ea = new EventSink<Int32>();
+            List<Int32> o = new List<Int32>();
+            Behavior<Int32> sum = ea.Accumulate(100, (a,s)=>a+s);
+            IListener l = sum.GetValue().Listen((x) => { o.Add(x); });
             ea.Send(5);
             ea.Send(7);
             ea.Send(1);
             ea.Send(2);
             ea.Send(3);
             l.Unlisten();
-            Assert.AreEqual(Arrays.asList(100,105,112,113,115,118), o);
+            AssertArraysEqual(Arrays<Int32>.AsList(100,105,112,113,115,118), o);
         }
-        */
 
         /**
          * This is used for tests where value() produces a single initial value on listen,
@@ -470,6 +448,7 @@ namespace sodium.tests
 
         private static class Arrays<TA>
         {
+
             public static List<TA> AsList(params TA[] items)
             {
                 return new List<TA>(items);
@@ -494,5 +473,31 @@ namespace sodium.tests
                 return true;
             }
         }
+
+        class SE
+	    {
+	        public SE(char a, char b, Event<char> sw)
+	        {
+	            this.a = a;
+	            this.b = b;
+	            this.sw = sw;
+	        }
+	        public char a;
+	        public char b;
+            public Event<char> sw;
+	    }
+
+        class SB
+	    {
+	        public SB(char a, char b, Behavior<char> sw)
+	        {
+	            this.a = a;
+	            this.b = b;
+	            this.sw = sw;
+	        }
+	        public char a;
+            public char b;
+            public Behavior<char> sw;
+	    }
     }
 }

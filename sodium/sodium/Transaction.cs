@@ -49,6 +49,11 @@ namespace sodium
             }
         }
 
+        public static void Run(Action<Transaction> code)
+        {
+            Run(new Handler<Transaction>(code));
+        }
+
         public static void Run(IHandler<Transaction> code)
         {
             lock (TransactionLock)
@@ -92,6 +97,11 @@ namespace sodium
                     _currentTransaction = transWas;
                 }
             }
+        }
+
+        public void Prioritized(Node rank, Action<Transaction> action)
+        {
+            Prioritized(rank, new Handler<Transaction>(action));
         }
 
         public void Prioritized(Node rank, IHandler<Transaction> action)
