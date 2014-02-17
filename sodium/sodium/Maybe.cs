@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace sodium
+﻿namespace sodium
 {
     public class Maybe<T>
     {
-        private T _value;
-        private bool _hasValue;
+        private readonly T _value;
+        private readonly bool _hasValue;
 
         public static Maybe<T> Null
         {
@@ -48,8 +42,50 @@ namespace sodium
         {
             get
             {
+                //if (!HasValue)
+                //{
+                //    throw new ArgumentException("Maybe doesn't contain a value!");
+                //}
                 return _value;
             }
+        }
+
+        public static implicit operator T(Maybe<T> m)
+        {
+            return m.Value;
+        }
+
+        public static implicit operator Maybe<T>(T m)
+        {
+            return new Maybe<T>(m);
+        }
+
+        public override string ToString()
+        {
+            if (HasValue)
+            {
+                return _value.ToString();
+            }
+            return string.Empty;
+        }
+
+        public override bool Equals(object obj)
+        {
+            var m = obj as Maybe<T>;
+            if (m == null)
+            {
+                return false;
+            }
+
+            if (HasValue != m.HasValue)
+                return false;
+
+            return Value.Equals(m.Value);
+        }
+
+        public override int GetHashCode()
+        {
+            return !HasValue ? 0 : Value.GetHashCode();
         }
     }
 }

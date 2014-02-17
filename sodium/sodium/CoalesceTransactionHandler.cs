@@ -15,7 +15,7 @@
         {
             _sink.Send(transaction, _handler.Accumulation);
             _handler.AccumulationValid = false;
-            _handler.Accumulation = default(TEvent);
+            _handler.Accumulation = Maybe<TEvent>.Null;
         }
     }
 }

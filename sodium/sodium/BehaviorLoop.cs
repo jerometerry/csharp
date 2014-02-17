@@ -3,7 +3,7 @@ namespace sodium
     public sealed class BehaviorLoop<TBehavior> : Behavior<TBehavior>
     {
         public BehaviorLoop()
-            : base(new EventLoop<TBehavior>(), default(TBehavior))
+            : base(new EventLoop<TBehavior>(), Maybe<TBehavior>.Null)
         {
         }
 
