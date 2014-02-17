@@ -7,6 +7,7 @@ namespace sodium.tests
     [TestFixture]
     public class EventTester : SodiumTestCase
     {
+        [Test]
         public void TestSendEvent()
         {
             EventSink<Int32> e = new EventSink<Int32>();
@@ -19,6 +20,7 @@ namespace sodium.tests
             AssertArraysEqual(Arrays<Int32>.AsList(5), o);
         }
 
+        [Test]
         public void TestMap()
         {
             EventSink<Int32> e = new EventSink<Int32>();
@@ -30,6 +32,7 @@ namespace sodium.tests
             AssertArraysEqual(Arrays<string>.AsList("5"), o);
         }
 
+        [Test]
         public void TestMergeNonSimultaneous()
         {
             EventSink<Int32> e1 = new EventSink<Int32>();
@@ -43,6 +46,7 @@ namespace sodium.tests
             AssertArraysEqual(Arrays<Int32>.AsList(7, 9, 8), o);
         }
 
+        [Test]
         public void TestMergeSimultaneous()
         {
             EventSink<Int32> e = new EventSink<Int32>();
@@ -54,6 +58,7 @@ namespace sodium.tests
             AssertArraysEqual(Arrays<Int32>.AsList(7, 7, 9, 9), o);
         }
 
+        [Test]
         public void TestCoalesce()
         {
             EventSink<Int32> e1 = new EventSink<Int32>();
@@ -70,6 +75,7 @@ namespace sodium.tests
             AssertArraysEqual(Arrays<Int32>.AsList(202, 808, 40), o);
         }
 
+        [Test]
         public void TestFilter()
         {
             EventSink<char> e = new EventSink<char>();
@@ -82,6 +88,7 @@ namespace sodium.tests
             AssertArraysEqual(Arrays<char>.AsList('H', 'I'), o);
         }
 
+        [Test]
         public void TestFilterNotNull()
         {
             EventSink<String> e = new EventSink<String>();
@@ -94,6 +101,7 @@ namespace sodium.tests
             AssertArraysEqual(Arrays<String>.AsList("tomato", "peach"), o);
         }
 
+        [Test]
         public void TestLoopEvent()
         {
             EventSink<Int32> ea = new EventSink<Int32>();
@@ -109,6 +117,7 @@ namespace sodium.tests
             AssertArraysEqual(Arrays<Int32>.AsList(2, 7), o);
         }
 
+        [Test]
         public void TestGate()
         {
             EventSink<char> ec = new EventSink<char>();
@@ -124,6 +133,7 @@ namespace sodium.tests
             AssertArraysEqual(Arrays<char>.AsList('H', 'I'), o);
         }
 
+        [Test]
         public void TestCollect()
         {
             EventSink<Int32> ea = new EventSink<Int32>();
@@ -145,6 +155,7 @@ namespace sodium.tests
             AssertArraysEqual(Arrays<Int32>.AsList(105, 112, 113, 115, 118), o);
         }
 
+        [Test]
         public void TestAccum()
         {
             EventSink<Int32> ea = new EventSink<Int32>();
@@ -160,6 +171,7 @@ namespace sodium.tests
             AssertArraysEqual(Arrays<Int32>.AsList(105, 112, 113, 115, 118), o);
         }
 
+        [Test]
         public void TestOnce()
         {
             EventSink<char> e = new EventSink<char>();
@@ -172,6 +184,7 @@ namespace sodium.tests
             AssertArraysEqual(Arrays<char>.AsList('A'), o);
         }
 
+        [Test]
         public void TestDelay()
         {
             EventSink<char> e = new EventSink<char>();
