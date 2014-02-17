@@ -96,6 +96,7 @@
     <Compile Include="IRunnable.cs" />
     <Compile Include="Function.cs" />
     <Compile Include="BinaryFunction.cs" />
+    <Compile Include="Maybe.cs" />
     <Compile Include="TernaryFunction.cs" />
     <Compile Include="Listener.cs" />
     <Compile Include="ListenerInvoker.cs" />
