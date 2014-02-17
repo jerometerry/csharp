@@ -56,12 +56,14 @@ namespace sodium
                     transaction.NeedToRegeneratePriorityQueue = true;
                 Actions.Add(action);
             }
-            var aNow = SampleNow();
-            if (aNow != null)
+
+            var events = SampleNow();
+            if (events != null)
             {    // In cases like value(), we start with an initial value.
-                foreach (object t in aNow)
-                    action.Run(transaction, (TEvent)t); 
+                foreach (object evt in events)
+                    action.Run(transaction, (TEvent)evt); 
             }
+
             if (!suppressEarlierFirings)
             {
                 // Anything sent already in this transaction must be sent now so that
@@ -69,6 +71,7 @@ namespace sodium
                 foreach (var firing in Firings)
                     action.Run(transaction, firing);
             }
+
             return new Listener<TEvent>(this, action, target);
         }
         
@@ -79,10 +82,9 @@ namespace sodium
         /// <returns></returns>
         public Event<TNewEvent> Map<TNewEvent>(IFunction<TEvent, TNewEvent> mapFunction)
         {
-            var ev = this;
-            var o = new MappedEventSink<TEvent, TNewEvent>(ev, mapFunction);
-            var l = Listen(o.Node, new MapSinkSender<TEvent, TNewEvent>(o, mapFunction));
-            return o.RegisterListener(l);
+            var sink = new MappedEventSink<TEvent, TNewEvent>(this, mapFunction);
+            var listener = Listen(sink.Node, new MapSinkSender<TEvent, TNewEvent>(sink, mapFunction));
+            return sink.RegisterListener(listener);
         }
 
         public Event<TNewEvent> Map<TNewEvent>(Func<TEvent, TNewEvent> mapFunction)
@@ -127,8 +129,7 @@ namespace sodium
             Behavior<TBehavior> behavior, 
             IBinaryFunction<TEvent, TBehavior, TSnapshot> snapshotFunction)
         {
-            var evt = this;
-            var sink = new SnapshotEventSink<TEvent, TBehavior, TSnapshot>(evt, snapshotFunction, behavior);
+            var sink = new SnapshotEventSink<TEvent, TBehavior, TSnapshot>(this, snapshotFunction, behavior);
             var listener = Listen(sink.Node, new SnapshotSinkSender<TEvent, TBehavior, TSnapshot>(sink, snapshotFunction, behavior));
             return sink.RegisterListener(listener);
         }
@@ -195,8 +196,7 @@ namespace sodium
 
         public Event<TEvent> Coalesce(Transaction transaction, IBinaryFunction<TEvent, TEvent, TEvent> combiningFunction)
         {
-            var evt = this;
-            var sink = new CoalesceEventSink<TEvent>(evt, combiningFunction);
+            var sink = new CoalesceEventSink<TEvent>(this, combiningFunction);
             var handler = new CoalesceHandler<TEvent>(combiningFunction, sink);
             var listener = Listen(sink.Node, transaction, handler, false);
             return sink.RegisterListener(listener);
@@ -247,8 +247,7 @@ namespace sodium
         /// <returns></returns>
         public Event<TEvent> Filter(IFunction<TEvent, Boolean> predicate)
         {
-            var evt = this;
-            var sink = new FilteredEventSink<TEvent>(evt, predicate);
+            var sink = new FilteredEventSink<TEvent>(this, predicate);
             var listener = Listen(sink.Node, new FilteredEventSinkSender<TEvent>(predicate, sink));
             return sink.RegisterListener(listener);
         }
@@ -294,22 +293,21 @@ namespace sodium
             TState initState, 
             IBinaryFunction<TEvent, TState, Tuple2<TNewEvent, TState>> melayMachineFunction)
         {
-            var ea = this;
-            var es = new EventLoop<TState>();
-            var s = es.Hold(initState);
-            var ebs = ea.Snapshot(s, melayMachineFunction);
-            var eb = ebs.Map(new Function<Tuple2<TNewEvent, TState>, TNewEvent>((bs) => bs.V1));
-            var esOut = ebs.Map(new Function<Tuple2<TNewEvent, TState>, TState>((bs) => bs.V2));
-            es.Loop(esOut);
-            return eb;
+            var loop = new EventLoop<TState>();
+            var behavior = loop.Hold(initState);
+            var snapshot = Snapshot(behavior, melayMachineFunction);
+            var event1 = snapshot.Map(new Function<Tuple2<TNewEvent, TState>, TNewEvent>((bs) => bs.V1));
+            var event2 = snapshot.Map(new Function<Tuple2<TNewEvent, TState>, TState>((bs) => bs.V2));
+            loop.Loop(event2);
+            return event1;
         }
 
         public Event<TNewEvent> Collect<TNewEvent, TState>(
             TState initState,
             Func<TEvent, TState, Tuple2<TNewEvent, TState>> melayMachineFunction)
         {
-            return Collect<TNewEvent, TState>(initState, 
-                new BinaryFunction<TEvent, TState, Tuple2<TNewEvent, TState>>(melayMachineFunction));
+            var function = new BinaryFunction<TEvent, TState, Tuple2<TNewEvent, TState>>(melayMachineFunction);
+            return Collect<TNewEvent, TState>(initState, function);
         }
 
         /// <summary>
@@ -322,12 +320,11 @@ namespace sodium
             TState initState, 
             IBinaryFunction<TEvent, TState, TState> snapshotGenerator)
         {
-            var ea = this;
-            var es = new EventLoop<TState>();
-            var s = es.Hold(initState);
-            var esOut = ea.Snapshot(s, snapshotGenerator);
-            es.Loop(esOut);
-            return esOut.Hold(initState);
+            var loop = new EventLoop<TState>();
+            var behavior = loop.Hold(initState);
+            var snapshot = Snapshot(behavior, snapshotGenerator);
+            loop.Loop(snapshot);
+            return snapshot.Hold(initState);
         }
 
         public Behavior<TState> Accumulate<TState>(TState initState, Func<TEvent, TState, TState> snapshotGenerator)
@@ -343,11 +340,10 @@ namespace sodium
         {
             // This is a bit long-winded but it's efficient because it deregisters
             // the listener.
-            var ev = this;
-            var la = new IListener[1];
-            var o = new OnceEventSink<TEvent>(ev, la);
-            la[0] = ev.Listen(o.Node, new OnceSinkSender<TEvent>(o, la));
-            return o.RegisterListener(la[0]);
+            var listeners = new IListener[1];
+            var sink = new OnceEventSink<TEvent>(this, listeners);
+            listeners[0] = Listen(sink.Node, new OnceSinkSender<TEvent>(sink, listeners));
+            return sink.RegisterListener(listeners[0]);
         }
 
         public Event<TEvent> RegisterListener(IListener listener)
