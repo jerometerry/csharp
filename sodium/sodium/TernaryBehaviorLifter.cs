@@ -1,11 +1,11 @@
 namespace sodium
 {
-    class BehaviorLifter3<TFirstBehavior,TSecondBehavior,TThirdBehavior,TResultBehavior> : 
+    class TernaryBehaviorLifter<TFirstBehavior,TSecondBehavior,TThirdBehavior,TResultBehavior> : 
         IFunction<TFirstBehavior, IFunction<TSecondBehavior, IFunction<TThirdBehavior, TResultBehavior>>>
     {
         private readonly ITernaryFunction<TFirstBehavior, TSecondBehavior, TThirdBehavior, TResultBehavior> _behaviorFunction;
 
-        public BehaviorLifter3(ITernaryFunction<TFirstBehavior, TSecondBehavior, TThirdBehavior, TResultBehavior> behaviorFunction)
+        public TernaryBehaviorLifter(ITernaryFunction<TFirstBehavior, TSecondBehavior, TThirdBehavior, TResultBehavior> behaviorFunction)
         {
             _behaviorFunction = behaviorFunction;
         }

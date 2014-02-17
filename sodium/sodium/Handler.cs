@@ -2,7 +2,7 @@
 {
     using System;
 
-    public class Handler<T> : IHandler<T>
+    class Handler<T> : IHandler<T>
     {
         readonly Action<T> _function;
 

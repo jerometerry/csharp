@@ -147,7 +147,7 @@ namespace sodium
             IBinaryFunction<TBehavior, TSecondBehavior, TResultBehavior> f, 
             Behavior<TSecondBehavior> behavior)
         {
-            var behaviorLifter = new BehaviorLifter2<TBehavior, TSecondBehavior, TResultBehavior>(f);
+            var behaviorLifter = new BinaryBehaviorLifter<TBehavior, TSecondBehavior, TResultBehavior>(f);
 		    var behaviorMap = Map(behaviorLifter);
 		    return Behavior<TSecondBehavior>.Apply(behaviorMap, behavior);
         }
@@ -194,7 +194,7 @@ namespace sodium
             Behavior<TBehavior2> behavior2, 
             Behavior<TBehavior3> behavior3)
         {
-            var behaviorLifter = new BehaviorLifter3<TBehavior, TBehavior2, TBehavior3, TResultBehavior>(f);
+            var behaviorLifter = new TernaryBehaviorLifter<TBehavior, TBehavior2, TBehavior3, TResultBehavior>(f);
 		    var mapFunction = Map(behaviorLifter);
             var behaviorFunction2 = Behavior<TBehavior2>.Apply(mapFunction, behavior2);
             return Behavior<TBehavior3>.Apply(behaviorFunction2, behavior3);
