@@ -13,7 +13,8 @@ namespace sodium
 
         public Behavior<TEvent> Apply(Transaction transaction)
         {
-            return new Behavior<TEvent>(_event.LastFiringOnly(transaction), _initValue);
+            var evt = _event.LastFiringOnly(transaction);
+            return new Behavior<TEvent>(evt, _initValue);
         }
     }
 }

@@ -11,9 +11,9 @@ namespace sodium
         protected readonly List<TEvent> Firings = new List<TEvent>();
         private bool _disposed;
 
-        /**
-         * An event that never fires.
-         */
+        /// <summary>
+        /// An event that never fires.
+        /// </summary>
         public Event()
         {
         }
@@ -25,11 +25,12 @@ namespace sodium
             var handler = new Handler<TEvent>(action);
             return Listen(handler);
         }
-
-        /**
-         * Listen for firings of this event. The returned Listener has an unlisten()
-         * method to cause the listener to be removed. This is the observer pattern.
-         */
+        
+        /// <summary>
+        /// method to cause the listener to be removed. This is the observer pattern.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
         public IListener Listen(IHandler<TEvent> action)
         {
             return Listen(Node.Null, new TransactionHandler<TEvent>(action));
@@ -67,10 +68,12 @@ namespace sodium
             }
             return new Listener<TEvent>(this, action, target);
         }
-
-        /**
-         * Transform the event's value according to the supplied function.
-         */
+        
+        /// <summary>
+        /// Transform the event's value according to the supplied function.
+        /// </summary>
+        /// <param name="mapFunction"></param>
+        /// <returns></returns>
         public Event<TNewEvent> Map<TNewEvent>(IFunction<TEvent, TNewEvent> mapFunction)
         {
             var ev = this;
@@ -84,32 +87,39 @@ namespace sodium
             return Map<TNewEvent>(new Function<TEvent, TNewEvent>(mapFunction));
         }
 
-        /**
-         * Create a behavior with the specified initial value, that gets updated
-         * by the values coming through the event. The 'current value' of the behavior
-         * is notionally the value as it was 'at the start of the transaction'.
-         * That is, state updates caused by event firings get processed at the end of
-         * the transaction.
-         */
+        /// <summary>
+        /// Create a behavior with the specified initial value, that gets updated
+        /// by the values coming through the event. The 'current value' of the behavior
+        /// is notionally the value as it was 'at the start of the transaction'.
+        /// That is, state updates caused by event firings get processed at the end of
+        /// the transaction.
+        /// </summary>
+        /// <param name="initValue"></param>
+        /// <returns></returns>
         public Behavior<TEvent> Hold(TEvent initValue)
         {
             return Transaction.Apply(new BehaviorBuilder<TEvent>(this, initValue));
         }
 
-        /**
-	     * Variant of snapshot that throws away the event's value and captures the behavior's.
-	     */
+        /// <summary>
+        /// Variant of snapshot that throws away the event's value and captures the behavior's.
+        /// </summary>
+        /// <param name="behavior"></param>
+        /// <returns></returns>
         public Event<TNewEvent> Snapshot<TNewEvent>(Behavior<TNewEvent> behavior)
         {
             var snapshotGenerator = new BinaryFunction<TEvent, TNewEvent, TNewEvent>((a,b) => b);
             return Snapshot(behavior, snapshotGenerator);
         }
 
-        /**
-         * Sample the behavior at the time of the event firing. Note that the 'current value'
-         * of the behavior that's sampled is the value as at the start of the transaction
-         * before any state changes of the current transaction are applied through 'hold's.
-         */
+        /// <summary>
+        /// Sample the behavior at the time of the event firing. Note that the 'current value'
+        /// of the behavior that's sampled is the value as at the start of the transaction
+        /// before any state changes of the current transaction are applied through 'hold's.
+        /// </summary>
+        /// <param name="behavior"></param>
+        /// <param name="snapshotFunction"></param>
+        /// <returns></returns>
         public Event<TSnapshot> Snapshot<TBehavior, TSnapshot>(
             Behavior<TBehavior> behavior, 
             IBinaryFunction<TEvent, TBehavior, TSnapshot> snapshotFunction)
@@ -127,15 +137,18 @@ namespace sodium
             return Snapshot<TBehavior, TSnapshot>(behavior, new BinaryFunction<TEvent, TBehavior, TSnapshot>(snapshotFunction));
         }
 
-        /**
-         * Merge two streams of events of the same type.
-         *
-         * In the case where two event occurrences are simultaneous (i.e. both
-         * within the same transaction), both will be delivered in the same
-         * transaction. If the event firings are ordered for some reason, then
-         * their ordering is retained. In many common cases the ordering will
-         * be undefined.
-         */
+        /// <summary>
+        /// Merge two streams of events of the same type.
+        ///
+        /// In the case where two event occurrences are simultaneous (i.e. both
+        /// within the same transaction), both will be delivered in the same
+        /// transaction. If the event firings are ordered for some reason, then
+        /// their ordering is retained. In many common cases the ordering will
+        /// be undefined.
+        /// </summary>
+        /// <param name="event1"></param>
+        /// <param name="event2"></param>
+        /// <returns></returns>
         public static Event<TEvent> Merge(Event<TEvent> event1, Event<TEvent> event2)
         {
             var sink = new MergeEventSink<TEvent>(event1, event2);
@@ -145,9 +158,10 @@ namespace sodium
             return sink.AddCleanup(listener1).AddCleanup(listener2);
         }
 
-        /**
-	     * Push each event occurrence onto a new transaction.
-	     */
+        /// <summary>
+        /// Push each event occurrence onto a new transaction.
+        /// </summary>
+        /// <returns></returns>
         public Event<TEvent> Delay()
         {
             var sink = new EventSink<TEvent>();
@@ -155,15 +169,17 @@ namespace sodium
             return sink.AddCleanup(listener);
         }
 
-        /**
-         * If there's more than one firing in a single transaction, combine them into
-         * one using the specified combining function.
-         *
-         * If the event firings are ordered, then the first will appear at the left
-         * input of the combining function. In most common cases it's best not to
-         * make any assumptions about the ordering, and the combining function would
-         * ideally be commutative.
-         */
+        /// <summary>
+        /// If there's more than one firing in a single transaction, combine them into
+        /// one using the specified combining function.
+        ///
+        /// If the event firings are ordered, then the first will appear at the left
+        /// input of the combining function. In most common cases it's best not to
+        /// make any assumptions about the ordering, and the combining function would
+        /// ideally be commutative.
+        /// </summary>
+        /// <param name="combiningFunction"></param>
+        /// <returns></returns>
         public Event<TEvent> Coalesce(IBinaryFunction<TEvent, TEvent, TEvent> combiningFunction)
         {
             return Transaction.Apply(new CoalesceInvoker<TEvent>(this, combiningFunction));
@@ -183,26 +199,33 @@ namespace sodium
             return sink.AddCleanup(listener);
         }
 
-        /**
-         * Clean up the output by discarding any firing other than the last one. 
-         */
+        /// <summary>
+        /// Clean up the output by discarding any firing other than the last one. 
+        /// </summary>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
         public Event<TEvent> LastFiringOnly(Transaction transaction)
         {
             var combiningFunction = new BinaryFunction<TEvent, TEvent, TEvent>((first, second) => { return second; });
             return Coalesce(transaction, combiningFunction);
         }
 
-        /**
-         * Merge two streams of events of the same type, combining simultaneous
-         * event occurrences.
-         *
-         * In the case where multiple event occurrences are simultaneous (i.e. all
-         * within the same transaction), they are combined using the same logic as
-         * 'coalesce'.
-         */
+        /// <summary>
+        /// Merge two streams of events of the same type, combining simultaneous
+        /// event occurrences.
+        ///
+        /// In the case where multiple event occurrences are simultaneous (i.e. all
+        /// within the same transaction), they are combined using the same logic as
+        /// 'coalesce'.
+        /// </summary>
+        /// <param name="combiningFunction"></param>
+        /// <param name="event1"></param>
+        /// <param name="event2"></param>
+        /// <returns></returns>
         public static Event<TEvent> MergeWith(
             IBinaryFunction<TEvent, TEvent, TEvent> combiningFunction, 
-            Event<TEvent> event1, Event<TEvent> event2)
+            Event<TEvent> event1, 
+            Event<TEvent> event2)
         {
             return Merge(event1, event2).Coalesce(combiningFunction);
         }
@@ -214,9 +237,11 @@ namespace sodium
             return MergeWith(new BinaryFunction<TEvent, TEvent, TEvent>(combiningFunction), event1, event2);
         }
 
-        /**
-         * Only keep event occurrences for which the predicate returns true.
-         */
+        /// <summary>
+        /// Only keep event occurrences for which the predicate returns true.
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
         public Event<TEvent> Filter(IFunction<TEvent, Boolean> predicate)
         {
             var evt = this;
@@ -230,30 +255,36 @@ namespace sodium
             return Filter(new Function<TEvent, Boolean>(predicate));
         }
 
-        /**
-         * Filter out any event occurrences whose value is a Java null pointer.
-         */
+        /// <summary>
+        /// Filter out any event occurrences whose value is a Java null pointer.
+        /// </summary>
+        /// <returns></returns>
         public Event<TEvent> FilterNotNull()
         {
             var predicate = new Function<TEvent, bool>((a) => a != null);
             return Filter(predicate);
         }
 
-        /**
-         * Let event occurrences through only when the behavior's value is True.
-         * Note that the behavior's value is as it was at the start of the transaction,
-         * that is, no state changes from the current transaction are taken into account.
-         */
+        /// <summary>
+        /// Let event occurrences through only when the behavior's value is True.
+        /// Note that the behavior's value is as it was at the start of the transaction,
+        /// that is, no state changes from the current transaction are taken into account.
+        /// </summary>
+        /// <param name="behaviorPredicate"></param>
+        /// <returns></returns>
         public Event<TEvent> Gate(Behavior<Boolean> behaviorPredicate)
         {
             var snapshotGenerator = new BinaryFunction<TEvent, bool, TEvent>((a,pred) => pred ? a : default(TEvent));
             return Snapshot(behaviorPredicate, snapshotGenerator).FilterNotNull();
         }
 
-        /**
-         * Transform an event with a generalized state loop (a mealy machine). The function
-         * is passed the input and the old state and returns the new state and output value.
-         */
+        /// <summary>
+        /// Transform an event with a generalized state loop (a mealy machine). The function
+        /// is passed the input and the old state and returns the new state and output value.
+        /// </summary>
+        /// <param name="initState"></param>
+        /// <param name="melayMachineFunction"></param>
+        /// <returns></returns>
         public Event<TNewEvent> Collect<TNewEvent, TState>(
             TState initState, 
             IBinaryFunction<TEvent, TState, Tuple2<TNewEvent, TState>> melayMachineFunction)
@@ -272,13 +303,19 @@ namespace sodium
             TState initState,
             Func<TEvent, TState, Tuple2<TNewEvent, TState>> melayMachineFunction)
         {
-            return Collect<TNewEvent, TState>(initState, new BinaryFunction<TEvent, TState, Tuple2<TNewEvent, TState>>(melayMachineFunction));
+            return Collect<TNewEvent, TState>(initState, 
+                new BinaryFunction<TEvent, TState, Tuple2<TNewEvent, TState>>(melayMachineFunction));
         }
 
-        /**
-         * Accumulate on input event, outputting the new state each time.
-         */
-        public Behavior<TState> Accumulate<TState>(TState initState, IBinaryFunction<TEvent, TState, TState> snapshotGenerator)
+        /// <summary>
+        /// Accumulate on input event, outputting the new state each time.
+        /// </summary>
+        /// <param name="initState"></param>
+        /// <param name="snapshotGenerator"></param>
+        /// <returns></returns>
+        public Behavior<TState> Accumulate<TState>(
+            TState initState, 
+            IBinaryFunction<TEvent, TState, TState> snapshotGenerator)
         {
             var ea = this;
             var es = new EventLoop<TState>();
@@ -293,9 +330,10 @@ namespace sodium
             return Accumulate<TState>(initState, new BinaryFunction<TEvent, TState, TState>(snapshotGenerator));
         }
 
-        /**
-         * Throw away all event occurrences except for the first one.
-         */
+        /// <summary>
+        /// Throw away all event occurrences except for the first one.
+        /// </summary>
+        /// <returns></returns>
         public Event<TEvent> Once()
         {
             // This is a bit long-winded but it's efficient because it deregisters
