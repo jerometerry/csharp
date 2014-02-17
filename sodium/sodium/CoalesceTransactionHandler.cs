@@ -13,9 +13,9 @@
 
         public void Run(Transaction transaction)
         {
-            _sink.Send(transaction, _handler.Accum);
-            _handler.AccumValid = false;
-            _handler.Accum = default(TEvent);
+            _sink.Send(transaction, _handler.Accumulation);
+            _handler.AccumulationValid = false;
+            _handler.Accumulation = default(TEvent);
         }
     }
 }
