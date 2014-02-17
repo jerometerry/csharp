@@ -5,8 +5,8 @@ namespace sodium
 
     public class Event<TEvent> : IDisposable
     {
-        public readonly List<ITransactionHandler<TEvent>> Listeners = new List<ITransactionHandler<TEvent>>();
-        protected readonly List<IListener> Finalizers = new List<IListener>();
+        protected readonly List<ITransactionHandler<TEvent>> Actions = new List<ITransactionHandler<TEvent>>();
+        protected readonly List<IListener> Listeners = new List<IListener>();
         public Node Node = new Node(0L);
         protected readonly List<TEvent> Firings = new List<TEvent>();
         private bool _disposed;
@@ -54,7 +54,7 @@ namespace sodium
             {
                 if (Node.LinkTo(target))
                     transaction.NeedToRegeneratePriorityQueue = true;
-                Listeners.Add(action);
+                Actions.Add(action);
             }
             var aNow = SampleNow();
             if (aNow != null)
@@ -82,7 +82,7 @@ namespace sodium
             var ev = this;
             var o = new MappedEventSink<TEvent, TNewEvent>(ev, mapFunction);
             var l = Listen(o.Node, new MapSinkSender<TEvent, TNewEvent>(o, mapFunction));
-            return o.AddCleanup(l);
+            return o.RegisterListener(l);
         }
 
         public Event<TNewEvent> Map<TNewEvent>(Func<TEvent, TNewEvent> mapFunction)
@@ -130,7 +130,7 @@ namespace sodium
             var evt = this;
             var sink = new SnapshotEventSink<TEvent, TBehavior, TSnapshot>(evt, snapshotFunction, behavior);
             var listener = Listen(sink.Node, new SnapshotSinkSender<TEvent, TBehavior, TSnapshot>(sink, snapshotFunction, behavior));
-            return sink.AddCleanup(listener);
+            return sink.RegisterListener(listener);
         }
 
         public Event<TSnapshot> Snapshot<TBehavior, TSnapshot>(
@@ -158,7 +158,7 @@ namespace sodium
             var handler = new EventSinkSender<TEvent>(sink);
             var listener1 = event1.Listen(sink.Node, handler);
             var listener2 = event2.Listen(sink.Node, handler);
-            return sink.AddCleanup(listener1).AddCleanup(listener2);
+            return sink.RegisterListener(listener1).RegisterListener(listener2);
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace sodium
         {
             var sink = new EventSink<TEvent>();
             var listener = Listen(sink.Node, new DelayTransactionHandler<TEvent>(sink));
-            return sink.AddCleanup(listener);
+            return sink.RegisterListener(listener);
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace sodium
             var sink = new CoalesceEventSink<TEvent>(evt, combiningFunction);
             var handler = new CoalesceHandler<TEvent>(combiningFunction, sink);
             var listener = Listen(sink.Node, transaction, handler, false);
-            return sink.AddCleanup(listener);
+            return sink.RegisterListener(listener);
         }
 
         /// <summary>
@@ -250,7 +250,7 @@ namespace sodium
             var evt = this;
             var sink = new FilteredEventSink<TEvent>(evt, predicate);
             var listener = Listen(sink.Node, new FilteredEventSinkSender<TEvent>(predicate, sink));
-            return sink.AddCleanup(listener);
+            return sink.RegisterListener(listener);
         }
 
         public Event<TEvent> Filter(Func<TEvent, Boolean> predicate)
@@ -347,13 +347,18 @@ namespace sodium
             var la = new IListener[1];
             var o = new OnceEventSink<TEvent>(ev, la);
             la[0] = ev.Listen(o.Node, new OnceSinkSender<TEvent>(o, la));
-            return o.AddCleanup(la[0]);
+            return o.RegisterListener(la[0]);
         }
 
-        public Event<TEvent> AddCleanup(IListener cleanup)
+        public Event<TEvent> RegisterListener(IListener listener)
         {
-            Finalizers.Add(cleanup);
+            Listeners.Add(listener);
             return this;
+        }
+
+        public void RemoveAction(ITransactionHandler<TEvent> action)
+        {
+            Actions.Remove(action);
         }
 
         public void Dispose()
@@ -372,8 +377,8 @@ namespace sodium
             {
                 if (disposing)
                 {
-                    foreach (var l in Finalizers)
-                        l.Unlisten();
+                    foreach (var listener in Listeners)
+                        listener.Unlisten();
                 }
 
                 // Indicate that the instance has been disposed.

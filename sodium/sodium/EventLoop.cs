@@ -17,8 +17,8 @@ namespace sodium
                 });
             Firings.Add(a);
 
-            var listeners = new List<ITransactionHandler<TEvent>>(this.Listeners);
-            foreach (var action in listeners)
+            var actions = new List<ITransactionHandler<TEvent>>(this.Actions);
+            foreach (var action in actions)
             {
                 try
                 {
@@ -37,7 +37,7 @@ namespace sodium
                 throw new ApplicationException("EventLoop looped more than once");
             _event = evt;
             var action = new EventLoopSender<TEvent>(this);
-            AddCleanup(evt.Listen(Node, action));
+            RegisterListener(evt.Listen(Node, action));
         }
     }
 }

@@ -141,7 +141,7 @@ namespace sodium
             var action = new EventSinkSender<TBehavior>(sink);
             var listener = Event.Listen(sink.Node, transaction, action, false);
             // Needed in case of an initial value and an update in the same transaction.
-            return sink.AddCleanup(listener).LastFiringOnly(transaction);  
+            return sink.RegisterListener(listener).LastFiringOnly(transaction);  
         }
 
         /**
@@ -250,7 +250,7 @@ namespace sodium
             var invoker = new BehaviorPrioritizedInvoker<TBehavior, TNewBehavior>(sink, behaviorFunction, behavior);
             var listener1 = behaviorFunction.Updates().Listen(sink.Node, new ApplyBehaviorTransactionHandler<TBehavior, TNewBehavior>(invoker));
             var listener2 = behavior.Updates().Listen(sink.Node, new ApplyBehaviorTransactionHandler2<TBehavior, TNewBehavior>(invoker));
-            return sink.AddCleanup(listener1).AddCleanup(listener2).Hold(behaviorFunction.Sample().Apply(behavior.Sample()));
+            return sink.RegisterListener(listener1).RegisterListener(listener2).Hold(behaviorFunction.Sample().Apply(behavior.Sample()));
         }
 
         /**
@@ -262,7 +262,7 @@ namespace sodium
             var sink = new EventSink<TBehavior>();
             var handler = new BehaviorUnwrapper<TBehavior>(sink);
             var listener = behaviorFunction.Value().Listen(sink.Node, handler);
-            return sink.AddCleanup(listener).Hold(value);
+            return sink.RegisterListener(listener).Hold(value);
         }
 
         /**
@@ -280,7 +280,7 @@ namespace sodium
             var handler2 = new EventSinkSender<TBehavior>(sink);
             var handler1 = new SwitchToEventTransactionHandler<TBehavior>(sink, eventBehavior, transaction, handler2);
             var listener = eventBehavior.Updates().Listen(sink.Node, transaction, handler1, false);
-            return sink.AddCleanup(listener);
+            return sink.RegisterListener(listener);
         }
 
         /**

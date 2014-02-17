@@ -17,7 +17,7 @@ namespace sodium
                 transaction.Last(new Runnable(() => Firings.Clear()));
             Firings.Add(evt);
 
-            var listeners = new List<ITransactionHandler<TEvent>>(this.Listeners);
+            var listeners = new List<ITransactionHandler<TEvent>>(this.Actions);
 
             foreach (var action in listeners)
             {
