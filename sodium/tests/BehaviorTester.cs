@@ -223,38 +223,38 @@ namespace sodium.tests
         [Test]
 	    public void TestValuesLateListen() 
         {
-		    BehaviorSink<Int32> b = new BehaviorSink<Int32>(9);
-		    List<Int32> o = new List<Int32>();
-		    Event<Int32> value = b.GetValue();
-		    b.Send(8);
-		    IListener l = value.Listen(x => { o.Add(x); });
-		    b.Send(2);
-		    l.Unlisten();
-            AssertArraysEqual(Arrays<Int32>.AsList(8, 2), o);
+		    var behavior = new BehaviorSink<Int32>(9);
+		    var results = new List<Int32>();
+		    var value = behavior.GetValue();
+		    behavior.Send(8);
+		    var listener = value.Listen(x => { results.Add(x); });
+		    behavior.Send(2);
+		    listener.Unlisten();
+            AssertArraysEqual(Arrays<Int32>.AsList(8, 2), results);
 	    }
 	
         [Test]
 	    public void TestMapB() 
         {
-		    BehaviorSink<Int32> b = new BehaviorSink<Int32>(6);
-		    List<String> o = new List<String>();
-		    IListener l = b.Map(x => x.ToString()).GetValue().Listen(x => { o.Add(x); });
-		    b.Send(8);
-		    l.Unlisten();
-		    AssertArraysEqual(Arrays<string>.AsList("6", "8"), o);
+		    var behavior = new BehaviorSink<Int32>(6);
+		    var results = new List<String>();
+		    var listener = behavior.Map(x => x.ToString()).GetValue().Listen(x => { results.Add(x); });
+		    behavior.Send(8);
+		    listener.Unlisten();
+		    AssertArraysEqual(Arrays<string>.AsList("6", "8"), results);
 	    }
 	
         [Test]
 	    public void TestMapBLateListen() 
         {
-		    BehaviorSink<Int32> b = new BehaviorSink<Int32>(6);
-		    List<String> o = new List<String>();
-		    Behavior<String> bm = b.Map(x => x.ToString());
-		    b.Send(2);
-		    IListener l = bm.GetValue().Listen(x => { o.Add(x); });
-		    b.Send(8);
-		    l.Unlisten();
-		    AssertArraysEqual(Arrays<string>.AsList("2", "8"), o);
+		    var behavior = new BehaviorSink<Int32>(6);
+		    var results = new List<String>();
+		    var map = behavior.Map(x => x.ToString());
+		    behavior.Send(2);
+		    var listener = map.GetValue().Listen(x => { results.Add(x); });
+		    behavior.Send(8);
+		    listener.Unlisten();
+		    AssertArraysEqual(Arrays<string>.AsList("2", "8"), results);
 	    }
 	
         [Test]
@@ -268,46 +268,43 @@ namespace sodium.tests
         [Test]
 	    public void TestApply() 
         {
-		    BehaviorSink<IFunction<Int64, String>> bf = new BehaviorSink<IFunction<Int64, String>>(
-				    new Function<Int64, String>((Int64 b) => "1 "+b));
-		    BehaviorSink<Int64> ba = new BehaviorSink<Int64>(5L);
-		    List<String> o = new List<String>();
-		    IListener l = Behavior<Int64>.Apply<string>(bf,ba).GetValue().Listen(x => { o.Add(x); });
-		    bf.Send(new Function<Int64, String>((Int64 b) => "12 "+b));
+		    var bf = new BehaviorSink<IFunction<Int64, String>>(new Function<Int64, String>((b) => "1 "+b));
+		    var ba = new BehaviorSink<Int64>(5L);
+		    var results = new List<String>();
+		    var listener = Behavior<Int64>.Apply<string>(bf,ba)
+                .GetValue().Listen(x => { results.Add(x); });
+		    bf.Send(new Function<Int64, String>((b) => "12 "+b));
 		    ba.Send(6L);
-            l.Unlisten();
-            AssertArraysEqual(Arrays<string>.AsList("1 5", "12 5", "12 6"), o);
+            listener.Unlisten();
+            AssertArraysEqual(Arrays<string>.AsList("1 5", "12 5", "12 6"), results);
 	    }
 
         [Test]
 	    public void TestLift() 
         {
-		    BehaviorSink<Int32> a = new BehaviorSink<Int32>(1);
-		    BehaviorSink<Int64> b = new BehaviorSink<Int64>(5L);
-		    List<String> o = new List<String>();
-		    IListener l = Behavior<Int32>.Lift(
-			    (x, y) => x + " " + y,
-			    a,
-			    b
-		    ).GetValue().Listen((String x) => { o.Add(x); });
-		    a.Send(12);
-		    b.Send(6L);
-            l.Unlisten();
-            AssertArraysEqual(Arrays<string>.AsList("1 5", "12 5", "12 6"), o);
+		    var behavior1 = new BehaviorSink<Int32>(1);
+		    var behavior2 = new BehaviorSink<Int64>(5L);
+		    var results = new List<String>();
+		    var listener = Behavior<Int32>.Lift((x, y) => x + " " + y, behavior1, behavior2)
+                .GetValue().Listen((String x) => { results.Add(x); });
+		    behavior1.Send(12);
+		    behavior2.Send(6L);
+            listener.Unlisten();
+            AssertArraysEqual(Arrays<string>.AsList("1 5", "12 5", "12 6"), results);
 	    }
 	
         [Test]
 	    public void TestLiftGlitch() 
         {
-		    BehaviorSink<Int32> a = new BehaviorSink<Int32>(1);
-		    Behavior<Int32> a3 = a.Map((Int32 x) => x * 3);
-		    Behavior<Int32> a5 = a.Map((Int32 x) => x * 5);
-		    Behavior<String> b = Behavior<Int32>.Lift((x, y) => x + " " + y, a3, a5);
-		    List<String> o = new List<String>();
-		    IListener l = b.GetValue().Listen((String x) => { o.Add(x); });
-		    a.Send(2);
-		    l.Unlisten();
-		    AssertArraysEqual(Arrays<string>.AsList("3 5", "6 10"), o);
+		    var behavior = new BehaviorSink<Int32>(1);
+		    var behavior1 = behavior.Map(x => x * 3);
+		    var behavior2 = behavior.Map(x => x * 5);
+		    var behavior3 = Behavior<Int32>.Lift((x, y) => x + " " + y, behavior1, behavior2);
+		    var results = new List<String>();
+		    var listener = behavior3.GetValue().Listen((x) => { results.Add(x); });
+		    behavior.Send(2);
+		    listener.Unlisten();
+		    AssertArraysEqual(Arrays<string>.AsList("3 5", "6 10"), results);
 	    }
 
         [Test]
@@ -395,15 +392,13 @@ namespace sodium.tests
         {
             EventSink<Int32> ea = new EventSink<Int32>();
             List<Int32> o = new List<Int32>();
-            Behavior<Int32> sum = null; // TODO
-            //Behavior<Int32> sum = ea.Hold(100).Collect(0,
-            //    (a,s) => new Tuple2(a+s, a+s)
-            //    new Lambda2<Int32, Int32, Tuple2<Int32,Int32>>() {
-            //        public Tuple2<Int32,Int32> apply(Int32 a, Int32 s) {
-            //            return new Tuple2<Int32,Int32>(a+s, a+s);
-            //        }
-            //    }
-            //);
+            Behavior<Int32> sum = ea.Hold(100).Collect(0,
+                //(a,s) -> new Tuple2(a+s, a+s)
+                new BinaryFunction<Int32, Int32, Tuple2<Int32, Int32>>((a, s) => 
+                {
+                    return new Tuple2<Int32, Int32>(a + s, a + s);
+                })
+            );
             IListener l = sum.GetValue().Listen((x) => { o.Add(x); });
             ea.Send(5);
             ea.Send(7);

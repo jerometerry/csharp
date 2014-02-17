@@ -7,9 +7,12 @@ namespace sodium
         private Event<TBehavior> _event;
         private TBehavior _value;
         private TBehavior _valueUpdate;
+        private bool _valueUpdated = false;
+
+        
+
         private IListener _cleanup;
         private bool _disposed;
-        private bool _valueUpdated = false;
 
         public TBehavior Value
         {
@@ -36,12 +39,9 @@ namespace sodium
             }
         }
 
-        public bool HasValueUpdate
+        public bool ValueUpdated
         {
-            get
-            {
-                return _valueUpdated;
-            }
+            get { return _valueUpdated; }
         }
 
         public IListener Cleanup
@@ -85,12 +85,19 @@ namespace sodium
             Transaction.Run(converter);
         }
 
+        public void Reset()
+        {
+            this.Value = this.ValueUpdate;
+            this.ValueUpdate = default(TBehavior);
+            this._valueUpdated = false;
+        }
+
         /**
          * @return The value including any updates that have happened in this transaction.
          */
         public TBehavior NewValue()
         {
-            return HasValueUpdate ? ValueUpdate : Value;
+            return ValueUpdated ? ValueUpdate : Value;
         }
 
         /**

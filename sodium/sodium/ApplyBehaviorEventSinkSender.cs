@@ -21,7 +21,10 @@ namespace sodium
 
         public void Run(Transaction transaction)
         {
-            _sink.Send(transaction, _behaviorFunction.NewValue().Apply(_behavior.NewValue()));
+            var mappingFunction = _behaviorFunction.NewValue();
+            var behavior = _behavior.NewValue();
+            var newBehavior = mappingFunction.Apply(behavior);
+            _sink.Send(transaction, newBehavior);
             _behaviorPrioritizedInvoker.Fired = false;
         }
     }

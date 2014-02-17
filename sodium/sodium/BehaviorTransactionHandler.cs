@@ -11,12 +11,11 @@ namespace sodium
 
         public void Run(Transaction transaction, TBehavior behavior)
         {
-            if (!_behavior.HasValueUpdate)
+            if (!_behavior.ValueUpdated)
             {
                 transaction.Last(new Runnable(() =>
                 {
-                    _behavior.Value = _behavior.ValueUpdate;
-                    _behavior.ValueUpdate = default(TBehavior);
+                    _behavior.Reset();
                 }));
                 _behavior.ValueUpdate = behavior;
             }
