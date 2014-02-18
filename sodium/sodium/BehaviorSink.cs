@@ -9,8 +9,15 @@ namespace sodium
 
         public void Send(TBehavior behavior)
         {
-            var sink = (EventSink<TBehavior>)Event;
-            sink.Send(behavior);
+            Sink.Send(behavior);
+        }
+
+        public EventSink<TBehavior> Sink
+        {
+            get
+            {
+                return (EventSink<TBehavior>)Event;
+            }
         }
     }
 }

@@ -13,40 +13,23 @@ namespace sodium
 
         public bool NeedToRegeneratePriorityQueue = false;
 
-        private readonly IPriorityQueue<Entry> _prioritizedQ = new PriorityQueue<Entry>();
+        private readonly IPriorityQueue<Entry> _prioritized = new PriorityQueue<Entry>();
         private readonly ISet<Entry> _entries = new HashSet<Entry>();
-        private readonly List<IRunnable> _lastQ = new List<IRunnable>();
-        private List<IRunnable> _postQ;
+        private readonly List<IRunnable> _last = new List<IRunnable>();
+        private List<IRunnable> _post = new List<IRunnable>();
         private static Transaction _currentTransaction;
 
-        /**
-         * Run the specified code inside a single transaction.
-         *
-         * In most cases this is not needed, because all APIs will create their own
-         * transaction automatically. It is useful where you want to run multiple
-         * reactive operations atomically.
-         */
+        /// <summary>
+        /// Run the specified code inside a single transaction.
+        ///
+        /// In most cases this is not needed, because all APIs will create their own
+        /// transaction automatically. It is useful where you want to run multiple
+        /// reactive operations atomically.
+        /// </summary>
+        /// <param name="code"></param>
         public static void Run(IRunnable code)
         {
-            lock (TransactionLock)
-            {
-                // If we are already inside a transaction (which must be on the same
-                // thread otherwise we wouldn't have acquired transactionLock), then
-                // keep using that same transaction.
-                var transWas = _currentTransaction;
-                try
-                {
-                    if (_currentTransaction == null)
-                        _currentTransaction = new Transaction();
-                    code.Run();
-                }
-                finally
-                {
-                    if (transWas == null)
-                        _currentTransaction.Close();
-                    _currentTransaction = transWas;
-                }
-            }
+            Run(new Handler<Transaction>(t => code.Run()));
         }
 
         public static void Run(Action<Transaction> code)
@@ -61,23 +44,27 @@ namespace sodium
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
                 // keep using that same transaction.
-                var transWas = _currentTransaction;
+                var previousTransaction = _currentTransaction;
                 try
                 {
                     if (_currentTransaction == null)
+                    { 
                         _currentTransaction = new Transaction();
+                    }
                     code.Run(_currentTransaction);
                 }
                 finally
                 {
-                    if (transWas == null)
+                    if (previousTransaction == null)
+                    { 
                         _currentTransaction.Close();
-                    _currentTransaction = transWas;
+                    }
+                    _currentTransaction = previousTransaction;
                 }
             }
         }
 
-        public static TA Apply<TA>(IFunction<Transaction, TA> code)
+        public static TResult Apply<TResult>(IFunction<Transaction, TResult> code)
         {
             lock (TransactionLock)
             {
@@ -88,7 +75,9 @@ namespace sodium
                 try
                 {
                     if (_currentTransaction == null)
+                    { 
                         _currentTransaction = new Transaction();
+                    }
                     return code.Apply(_currentTransaction);
                 }
                 finally
@@ -107,32 +96,32 @@ namespace sodium
         public void Prioritized(Node rank, IHandler<Transaction> action)
         {
             var e = new Entry(rank, action);
-            _prioritizedQ.Add(e);
+            _prioritized.Add(e);
             _entries.Add(e);
         }
 
-        /**
-         * Add an action to run after all prioritized() actions.
-         */
+        /// <summary>
+        /// Add an action to run after all Prioritized() actions.
+        /// </summary>
+        /// <param name="action"></param>
         public void Last(IRunnable action)
         {
-            _lastQ.Add(action);
+            _last.Add(action);
         }
-
-        /**
-         * Add an action to run after all last() actions.
-         */
+        
+        /// <summary>
+        /// Add an action to run after all Last() actions.
+        /// </summary>
+        /// <param name="action"></param>
         public void Post(IRunnable action)
         {
-            if (_postQ == null)
-                _postQ = new List<IRunnable>();
-            _postQ.Add(action);
+            _post.Add(action);
         }
 
-        /**
-         * If the priority queue has entries in it when we modify any of the nodes'
-         * ranks, then we need to re-generate it to make sure it's up-to-date.
-         */
+        /// <summary>
+        /// If the priority queue has entries in it when we modify any of the nodes'
+        /// ranks, then we need to re-generate it to make sure it's up-to-date.
+        /// </summary>
         private void CheckRegeneratePriorityQueue()
         {
             if (NeedToRegeneratePriorityQueue)
@@ -144,9 +133,11 @@ namespace sodium
 
         private void RegeneratePriorityQueue()
         {
-            _prioritizedQ.Clear();
+            _prioritized.Clear();
             foreach (var e in _entries)
-                _prioritizedQ.Add(e);
+            { 
+                _prioritized.Add(e);
+            }
         }
 
         public void Close()
@@ -154,20 +145,27 @@ namespace sodium
             while (true)
             {
                 CheckRegeneratePriorityQueue();
-                if (_prioritizedQ.IsEmpty()) break;
-                var e = _prioritizedQ.Remove();
+                if (_prioritized.IsEmpty())
+                { 
+                    break;
+                }
+                var e = _prioritized.Remove();
                 _entries.Remove(e);
                 e.Action.Run(this);
             }
-            foreach (var action in _lastQ)
+
+            foreach (var action in _last)
+            { 
                 action.Run();
-            _lastQ.Clear();
-            if (_postQ != null)
-            {
-                foreach (var action in _postQ)
-                    action.Run();
-                _postQ.Clear();
             }
+            
+            _last.Clear();
+            
+            foreach (var action in _post)
+            { 
+                action.Run();
+            }
+            _post.Clear();
         }
     }
 }

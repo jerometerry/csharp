@@ -13,7 +13,8 @@ namespace sodium
         {
             if (!_behavior.ValueUpdated)
             {
-                transaction.Last(new Runnable(() => _behavior.ResetValue()));
+                var action = new Runnable(() => _behavior.ApplyUpdate());
+                transaction.Last(action);
                 _behavior.ValueUpdate = behavior;
             }
         }

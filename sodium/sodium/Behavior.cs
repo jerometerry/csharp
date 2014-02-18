@@ -7,7 +7,7 @@ namespace sodium
         private TBehavior _valueUpdate;
         private bool _disposed;
 
-        public TBehavior Val { get; set; }
+        public TBehavior Val { get; protected set; }
 
         public TBehavior ValueUpdate
         {
@@ -15,7 +15,7 @@ namespace sodium
             {
                 return _valueUpdate;
             }
-            set 
+            internal set 
             { 
                 _valueUpdate = value;
                 ValueUpdated = true;
@@ -47,10 +47,10 @@ namespace sodium
             Transaction.Run(converter);
         }
 
-        public void ResetValue()
+        public void ApplyUpdate()
         {
             Val = ValueUpdate;
-            _valueUpdate = default(TBehavior);
+            ValueUpdate = default(TBehavior);
             ValueUpdated = false;
         }
 
