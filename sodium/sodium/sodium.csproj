@@ -63,7 +63,6 @@
     <Compile Include="Behavior.cs" />
     <Compile Include="BinaryBehaviorLifter.cs" />
     <Compile Include="TernaryBehaviorLifter.cs" />
-    <Compile Include="EventToBehaviorConverter.cs" />
     <Compile Include="BehaviorLoop.cs" />
     <Compile Include="BehaviorPrioritizedInvoker.cs" />
     <Compile Include="BehaviorSink.cs" />
@@ -80,7 +79,6 @@
     <Compile Include="FilteredEventSink.cs" />
     <Compile Include="FilteredEventSinkSender.cs" />
     <Compile Include="GetBehaviorValueEventSink.cs" />
-    <Compile Include="GetBehaviorValueInvoker.cs" />
     <Compile Include="Handler.cs" />
     <Compile Include="IHandler.cs" />
     <Compile Include="IFunction.cs" />

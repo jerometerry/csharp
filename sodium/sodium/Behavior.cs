@@ -43,8 +43,13 @@ namespace sodium
         {
             Event = evt;
             Val = initValue;
-            var converter = new EventToBehaviorConverter<TBehavior>(this, evt);
-            Transaction.Run(converter);
+            var behavior = this;
+            var code = new Handler<Transaction>(t => 
+            {
+                var handler = new BehaviorEventListener<TBehavior>(behavior);
+                behavior.EventListener = evt.Listen(Node.Null, t, handler, false);
+            });
+            Transaction.Run(code);
         }
 
         public void ApplyUpdate()
@@ -105,8 +110,12 @@ namespace sodium
         /// </returns>
         public Event<TBehavior> Value()
         {
-            var code = new GetBehaviorValueInvoker<TBehavior>(this);
-            return Transaction.Apply(code);
+            var behavior = this;
+            var action = new Function<Transaction, Event<TBehavior>>(t => 
+            {
+                return behavior.GetValue(t);
+            });
+            return Transaction.Apply(action);
         }
 
         public Event<TBehavior> GetValue(Transaction transaction)

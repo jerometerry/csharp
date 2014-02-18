@@ -12,9 +12,9 @@ namespace sodium
         public void Send(Transaction transaction, TEvent a)
         {
             if (!Firings.Any())
-                transaction.Last(new Runnable(() => Firings.Clear())
-                {
-                });
+            { 
+                transaction.Last(new Runnable(() => Firings.Clear()));
+            }
             Firings.Add(a);
 
             var actions = new List<ITransactionHandler<TEvent>>(this.Actions);
@@ -34,7 +34,9 @@ namespace sodium
         public void Loop(Event<TEvent> evt)
         {
             if (_event != null)
+            { 
                 throw new ApplicationException("EventLoop looped more than once");
+            }
             _event = evt;
             var action = new EventLoopSender<TEvent>(this);
             RegisterListener(evt.Listen(Node, action));
