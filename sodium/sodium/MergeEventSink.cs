@@ -27,13 +27,11 @@
                     outputs[i++] = t;
                 return outputs;
             }
-            else
-            { 
-                if (output1 != null)
-                    return output1;
-                else
-                    return output2;
-                }
+
+            if (output1 != null)
+                return output1;
+
+            return output2;
         }
     }
 }

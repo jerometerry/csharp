@@ -15,18 +15,16 @@
 
         public override Object[] SampleNow()
         {
-            var oi = _event.SampleNow();
-            if (oi != null)
+            var events = _event.SampleNow();
+            if (events == null)
             {
-                var o = (TEvent)oi[0];
-                for (var i = 1; i < oi.Length; i++)
-                    o = _combiningFunction.Apply(o, (TEvent)oi[i]);
-                return new Object[] { o };
-            }
-            else
-            { 
                 return null;
             }
+            
+            var evt = (TEvent)events[0];
+            for (var i = 1; i < events.Length; i++)
+                evt = _combiningFunction.Apply(evt, (TEvent)events[i]);
+            return new Object[] { evt };
         }
     }
 }

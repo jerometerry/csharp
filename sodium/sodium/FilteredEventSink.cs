@@ -1,7 +1,8 @@
-﻿namespace sodium
+﻿using System.Linq;
+
+namespace sodium
 {
     using System;
-    using System.Collections.Generic;
 
     class FilteredEventSink<TEvent> : EventSink<TEvent>
     {
@@ -22,24 +23,17 @@
                 return null;
             }
 
-            var outputs = new List<Object>();
-            foreach(var i in inputs)
-            {
-                var evt = (TEvent)i;
-                if (_predicate.Apply(evt))
-                {
-                    outputs.Add(i);
-                }
-            }
+            var outputs = (from i in inputs 
+                           let evt = (TEvent) i 
+                           where _predicate.Apply(evt) 
+                           select i).ToArray();
 
-            if (outputs.Count == 0)
+            if (outputs.Length == 0)
             {
                 return null;
             }
-            else
-            {
-                return outputs.ToArray();
-            }
+            
+            return outputs;
         }
     }
 }

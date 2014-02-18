@@ -16,17 +16,14 @@ namespace sodium
         public override Object[] SampleNow()
         {
             var oi = _event.SampleNow();
-            if (oi != null)
-            {
-                var oo = new Object[oi.Length];
-                for (var i = 0; i < oo.Length; i++)
-                    oo[i] = _mapFunction.Apply((TEvent)oi[i]);
-                return oo;
-            }
-            else
-            { 
+            if (oi == null)
                 return null;
-            }
+            
+            var results = new Object[oi.Length];
+            for (var i = 0; i < results.Length; i++)
+                results[i] = _mapFunction.Apply((TEvent)oi[i]);
+            return results;
+            
         }
     }
 }

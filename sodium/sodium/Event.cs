@@ -35,10 +35,7 @@ namespace sodium
         public IListener Listen(Node target, ITransactionHandler<TEvent> action)
         {
             var evt = this;
-            var code = new Function<Transaction, IListener>(t => 
-            {
-                return evt.Listen(target, t, action, false);
-            });
+            var code = new Function<Transaction, IListener>(t => evt.Listen(target, t, action, false));
             return Transaction.Apply(code);
         }
 
@@ -102,10 +99,7 @@ namespace sodium
         public Behavior<TEvent> Hold(TEvent initValue)
         {
             var evt = this;
-            var code = new Function<Transaction, Behavior<TEvent>>((t) => 
-            {
-                return new Behavior<TEvent>(evt.LastFiringOnly(t), initValue);
-            });
+            var code = new Function<Transaction, Behavior<TEvent>>(t => new Behavior<TEvent>(evt.LastFiringOnly(t), initValue));
             return Transaction.Apply(code);
         }
 
@@ -190,10 +184,7 @@ namespace sodium
         public Event<TEvent> Coalesce(IBinaryFunction<TEvent, TEvent, TEvent> f)
         {
             var evt = this;
-            var code = new Function<Transaction, Event<TEvent>>((t) => 
-            {
-                return evt.Coalesce(t, f);
-            });
+            var code = new Function<Transaction, Event<TEvent>>(t => evt.Coalesce(t, f));
             return Transaction.Apply(code);
         }
 
@@ -272,7 +263,8 @@ namespace sodium
         /// <returns></returns>
         public Event<TEvent> FilterNotNull()
         {
-            var predicate = new Function<TEvent, bool>((a) => a != null);
+            // TODO - can't assume nullable
+            var predicate = new Function<TEvent, bool>(a => a != null);
             return Filter(predicate);
         }
 
@@ -286,7 +278,7 @@ namespace sodium
         public Event<TEvent> Gate(Behavior<Boolean> behaviorPredicate)
         {
             var f = new BinaryFunction<TEvent, bool, Maybe<TEvent>>((a,pred) => pred ? new Maybe<TEvent>(a) : null);
-            return Snapshot<Boolean, Maybe<TEvent>>(behaviorPredicate, f).FilterNotNull().Map<TEvent>(a => a.Value);
+            return Snapshot(behaviorPredicate, f).FilterNotNull().Map(a => a.Value);
         }
 
         /// <summary>

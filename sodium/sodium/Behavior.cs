@@ -50,7 +50,7 @@ namespace sodium
                 {
                     if (!behavior.ValueUpdated)
                     {
-                        var action = new Runnable(() => behavior.ApplyUpdate());
+                        var action = new Runnable(behavior.ApplyUpdate);
                         t2.Last(action);
                         behavior.ValueUpdate = b;
                     }
@@ -120,10 +120,7 @@ namespace sodium
         public Event<TBehavior> Value()
         {
             var behavior = this;
-            var action = new Function<Transaction, Event<TBehavior>>(t => 
-            {
-                return behavior.GetValue(t);
-            });
+            var action = new Function<Transaction, Event<TBehavior>>(behavior.GetValue);
             return Transaction.Apply(action);
         }
 
@@ -291,10 +288,7 @@ namespace sodium
         /// <returns></returns>
         public static Event<TBehavior> SwitchE(Behavior<Event<TBehavior>> behavior)
         {
-            var action = new Function<Transaction, Event<TBehavior>>(t => 
-            {
-                return Behavior<TBehavior>.SwitchE(t, behavior);
-            });
+            var action = new Function<Transaction, Event<TBehavior>>(t => SwitchE(t, behavior));
             return Transaction.Apply(action);
         }
 

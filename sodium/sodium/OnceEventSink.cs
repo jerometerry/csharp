@@ -20,7 +20,7 @@
             if (outputs != null)
             {
                 if (outputs.Length > 1)
-                    outputs = new Object[] { inputs[0] };
+                    outputs = new[] { inputs[0] };
                 if (_listeners[0] != null)
                 {
                     _listeners[0].Unlisten();

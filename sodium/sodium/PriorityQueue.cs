@@ -37,6 +37,7 @@
             lock(_items)
             {
                 var last = Peek();
+                // TODO - can't assume nullable
                 if (last != null)
                     Remove(last);
                 return last;

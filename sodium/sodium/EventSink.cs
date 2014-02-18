@@ -9,7 +9,7 @@ namespace sodium
         public void Send(TEvent evt)
         {
             var sink = this;
-            var action = new Handler<Transaction>(t => { sink.Send(t, evt); });
+            var action = new Handler<Transaction>(t => sink.Send(t, evt));
             Transaction.Run(action);
         }
 
@@ -19,7 +19,7 @@ namespace sodium
                 transaction.Last(new Runnable(() => Firings.Clear()));
             Firings.Add(evt);
 
-            var listeners = new List<ITransactionHandler<TEvent>>(this.Actions);
+            var listeners = new List<ITransactionHandler<TEvent>>(Actions);
 
             foreach (var action in listeners)
             {

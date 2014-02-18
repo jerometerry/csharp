@@ -16,7 +16,7 @@ namespace sodium
         private readonly IPriorityQueue<Entry> _prioritized = new PriorityQueue<Entry>();
         private readonly ISet<Entry> _entries = new HashSet<Entry>();
         private readonly List<IRunnable> _last = new List<IRunnable>();
-        private List<IRunnable> _post = new List<IRunnable>();
+        private readonly List<IRunnable> _post = new List<IRunnable>();
         private static Transaction _currentTransaction;
 
         /// <summary>
@@ -56,8 +56,11 @@ namespace sodium
                 finally
                 {
                     if (previousTransaction == null)
-                    { 
-                        _currentTransaction.Close();
+                    {
+                        if (_currentTransaction != null) 
+                        {
+                            _currentTransaction.Close();
+                        }
                     }
                     _currentTransaction = previousTransaction;
                 }
@@ -82,7 +85,10 @@ namespace sodium
                 }
                 finally
                 {
-                    _currentTransaction.Close();
+                    if (_currentTransaction != null) 
+                    {
+                        _currentTransaction.Close();
+                    }
                     _currentTransaction = transWas;
                 }
             }

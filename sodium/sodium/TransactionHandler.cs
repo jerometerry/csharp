@@ -4,16 +4,16 @@
 
     public class TransactionHandler<T> : ITransactionHandler<T>
     {
-        private Action<Transaction, T> _handler;
+        private readonly Action<Transaction, T> _handler;
 
         public static TransactionHandler<T> Create<T>(IHandler<T> action)
         {
-            return new TransactionHandler<T>((t, a) => { action.Run(a); });
+            return new TransactionHandler<T>((t, a) => action.Run(a));
         }
 
         public static TransactionHandler<T> Create<T>(IHandler<Transaction> h)
         {
-            return new TransactionHandler<T>((t, a) => { h.Run(t); });
+            return new TransactionHandler<T>((t, a) => h.Run(t));
         }
 
         public TransactionHandler(Action<Transaction, T> handler)

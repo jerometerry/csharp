@@ -17,7 +17,7 @@ namespace sodium
             }
             Firings.Add(a);
 
-            var actions = new List<ITransactionHandler<TEvent>>(this.Actions);
+            var actions = new List<ITransactionHandler<TEvent>>(Actions);
             foreach (var action in actions)
             {
                 try
@@ -39,7 +39,7 @@ namespace sodium
             }
             _event = evt;
             var loop = this;
-            var action = new TransactionHandler<TEvent>((t, a) => { loop.Send(t, a); });
+            var action = new TransactionHandler<TEvent>(loop.Send);
             RegisterListener(evt.Listen(Node, action));
         }
     }
