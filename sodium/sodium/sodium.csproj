@@ -94,7 +94,6 @@
     <Compile Include="Maybe.cs" />
     <Compile Include="TernaryFunction.cs" />
     <Compile Include="Listener.cs" />
-    <Compile Include="ListenerInvoker.cs" />
     <Compile Include="ListenerBase.cs" />
     <Compile Include="Map[edEventSink.cs" />
     <Compile Include="MapSinkSender.cs" />

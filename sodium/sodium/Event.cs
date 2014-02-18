@@ -34,7 +34,12 @@ namespace sodium
 
         public IListener Listen(Node target, ITransactionHandler<TEvent> action)
         {
-            return Transaction.Apply(new ListenerInvoker<TEvent>(this, target, action));
+            var evt = this;
+            var code = new Function<Transaction, IListener>(t => 
+            {
+                return evt.Listen(target, t, action, false);
+            });
+            return Transaction.Apply(code);
         }
 
         public IListener Listen(
