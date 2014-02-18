@@ -184,7 +184,12 @@ namespace sodium
         /// <returns></returns>
         public Event<TEvent> Coalesce(IBinaryFunction<TEvent, TEvent, TEvent> f)
         {
-            return Transaction.Apply(new CoalesceInvoker<TEvent>(this, f));
+            var evt = this;
+            var code = new Function<Transaction, Event<TEvent>>((t) => 
+            {
+                return evt.Coalesce(t, f);
+            });
+            return Transaction.Apply(code);
         }
 
         public Event<TEvent> Coalesce(Func<TEvent, TEvent, TEvent> f)

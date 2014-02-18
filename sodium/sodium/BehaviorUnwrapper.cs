@@ -21,7 +21,9 @@ namespace sodium
             // for the last one. Therefore, anything from the old input behaviour
             // that might have happened during this transaction will be suppressed.
             if (_currentListener != null)
+            { 
                 _currentListener.Unlisten();
+            }
             var handler = new EventSinkSender<TBehavior>(_sink);
             _currentListener = behavior.GetValue(transaction).Listen(_sink.Node, transaction, handler, false);
         }
@@ -29,7 +31,9 @@ namespace sodium
         public void Dispose()
         {
             if (_currentListener != null)
+            { 
                 _currentListener.Unlisten();
+            }
         }
     }
 }

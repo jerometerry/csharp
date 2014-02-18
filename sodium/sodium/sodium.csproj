@@ -70,7 +70,6 @@
     <Compile Include="BehaviorEventListener.cs" />
     <Compile Include="CoalesceEventSink.cs" />
     <Compile Include="CoalesceHandler.cs" />
-    <Compile Include="CoalesceInvoker.cs" />
     <Compile Include="CoalesceTransactionHandler.cs" />
     <Compile Include="DelayTransactionHandler.cs" />
     <Compile Include="DualListener.cs" />
