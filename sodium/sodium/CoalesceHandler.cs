@@ -21,7 +21,14 @@
             }
             else
             {
-                transaction.Prioritized(_sink.Node, new CoalesceTransactionHandler<TEvent>(this, _sink));
+                var handler = this;
+                var action = new Handler<Transaction>(t => 
+                {
+                    _sink.Send(t, this.Accumulation);
+                    this.AccumulationValid = false;
+                    this.Accumulation = default(TEvent);
+                });
+                transaction.Prioritized(_sink.Node, action);
                 Accumulation = evt;
                 AccumulationValid = true;
             }
