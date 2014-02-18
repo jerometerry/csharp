@@ -58,7 +58,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApplyBehaviorEventSinkSender.cs" />
     <Compile Include="BehaviorFunctionUpdateHandler.cs" />
     <Compile Include="BehaviorUpdateHandler.cs" />
     <Compile Include="Behavior.cs" />

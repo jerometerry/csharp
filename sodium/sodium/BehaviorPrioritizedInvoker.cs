@@ -23,8 +23,18 @@ namespace sodium
                 return;
 
             Fired = true;
-            var handler = new ApplyBehaviorEventSinkSender<TBehavior, TNewBehavior>(_sink, _behaviorFunction, _behavior, this);
-            transaction.Prioritized(_sink.Node, handler);
+            var invoker = this;
+
+            var action = new Handler<Transaction>(t => 
+            {
+                var mappingFunction = _behaviorFunction.NewValue();
+                var behavior = _behavior.NewValue();
+                var newBehavior = mappingFunction.Apply(behavior);
+                _sink.Send(t, newBehavior);
+                invoker.Fired = false;
+            });
+
+            transaction.Prioritized(_sink.Node, action);
         }
     }
 }
