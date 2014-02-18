@@ -96,7 +96,12 @@ namespace sodium
         /// <returns></returns>
         public Behavior<TEvent> Hold(TEvent initValue)
         {
-            return Transaction.Apply(new BehaviorBuilder<TEvent>(this, initValue));
+            var evt = this;
+            var code = new Function<Transaction, Behavior<TEvent>>((t) => 
+            {
+                return new Behavior<TEvent>(evt.LastFiringOnly(t), initValue);
+            });
+            return Transaction.Apply(code);
         }
 
         /// <summary>

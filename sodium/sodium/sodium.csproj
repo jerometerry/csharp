@@ -61,7 +61,6 @@
     <Compile Include="BehaviorFunctionUpdateHandler.cs" />
     <Compile Include="BehaviorUpdateHandler.cs" />
     <Compile Include="Behavior.cs" />
-    <Compile Include="BehaviorBuilder.cs" />
     <Compile Include="BinaryBehaviorLifter.cs" />
     <Compile Include="TernaryBehaviorLifter.cs" />
     <Compile Include="EventToBehaviorConverter.cs" />
