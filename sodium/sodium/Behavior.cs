@@ -46,7 +46,16 @@ namespace sodium
             var behavior = this;
             var code = new Handler<Transaction>(t => 
             {
-                var handler = new BehaviorEventListener<TBehavior>(behavior);
+                var handler = new TransactionHandler<TBehavior>((t2,b) => 
+                {
+                    if (!behavior.ValueUpdated)
+                    {
+                        var action = new Runnable(() => behavior.ApplyUpdate());
+                        t2.Last(action);
+                        behavior.ValueUpdate = b;
+                    }
+                });
+
                 behavior.EventListener = evt.Listen(Node.Null, t, handler, false);
             });
             Transaction.Run(code);
@@ -253,9 +262,9 @@ namespace sodium
         {
             var sink = new EventSink<TResultBehavior>();
             var invoker = new BehaviorPrioritizedInvoker<TBehavior, TResultBehavior>(sink, f, behavior);
-            var handler1 = new BehaviorFunctionUpdateHandler<TBehavior, TResultBehavior>(invoker);
+            var handler1 = TransactionHandler<IFunction<TBehavior, TResultBehavior>>.Create<IFunction<TBehavior, TResultBehavior>>(invoker);
             var listener1 = f.Updates().Listen(sink.Node, handler1);
-            var handler2 = new BehaviorUpdateHandler<TBehavior>(invoker);
+            var handler2 = TransactionHandler<TBehavior>.Create<TBehavior>(invoker);
             var listener2 = behavior.Updates().Listen(sink.Node, handler2);
             var initValue = f.Sample().Apply(behavior.Sample());
             return sink.RegisterListener(listener1).RegisterListener(listener2).Hold(initValue);

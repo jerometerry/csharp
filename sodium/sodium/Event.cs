@@ -29,7 +29,7 @@ namespace sodium
         /// <returns></returns>
         public IListener Listen(IHandler<TEvent> action)
         {
-            return Listen(Node.Null, new TransactionHandler<TEvent>(action));
+            return Listen(Node.Null, TransactionHandler<TEvent>.Create(action));
         }
 
         public IListener Listen(Node target, ITransactionHandler<TEvent> action)

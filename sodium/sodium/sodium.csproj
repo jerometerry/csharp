@@ -58,15 +58,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BehaviorFunctionUpdateHandler.cs" />
-    <Compile Include="BehaviorUpdateHandler.cs" />
     <Compile Include="Behavior.cs" />
     <Compile Include="BinaryBehaviorLifter.cs" />
     <Compile Include="TernaryBehaviorLifter.cs" />
     <Compile Include="BehaviorLoop.cs" />
     <Compile Include="BehaviorPrioritizedInvoker.cs" />
     <Compile Include="BehaviorSink.cs" />
-    <Compile Include="BehaviorEventListener.cs" />
     <Compile Include="CoalesceEventSink.cs" />
     <Compile Include="CoalesceHandler.cs" />
     <Compile Include="DelayTransactionHandler.cs" />
@@ -74,7 +71,6 @@
     <Compile Include="Entry.cs" />
     <Compile Include="Event.cs" />
     <Compile Include="EventLoop.cs" />
-    <Compile Include="EventLoopSender.cs" />
     <Compile Include="EventSink.cs" />
     <Compile Include="FilteredEventSink.cs" />
     <Compile Include="FilteredEventSinkSender.cs" />

@@ -38,7 +38,8 @@ namespace sodium
                 throw new ApplicationException("EventLoop looped more than once");
             }
             _event = evt;
-            var action = new EventLoopSender<TEvent>(this);
+            var loop = this;
+            var action = new TransactionHandler<TEvent>((t, a) => { loop.Send(t, a); });
             RegisterListener(evt.Listen(Node, action));
         }
     }
