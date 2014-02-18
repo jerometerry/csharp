@@ -12,7 +12,7 @@ namespace sodium
             Sink.Send(behavior);
         }
 
-        public EventSink<TBehavior> Sink
+        private EventSink<TBehavior> Sink
         {
             get
             {

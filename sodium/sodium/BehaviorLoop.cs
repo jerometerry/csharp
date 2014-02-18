@@ -10,9 +10,16 @@ namespace sodium
         public void Loop(Behavior<TBehavior> behavior)
         {
             var updates = behavior.Updates();
-            var eventLoop = ((EventLoop<TBehavior>)Event);
-            eventLoop.Loop(updates);
+            EventLoop.Loop(updates);
             Val = behavior.Sample();
+        }
+
+        private EventLoop<TBehavior> EventLoop
+        {
+            get
+            {
+                return ((EventLoop<TBehavior>)Event);
+            }
         }
     }
 }

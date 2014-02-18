@@ -2,14 +2,42 @@ namespace sodium
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     public class Event<TEvent> : IDisposable
     {
-        protected readonly List<ITransactionHandler<TEvent>> Actions = new List<ITransactionHandler<TEvent>>();
-        protected readonly List<IListener> Listeners = new List<IListener>();
+        private readonly List<ITransactionHandler<TEvent>> _actions = new List<ITransactionHandler<TEvent>>();
+        private readonly List<IListener> _listeners = new List<IListener>();
         internal Node Node = new Node(0L);
         protected readonly List<TEvent> Firings = new List<TEvent>();
         private bool _disposed;
+
+        private IEnumerable<ITransactionHandler<TEvent>> CloneActions()
+        {
+            return new List<ITransactionHandler<TEvent>>(_actions);
+        }
+
+        public void Send(Transaction transaction, TEvent evt)
+        {
+            if (!Firings.Any())
+            {
+                transaction.Last(new Runnable(() => Firings.Clear()));
+            }
+            Firings.Add(evt);
+
+            var actions = CloneActions();
+            foreach (var action in actions)
+            {
+                try
+                {
+                    action.Run(transaction, evt);
+                }
+                catch (Exception t)
+                {
+                    Console.WriteLine("{0}", t);
+                }
+            }
+        }
 
         public virtual Object[] SampleNow() 
         { 
@@ -49,7 +77,7 @@ namespace sodium
             {
                 if (Node.LinkTo(target))
                     transaction.NeedToRegeneratePriorityQueue = true;
-                Actions.Add(action);
+                _actions.Add(action);
             }
 
             var events = SampleNow();
@@ -347,13 +375,13 @@ namespace sodium
 
         public Event<TEvent> RegisterListener(IListener listener)
         {
-            Listeners.Add(listener);
+            _listeners.Add(listener);
             return this;
         }
 
         public void RemoveAction(ITransactionHandler<TEvent> action)
         {
-            Actions.Remove(action);
+            _actions.Remove(action);
         }
 
         public void Dispose()
@@ -372,7 +400,7 @@ namespace sodium
             {
                 if (disposing)
                 {
-                    foreach (var listener in Listeners)
+                    foreach (var listener in _listeners)
                         listener.Unlisten();
                 }
 
