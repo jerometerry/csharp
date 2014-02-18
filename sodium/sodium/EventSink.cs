@@ -8,7 +8,9 @@ namespace sodium
     {
         public void Send(TEvent evt)
         {
-            Transaction.Run(new EventSinkRunner<TEvent>(this, evt));
+            var sink = this;
+            var action = new Handler<Transaction>(t => { sink.Send(t, evt); });
+            Transaction.Run(action);
         }
 
         public void Send(Transaction transaction, TEvent evt)

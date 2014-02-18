@@ -35,5 +35,17 @@
             Assert.AreEqual(1, sink.NewValue());
             Assert.AreEqual(1, sink.Val);
         }
+
+        [Test]
+        public void Send_PassIntValueTwice_ExpectSecondValue()
+        {
+            var sink = new BehaviorSink<int>(0);
+            sink.Send(1);
+            sink.Send(2);
+            Assert.False(sink.ValueUpdated);
+            Assert.AreEqual(default(Int32), sink.ValueUpdate);
+            Assert.AreEqual(2, sink.NewValue());
+            Assert.AreEqual(2, sink.Val);
+        }
     }
 }

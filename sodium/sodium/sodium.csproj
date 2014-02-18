@@ -81,7 +81,6 @@
     <Compile Include="EventLoop.cs" />
     <Compile Include="EventLoopSender.cs" />
     <Compile Include="EventSink.cs" />
-    <Compile Include="EventSinkRunner.cs" />
     <Compile Include="FilteredEventSink.cs" />
     <Compile Include="FilteredEventSinkSender.cs" />
     <Compile Include="GetBehaviorValueEventSink.cs" />
