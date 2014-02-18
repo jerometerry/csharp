@@ -93,7 +93,7 @@
     <Compile Include="TernaryFunction.cs" />
     <Compile Include="Listener.cs" />
     <Compile Include="ListenerBase.cs" />
-    <Compile Include="Map[edEventSink.cs" />
+    <Compile Include="MappedEventSink.cs" />
     <Compile Include="MapSinkSender.cs" />
     <Compile Include="MergeEventSink.cs" />
     <Compile Include="Node.cs" />
@@ -106,7 +106,6 @@
     <Compile Include="SnapshotSinkSender.cs" />
     <Compile Include="BehaviorUnwrapper.cs" />
     <Compile Include="EventSinkSender.cs" />
-    <Compile Include="SwitchToEventInvoker.cs" />
     <Compile Include="SwitchToEventTransactionHandler.cs" />
     <Compile Include="Transaction.cs" />
     <Compile Include="ITransactionHandler.cs" />

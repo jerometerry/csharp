@@ -282,8 +282,11 @@ namespace sodium
         /// <returns></returns>
         public static Event<TBehavior> SwitchE(Behavior<Event<TBehavior>> behavior)
         {
-            var code = new SwitchToEventInvoker<TBehavior>(behavior);
-            return Transaction.Apply(code);
+            var action = new Function<Transaction, Event<TBehavior>>(t => 
+            {
+                return Behavior<TBehavior>.SwitchE(t, behavior);
+            });
+            return Transaction.Apply(action);
         }
 
         public static Event<TBehavior> SwitchE(Transaction transaction, Behavior<Event<TBehavior>> behavior)

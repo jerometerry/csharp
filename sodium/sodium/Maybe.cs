@@ -1,5 +1,7 @@
 ﻿namespace sodium
 {
+    using System;
+
     public class Maybe<T>
     {
         private readonly T _value;
@@ -42,10 +44,10 @@
         {
             get
             {
-                //if (!HasValue)
-                //{
-                //    throw new ArgumentException("Maybe doesn't contain a value!");
-                //}
+                if (!HasValue)
+                {
+                    throw new ArgumentException("Maybe doesn't contain a value!");
+                }
                 return _value;
             }
         }

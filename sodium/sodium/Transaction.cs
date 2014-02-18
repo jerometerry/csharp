@@ -26,18 +26,18 @@ namespace sodium
         /// transaction automatically. It is useful where you want to run multiple
         /// reactive operations atomically.
         /// </summary>
-        /// <param name="code"></param>
-        public static void Run(IRunnable code)
+        /// <param name="action"></param>
+        public static void Run(IRunnable action)
         {
-            Run(new Handler<Transaction>(t => code.Run()));
+            Run(new Handler<Transaction>(t => action.Run()));
         }
 
-        public static void Run(Action<Transaction> code)
+        public static void Run(Action<Transaction> action)
         {
-            Run(new Handler<Transaction>(code));
+            Run(new Handler<Transaction>(action));
         }
 
-        public static void Run(IHandler<Transaction> code)
+        public static void Run(IHandler<Transaction> action)
         {
             lock (TransactionLock)
             {
@@ -51,7 +51,7 @@ namespace sodium
                     { 
                         _currentTransaction = new Transaction();
                     }
-                    code.Run(_currentTransaction);
+                    action.Run(_currentTransaction);
                 }
                 finally
                 {
@@ -64,7 +64,7 @@ namespace sodium
             }
         }
 
-        public static TResult Apply<TResult>(IFunction<Transaction, TResult> code)
+        public static TResult Apply<TResult>(IFunction<Transaction, TResult> action)
         {
             lock (TransactionLock)
             {
@@ -78,7 +78,7 @@ namespace sodium
                     { 
                         _currentTransaction = new Transaction();
                     }
-                    return code.Apply(_currentTransaction);
+                    return action.Apply(_currentTransaction);
                 }
                 finally
                 {
