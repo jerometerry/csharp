@@ -13,7 +13,7 @@ namespace sodium
             */
 	    }
 
-        void send(Transaction trans, A a) {
+        internal void send(Transaction trans, A a) {
             /*
             if (firings.isEmpty())
                 trans.last(new Runnable() {

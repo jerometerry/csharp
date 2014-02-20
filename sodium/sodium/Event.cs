@@ -44,7 +44,7 @@ namespace sodium
 	    public Event() {
 	    }
 
-	    protected Object[] sampleNow() { return null; }
+        protected internal virtual Object[] sampleNow() { return null; }
 
         public Listener listen(Action<A> action)
         {
@@ -100,10 +100,15 @@ namespace sodium
 	        return null;
 	    }
         
-
+        /// <summary>
+        /// Overload of map that accepts a Func<A,B>, allowing for C# lambda support
+        /// </summary>
+        /// <typeparam name="B"></typeparam>
+        /// <param name="f"></param>
+        /// <returns></returns>
         public Event<B> map<B>(Func<A,B> f)
         {
-            return null;
+            return map(new Lambda1Invoker<A, B>(f));
         }
 
         ///
@@ -111,33 +116,11 @@ namespace sodium
          ///
 	    public Event<B> map<B>(Lambda1<A,B> f)
 	    {
-            /*
 	        Event<A> ev = this;
-	        EventSink<B> out_ = new EventSink<B>() {
-			    @Override
-                protected Object[] sampleNow()
-                {
-                    Object[] oi = ev.sampleNow();
-                    if (oi != null) {
-                        Object[] oo = new Object[oi.length];
-                        for (int i = 0; i < oo.length; i++)
-                            oo[i] = f.apply((A)oi[i]);
-                        return oo;
-                    }
-                    else
-                        return null;
-                }
-	        };
-            Listener l = listen_(out_.node, new TransactionHandler<A>() {
-        	    public void run(Transaction trans2, A a) {
-	                out.send(trans2, f.apply(a));
-	            }
-            });
+	        EventSink<B> out_ = new MapEventSink<A,B>(ev, f);
+            Listener l = listen_(out_.node, new TransactionHandlerInvoker<A>((t,a) => out_.send(t, f.apply(a)))); 
             return out_.addCleanup(l);
-            */
-            return null;
 	    }
-
         
 	    ///
 	    /// Create a behavior with the specified initial value, that gets updated
@@ -467,13 +450,15 @@ namespace sodium
             });
             return out.addCleanup(la[0]);
         }
+        */
 
         Event<A> addCleanup(Listener cleanup)
         {
-            finalizers.add(cleanup);
+            finalizers.Add(cleanup);
             return this;
         }
 
+        /*
 	    @Override
 	    protected void finalize() throws Throwable {
 		    for (Listener l : finalizers)
