@@ -11,8 +11,7 @@ namespace sodium
 
         // True if we need to re-generate the priority queue.
         bool toRegen = false;
-
-        /*
+        
 	    private class Entry : IComparable<Entry> {
 		    private Node rank;
 		    private Handler<Transaction> action;
@@ -25,36 +24,36 @@ namespace sodium
 			    this.seq = nextSeq++;
 		    }
 
-		    @Override
-		    public int compareTo(Entry o) {
-			    int answer = rank.compareTo(o.rank);
+		    public int CompareTo(Entry o) {
+			    int answer = rank.CompareTo(o.rank);
 			    if (answer == 0) {  // Same rank: preserve chronological sequence.
 				    if (seq < o.seq) answer = -1; else
 				    if (seq > o.seq) answer = 1;
 			    }
 			    return answer;
 		    }
-
 	    }
-
+        
 	    private PriorityQueue<Entry> prioritizedQ = new PriorityQueue<Entry>();
-	    private Set<Entry> entries = new HashSet<Entry>();
-	    private List<Runnable> lastQ = new ArrayList<Runnable>(); 
-	    private List<Runnable> postQ;
+	    private ISet<Entry> entries = new HashSet<Entry>();
 
-	    Transaction() {
-	    }
+        /*
+        private List<Runnable> lastQ = new ArrayList<Runnable>(); 
+        private List<Runnable> postQ;
 
-	    private static Transaction currentTransaction;
+        Transaction() {
+        }
 
-	    ///
-	    /// Run the specified code inside a single transaction.
-	    ///
-	    /// In most cases this is not needed, because all APIs will create their own
-	    /// transaction automatically. It is useful where you want to run multiple
-	    /// reactive operations atomically.
-	     ///
-	    public static void run(Runnable code) {
+        private static Transaction currentTransaction;
+
+        ///
+        /// Run the specified code inside a single transaction.
+        ///
+        /// In most cases this is not needed, because all APIs will create their own
+        /// transaction automatically. It is useful where you want to run multiple
+        /// reactive operations atomically.
+         ///
+        public static void run(Runnable code) {
             synchronized (transactionLock) {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
@@ -70,9 +69,9 @@ namespace sodium
                     currentTransaction = transWas;
                 }
             }
-	    }
+        }
 
-	    static void run(Handler<Transaction> code) {
+        static void run(Handler<Transaction> code) {
             synchronized (transactionLock) {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
@@ -88,9 +87,9 @@ namespace sodium
                     currentTransaction = transWas;
                 }
             }
-	    }
+        }
 
-	    static <A> A apply(Lambda1<Transaction, A> code) {
+        static <A> A apply(Lambda1<Transaction, A> code) {
             synchronized (transactionLock) {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
@@ -105,61 +104,61 @@ namespace sodium
                     currentTransaction = transWas;
                 }
             }
-	    }
+        }
 
-	    public void prioritized(Node rank, Handler<Transaction> action) {
-	        Entry e = new Entry(rank, action);
-		    prioritizedQ.add(e);
-		    entries.add(e);
-	    }
+        public void prioritized(Node rank, Handler<Transaction> action) {
+            Entry e = new Entry(rank, action);
+            prioritizedQ.add(e);
+            entries.add(e);
+        }
 
-	    ///
+        ///
         /// Add an action to run after all prioritized() actions.
          ///
-	    public void last(Runnable action) {
-	        lastQ.add(action);
-	    }
+        public void last(Runnable action) {
+            lastQ.add(action);
+        }
 
-	    ///
+        ///
         /// Add an action to run after all last() actions.
          ///
-	    public void post(Runnable action) {
-	        if (postQ == null)
-	            postQ = new ArrayList<Runnable>();
-	        postQ.add(action);
-	    }
+        public void post(Runnable action) {
+            if (postQ == null)
+                postQ = new ArrayList<Runnable>();
+            postQ.add(action);
+        }
 
-	    ///
-	    /// If the priority queue has entries in it when we modify any of the nodes'
-	    /// ranks, then we need to re-generate it to make sure it's up-to-date.
-	     ///
-	    private void checkRegen()
-	    {
-	        if (toRegen) {
-	            toRegen = false;
-	            prioritizedQ.clear();
-	            for (Entry e : entries)
-	                prioritizedQ.add(e);
-	        }
-	    }
+        ///
+        /// If the priority queue has entries in it when we modify any of the nodes'
+        /// ranks, then we need to re-generate it to make sure it's up-to-date.
+         ///
+        private void checkRegen()
+        {
+            if (toRegen) {
+                toRegen = false;
+                prioritizedQ.clear();
+                for (Entry e : entries)
+                    prioritizedQ.add(e);
+            }
+        }
 
-	    public void close() {
-	        while (true) {
-	            checkRegen();
-		        if (prioritizedQ.isEmpty()) break;
-		        Entry e = prioritizedQ.remove();
-		        entries.remove(e);
-			    e.action.run(this);
-		    }
-		    for (Runnable action : lastQ)
-			    action.run();
-		    lastQ.clear();
-		    if (postQ != null) {
+        public void close() {
+            while (true) {
+                checkRegen();
+                if (prioritizedQ.isEmpty()) break;
+                Entry e = prioritizedQ.remove();
+                entries.remove(e);
+                e.action.run(this);
+            }
+            for (Runnable action : lastQ)
+                action.run();
+            lastQ.clear();
+            if (postQ != null) {
                 for (Runnable action : postQ)
                     action.run();
                 postQ.clear();
-		    }
-	    }
+            }
+        }
         */
     }
 }

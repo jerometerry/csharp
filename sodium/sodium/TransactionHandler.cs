@@ -8,7 +8,7 @@ namespace sodium
 
     public class TransactionHandlerInvoker<A> : TransactionHandler<A>
     {
-        private Action<Transaction, A> _action;
+        private readonly Action<Transaction, A> _action;
 
         public TransactionHandlerInvoker(Action<Transaction, A> action)
         {

@@ -9,7 +9,7 @@ namespace sodium
 
     public class Lambda1Invoker<A,B> : Lambda1<A,B>
     {
-        private Func<A, B> _action;
+        private readonly Func<A, B> _action;
 
         public Lambda1Invoker(Func<A, B> action)
         {

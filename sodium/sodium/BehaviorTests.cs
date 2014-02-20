@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NUnit.Framework;
+using NUnit;
 
 namespace sodium
 {
-    class Program
+    [TestFixture]
+    public class BehaviorTests
     {
-        static void Main(string[] args)
-        {
-            testSwitchB();
-        }
-
-        public static void testSwitchB()
+        [Test]
+        public void testSwitchB()
 	    {
 	        EventSink<SB> esb = new EventSink<SB>();
 	        // Split each field out_ of SB so we can update multiple behaviours in a
@@ -49,6 +49,23 @@ namespace sodium
             public char? a;
             public char? b;
             public Behavior<char?> sw;
+        }
+
+        [Test]
+        public void TestTransactionHandlerInvoker()
+        {
+            var results = new List<string>();
+            var invoker = new TransactionHandlerInvoker<string>((t, a) => results.Add(a));
+            invoker.run(null, "this is a test");
+            Assert.AreEqual("this is a test", results[0]);
+        }
+
+        [Test]
+        public void TestLambda1Invoker()
+        {
+            var invoker = new Lambda1Invoker<int, string>(a => a.ToString(CultureInfo.InvariantCulture));
+            var results = invoker.apply(1);
+            Assert.AreEqual("1", results);
         }
     }
 }
