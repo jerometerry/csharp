@@ -6,39 +6,39 @@ namespace sodium
 	    A valueUpdate;
 	    private Listener cleanup;
 
-        /*
 	    ///
 	    /// A behavior with a constant value.
 	    ///
         public Behavior(A value)
         {
-    	    this.event = new Event<A>();
-    	    this.value = value;
+    	    this._event = new Event<A>();
+    	    this._value = value;
         }
 
-        Behavior(final Event<A> event, A initValue)
+        internal Behavior(Event<A> evt, A initValue)
         {
-    	    this.event = event;
-    	    this.value = initValue;
-    	    Transaction.run(new Handler<Transaction>() {
-    		    public void run(Transaction trans1) {
-	    		    Behavior.this.cleanup = event.listen(Node.NULL, trans1, new TransactionHandler<A>() {
-	    			    public void run(Transaction trans2, A a) {
-			    		    if (Behavior.this.valueUpdate == null) {
-			    			    trans2.last(new Runnable() {
-			    				    public void run() {
-				    				    Behavior.this.value = Behavior.this.valueUpdate;
-				    				    Behavior.this.valueUpdate = null;
-				    			    }
-			    			    });
-			    		    }
-			    		    Behavior.this.valueUpdate = a;
-			    	    }
-	    		    }, false);
-    		    }
-    	    });
+    	    this._event = evt;
+    	    this._value = initValue;
+            Behavior<A> thiz = this;
+
+            Transaction.run(new HandlerImpl<Transaction>(t1 =>
+            {
+                var handler = new TransactionHandlerImpl<A>((t2, a) =>
+                { 
+                    if (thiz.valueUpdate == null)
+                    {
+                        t2.last(new RunnableImpl(() =>
+                        {
+                            thiz._value = thiz.valueUpdate;
+                            thiz.valueUpdate = default(A); // TODO - used to be set to null
+                        }));
+                    }
+                    this.valueUpdate = a;
+
+                });
+                this.cleanup = evt.listen(Node.NULL, t1, handler, false);
+            }));
         }
-        */
 
         ///
         /// @return The value including any updates that have happened in this transaction.

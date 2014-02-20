@@ -105,13 +105,11 @@ namespace sodium
             }
         }
 
-        /*
         public void prioritized(Node rank, Handler<Transaction> action) {
             Entry e = new Entry(rank, action);
-            prioritizedQ.add(e);
-            entries.add(e);
+            prioritizedQ.Enqueue(e);
+            entries.Add(e);
         }
-        */
 
         ///
         /// Add an action to run after all prioritized() actions.
