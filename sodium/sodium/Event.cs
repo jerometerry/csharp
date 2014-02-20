@@ -137,10 +137,7 @@ namespace sodium
         ///
         public Behavior<A> hold(A initValue)
         {
-            return
-                Transaction.apply(
-                    new Lambda1Impl<Transaction, Behavior<A>>(
-                        t => { return new Behavior<A>(lastFiringOnly(t), initValue); }));
+            return Transaction.apply(new Lambda1Impl<Transaction, Behavior<A>>(t => new Behavior<A>(lastFiringOnly(t), initValue)));
         }
 
         /*
