@@ -13,12 +13,12 @@ namespace sodium
     public class BehaviorTests
     {
         [Test]
-        public void testSwitchB()
+        public void TestSwitchB()
 	    {
 	        EventSink<SB> esb = new EventSink<SB>();
 	        // Split each field out_ of SB so we can update multiple behaviours in a
 	        // single transaction.
-	        Behavior<char?> ba = esb.map(s => s.a).filterNotNull().hold('A');
+	        Behavior<char?> ba = esb.map<char?>(s => s.a).filterNotNull().hold('A');
 	        Behavior<char?> bb = esb.map(s => s.b).filterNotNull().hold('a');
 	        Behavior<Behavior<char?>> bsw = esb.map(s => s.sw).filterNotNull().hold(ba);
 	        Behavior<char?> bo = Behavior<char?>.switchB(bsw);
@@ -52,20 +52,29 @@ namespace sodium
         }
 
         [Test]
-        public void TestTransactionHandlerInvoker()
+        public void TestTransactionHandlerImpl()
         {
             var results = new List<string>();
-            var invoker = new TransactionHandlerInvoker<string>((t, a) => results.Add(a));
-            invoker.run(null, "this is a test");
+            var impl = new TransactionHandlerImpl<string>((t, a) => results.Add(a));
+            impl.run(null, "this is a test");
             Assert.AreEqual("this is a test", results[0]);
         }
 
         [Test]
-        public void TestLambda1Invoker()
+        public void TestLambda1Impl()
         {
-            var invoker = new Lambda1Invoker<int, string>(a => a.ToString(CultureInfo.InvariantCulture));
-            var results = invoker.apply(1);
+            var impl = new Lambda1Impl<int, string>(a => a.ToString(CultureInfo.InvariantCulture));
+            var results = impl.apply(1);
             Assert.AreEqual("1", results);
+        }
+
+        [Test]
+        public void TestHandlerImpl()
+        {
+            List<string> results = new List<string>();
+            var impl = new HandlerImpl<string>(results.Add);
+            impl.run("hello world!");
+            Assert.AreEqual("hello world!", results[0]);
         }
     }
 }

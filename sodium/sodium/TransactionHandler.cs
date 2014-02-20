@@ -6,11 +6,11 @@ namespace sodium
         void run(Transaction trans, A a);
     }
 
-    public class TransactionHandlerInvoker<A> : TransactionHandler<A>
+    public class TransactionHandlerImpl<A> : TransactionHandler<A>
     {
         private readonly Action<Transaction, A> _action;
 
-        public TransactionHandlerInvoker(Action<Transaction, A> action)
+        public TransactionHandlerImpl(Action<Transaction, A> action)
         {
             _action = action;
         }

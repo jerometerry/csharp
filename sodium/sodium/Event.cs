@@ -4,85 +4,75 @@ namespace sodium
     using System.Collections.Generic;   
 
     public class Event<A> {
-        /*
-	    private static final class ListenerImplementation<A> extends Listener {
+	    private sealed class ListenerImplementation<A> : Listener {
 		    ///
 		    /// It's essential that we keep the listener alive while the caller holds
 		    /// the Listener, so that the finalizer doesn't get triggered.
 		     ///
-		    private final Event<A> event;
-		    private final TransactionHandler<A> action;
-		    private final Node target;
+		    private readonly Event<A> _event;
+		    private readonly TransactionHandler<A> action;
+		    private readonly Node target;
 
-		    private ListenerImplementation(Event<A> event, TransactionHandler<A> action, Node target) {
-			    this.event = event;
+		    public ListenerImplementation(Event<A> evt, TransactionHandler<A> action, Node target) {
+			    this._event = evt;
 			    this.action = action;
 			    this.target = target;
 		    }
 
 		    public void unlisten() {
-		        synchronized (Transaction.listenersLock) {
-                    event.listeners.remove(action);
-                    event.node.unlinkTo(target);
+		        lock (Transaction.listenersLock) {
+                    _event.listeners.Remove(action);
+                    _event.node.unlinkTo(target);
                 }
 		    }
 
-		    protected void finalize() throws Throwable {
+		    protected void finalize() {
 			    unlisten();
 		    }
 	    }
-        */
+        
 
 	    protected List<TransactionHandler<A>> listeners = new List<TransactionHandler<A>>();
 	    protected List<Listener> finalizers = new List<Listener>();
 	    Node node = new Node(0L);
 	    protected List<A> firings = new List<A>();
 
-	    ///
+	    /// <summary>
 	    /// An event that never fires.
-	     ///
+        /// </summary>
 	    public Event() {
 	    }
 
         protected internal virtual Object[] sampleNow() { return null; }
 
+        /// <summary>
+        /// Overload of the listen method that accepts and Action, to support C# lambda expressions
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
         public Listener listen(Action<A> action)
         {
-            return null;
+            return listen(new HandlerImpl<A>(action));
         }
 
-	    ///
+	    /// <summary>
 	    /// Listen for firings of this event. The returned Listener has an unlisten()
 	    /// method to cause the listener to be removed. This is the observer pattern.
-         ///
+        ///</summary>
 	    public Listener listen(Handler<A> action) {
-		    /*
-            return listen_(Node.NULL, new TransactionHandler<A>() {
-			    public void run(Transaction trans2, A a) {
-				    action.run(a);
-			    }
-		    });
-            */
-	        return null;
+            return listen_(Node.NULL, new TransactionHandlerImpl<A>((t,a) => action.run(a)));
 	    }
 
-	    Listener listen_(Node target, TransactionHandler<A> action) {
-		    /*
-            return Transaction.apply(new Lambda1<Transaction, Listener>() {
-			    public Listener apply(Transaction trans1) {
-				    return listen(target, trans1, action, false);
-			    }
-		    });
-            */
-	        return null;
+	    Listener listen_(Node target, TransactionHandler<A> action)
+	    {
+	        return Transaction.apply(new Lambda1Impl<Transaction, Listener>(t => listen(target, t, action, false)));
 	    }
 
 	    Listener listen(Node target, Transaction trans, TransactionHandler<A> action, bool suppressEarlierFirings) {
-            /*
             lock (Transaction.listenersLock) {
                 if (node.linkTo(target))
                     trans.toRegen = true;
-                listeners.add(action);
+                listeners.Add(action);
             }
 		    Object[] aNow = sampleNow();
 		    if (aNow != null) {    // In cases like value(), we start with an initial value.
@@ -92,12 +82,10 @@ namespace sodium
 		    if (!suppressEarlierFirings) {
                 // Anything sent already in this transaction must be sent now so that
                 // there's no order dependency between send and listen.
-                for (A a : firings)
+                foreach (A a in firings)
                     action.run(trans, a);
             }
 		    return new ListenerImplementation<A>(this, action, target);
-            */
-	        return null;
 	    }
         
         /// <summary>
@@ -108,7 +96,7 @@ namespace sodium
         /// <returns></returns>
         public Event<B> map<B>(Func<A,B> f)
         {
-            return map(new Lambda1Invoker<A, B>(f));
+            return map(new Lambda1Impl<A, B>(f));
         }
 
         ///
@@ -118,7 +106,7 @@ namespace sodium
 	    {
 	        Event<A> ev = this;
 	        EventSink<B> out_ = new MapEventSink<A,B>(ev, f);
-            Listener l = listen_(out_.node, new TransactionHandlerInvoker<A>((t,a) => out_.send(t, f.apply(a)))); 
+            Listener l = listen_(out_.node, new TransactionHandlerImpl<A>((t,a) => out_.send(t, f.apply(a)))); 
             return out_.addCleanup(l);
 	    }
         

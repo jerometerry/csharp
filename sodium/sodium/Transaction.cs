@@ -7,14 +7,14 @@ namespace sodium
         // Coarse-grained lock that's held during the whole transaction.
         static Object transactionLock = new Object();
         // Fine-grained lock that protects listeners and nodes.
-        static Object listenersLock = new Object();
+        internal static Object listenersLock = new Object();
 
         // True if we need to re-generate the priority queue.
-        bool toRegen = false;
+        internal bool toRegen = false;
         
 	    private class Entry : IComparable<Entry> {
 		    private Node rank;
-		    private Handler<Transaction> action;
+		    internal Handler<Transaction> action;
 		    private static long nextSeq;
 		    private long seq;
 
@@ -37,8 +37,7 @@ namespace sodium
 	    private PriorityQueue<Entry> prioritizedQ = new PriorityQueue<Entry>();
 	    private ISet<Entry> entries = new HashSet<Entry>();
 
-        /*
-        private List<Runnable> lastQ = new ArrayList<Runnable>(); 
+        private List<Runnable> lastQ = new List<Runnable>(); 
         private List<Runnable> postQ;
 
         Transaction() {
@@ -54,7 +53,7 @@ namespace sodium
         /// reactive operations atomically.
          ///
         public static void run(Runnable code) {
-            synchronized (transactionLock) {
+            lock (transactionLock) {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
                 // keep using that same transaction.
@@ -71,8 +70,8 @@ namespace sodium
             }
         }
 
-        static void run(Handler<Transaction> code) {
-            synchronized (transactionLock) {
+        internal static void run(Handler<Transaction> code) {
+            lock (transactionLock) {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
                 // keep using that same transaction.
@@ -89,8 +88,8 @@ namespace sodium
             }
         }
 
-        static <A> A apply(Lambda1<Transaction, A> code) {
-            synchronized (transactionLock) {
+        internal static A apply<A> (Lambda1<Transaction, A> code) {
+            lock (transactionLock) {
                 // If we are already inside a transaction (which must be on the same
                 // thread otherwise we wouldn't have acquired transactionLock), then
                 // keep using that same transaction.
@@ -106,19 +105,22 @@ namespace sodium
             }
         }
 
+        /*
         public void prioritized(Node rank, Handler<Transaction> action) {
             Entry e = new Entry(rank, action);
             prioritizedQ.add(e);
             entries.add(e);
         }
+        */
 
         ///
         /// Add an action to run after all prioritized() actions.
          ///
         public void last(Runnable action) {
-            lastQ.add(action);
+            lastQ.Add(action);
         }
 
+        /*
         ///
         /// Add an action to run after all last() actions.
          ///
@@ -127,6 +129,7 @@ namespace sodium
                 postQ = new ArrayList<Runnable>();
             postQ.add(action);
         }
+        */
 
         ///
         /// If the priority queue has entries in it when we modify any of the nodes'
@@ -137,8 +140,8 @@ namespace sodium
             if (toRegen) {
                 toRegen = false;
                 prioritizedQ.clear();
-                for (Entry e : entries)
-                    prioritizedQ.add(e);
+                foreach (Entry e in entries)
+                    prioritizedQ.Enqueue(e);
             }
         }
 
@@ -146,19 +149,18 @@ namespace sodium
             while (true) {
                 checkRegen();
                 if (prioritizedQ.isEmpty()) break;
-                Entry e = prioritizedQ.remove();
-                entries.remove(e);
+                Entry e = prioritizedQ.Dequeue();
+                entries.Remove(e);
                 e.action.run(this);
             }
-            for (Runnable action : lastQ)
+            foreach (Runnable action in lastQ)
                 action.run();
-            lastQ.clear();
+            lastQ.Clear();
             if (postQ != null) {
-                for (Runnable action : postQ)
+                foreach (Runnable action in postQ)
                     action.run();
-                postQ.clear();
+                postQ.Clear();
             }
         }
-        */
     }
 }

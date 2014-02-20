@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EventTests.cs" />
     <Compile Include="MapEventSink.cs" />
     <Compile Include="PriorityQueue.cs" />
     <Compile Include="PriorityQueueTests.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="EventSink.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Runnable.cs" />
     <Compile Include="Transaction.cs" />
   </ItemGroup>
   <ItemGroup>

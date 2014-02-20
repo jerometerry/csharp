@@ -55,9 +55,19 @@ namespace sodium
             return frontItem;
         }
 
+        public void clear()
+        {
+            data.Clear();
+        }
+
         public int Count()
         {
             return data.Count;
+        }
+
+        public bool isEmpty()
+        {
+            return Count() == 0;
         }
 
         public override string ToString()
