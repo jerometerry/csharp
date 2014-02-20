@@ -301,58 +301,72 @@ namespace sodium
         {
             return merge(ea, eb).coalesce(f);
         }
+        */
+
+        /// <summary>
+        /// Overload of filter that accepts a Func<A,Bool> to support C# lambda expressions
+        /// </summary>
+        /// <param name="f"></param>
+        /// <returns></returns>
+        public Event<A> filter(Func<A,bool> f)
+        {
+            return filter(new Lambda1Impl<A, bool>(f));
+        }
 
         ///
         /// Only keep event occurrences for which the predicate returns true.
          ///
-        public final Event<A> filter(final Lambda1<A,Boolean> f)
+        public Event<A> filter(Lambda1<A,Boolean> f)
         {
-            final Event<A> ev = this;
-            final EventSink<A> out = new EventSink<A>() {
-    		    @SuppressWarnings("unchecked")
-			    @Override
-                protected Object[] sampleNow()
-                {
-                    Object[] oi = ev.sampleNow();
-                    if (oi != null) {
-                        Object[] oo = new Object[oi.length];
-                        int j = 0;
-                        for (int i = 0; i < oi.length; i++)
-                            if (f.apply((A)oi[i]))
-                                oo[j++] = oi[i];
-                        if (j == 0)
-                            oo = null;
-                        else
-                        if (j < oo.length) {
-                            Object[] oo2 = new Object[j];
-                            for (int i = 0; i < j; i++)
-                                oo2[i] = oo[i];
-                            oo = oo2;
-                        }
-                        return oo;
-                    }
-                    else
-                        return null;
-                }
-            };
-            Listener l = listen_(out.node, new TransactionHandler<A>() {
-        	    public void run(Transaction trans2, A a) {
-	                if (f.apply(a)) out.send(trans2, a);
-	            }
-            });
-            return out.addCleanup(l);
+            Event<A> ev = this;
+            EventSink<A> out_ = new FilterEventSink<A>(ev, f);
+
+            Listener l = listen_(out_.node, new TransactionHandlerImpl<A>((t,a) => { if (f.apply(a)) out_.send(t, a); }));
+            return out_.addCleanup(l);
         }
-        */
+
+        private class FilterEventSink<A> : EventSink<A>
+        {
+            private Event<A> ev;
+            private Lambda1<A, Boolean> f;
+
+            public FilterEventSink(Event<A> ev, Lambda1<A, Boolean> f)
+            {
+                this.ev = ev;
+                this.f = f;
+            }
+ 
+            protected internal override Object[] sampleNow()
+            {
+                Object[] oi = ev.sampleNow();
+                if (oi != null) {
+                    Object[] oo = new Object[oi.Length];
+                    int j = 0;
+                    for (int i = 0; i < oi.Length; i++)
+                        if (f.apply((A)oi[i]))
+                            oo[j++] = oi[i];
+                    if (j == 0)
+                        oo = null;
+                    else
+                    if (j < oo.Length) {
+                        Object[] oo2 = new Object[j];
+                        for (int i = 0; i < j; i++)
+                            oo2[i] = oo[i];
+                        oo = oo2;
+                    }
+                    return oo;
+                }
+                else
+                    return null;
+            }
+        }
 
         ///
         /// Filter out any event occurrences whose value is a Java null pointer.
          ///
         public Event<A> filterNotNull()
         {
-            //return filter(new Lambda1<A,Boolean>() {
-        	//    public Boolean apply(A a) { return a != null; }
-            //});
-            return null;
+            return filter(new Lambda1Impl<A,Boolean>(a => a != null));
         }
 
         /*
