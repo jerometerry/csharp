@@ -35,7 +35,7 @@ namespace sodium
 	        esb.send(new SB('H','h',ba));
 	        esb.send(new SB('I','i',ba));
 	        l.unlisten();
-	        //assertEquals(Arrays.asList('A','B','c','d','E','F','f','F','g','H','I'), out_);
+	        EventTests.AssertArraysEqual(EventTests.Arrays<char?>.AsList('A','B','c','d','E','F','f','F','g','H','I'), out_);
 	    }
 
         class SB

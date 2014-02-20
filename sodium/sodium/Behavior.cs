@@ -1,5 +1,7 @@
 namespace sodium
 {
+    using System;
+
     public class Behavior<A> {
 	    protected Event<A> _event;
 	    A _value;
@@ -82,35 +84,35 @@ namespace sodium
         ///
         public Event<A> value()
         {
-            /*
-            return Transaction.apply(new Lambda1<Transaction, Event<A>>() {
-        	    public Event<A> apply(Transaction trans) {
-        		    return value(trans);
-        	    }
-            });
-            */
-            return null;
+            return Transaction.apply(new Lambda1Impl<Transaction, Event<A>>((t) => { return value(t); }));
         }
 
-        /*
-        final Event<A> value(Transaction trans1)
+        Event<A> value(Transaction trans1)
         {
-    	    final EventSink<A> out = new EventSink<A>() {
-    		    @Override
-                protected Object[] sampleNow()
-                {
-                    return new Object[] { sample() };
-                }
-    	    };
-            Listener l = event.listen(out.node, trans1,
-    		    new TransactionHandler<A>() {
-	        	    public void run(Transaction trans2, A a) { out.send(trans2, a); }
-	            }, false);
-            return out.addCleanup(l)
+    	    EventSink<A> out_ = new ValueEventSink<A>(this);
+            Listener l = _event.listen(out_.node, trans1,
+    		    new TransactionHandlerImpl<A>((t2,a) => { out_.send(t2, a); }), false);
+            return out_.addCleanup(l)
                 .lastFiringOnly(trans1);  // Needed in case of an initial value and an update
     	                                  // in the same transaction.
         }
 
+        private class ValueEventSink<A> : EventSink<A>
+        {
+            private Behavior<A> _behavior; 
+
+            public ValueEventSink(Behavior<A> behavior)
+            {
+                _behavior = behavior;
+            }
+
+            protected internal override Object[] sampleNow()
+            {
+                return new Object[] { _behavior.sample() };
+            }
+        }
+
+        /*
         ///
         /// Transform the behavior's value according to the supplied function.
         ///
@@ -219,39 +221,36 @@ namespace sodium
 	    ///
 	    public static Behavior<A> switchB<A> (Behavior<Behavior<A>> bba)
 	    {
-            /*
 	        A za = bba.sample().sample();
-	        final EventSink<A> out = new EventSink<A>();
-            TransactionHandler<Behavior<A>> h = new TransactionHandler<Behavior<A>>() {
-                private Listener currentListener;
-                @Override
-                public void run(Transaction trans2, Behavior<A> ba) {
-                    // Note: If any switch takes place during a transaction, then the
-                    // value().listen will always cause a sample to be fetched from the
-                    // one we just switched to. The caller will be fetching our output
-                    // using value().listen, and value() throws away all firings except
-                    // for the last one. Therefore, anything from the old input behaviour
-                    // that might have happened during this transaction will be suppressed.
-                    if (currentListener != null)
-                        currentListener.unlisten();
-                    currentListener = ba.value(trans2).listen(out.node, trans2, new TransactionHandler<A>() {
-                	    public void run(Transaction trans3, A a) {
-	                        out.send(trans3, a);
-	                    }
-                    }, false);
-                }
-
-                @Override
-                protected void finalize() throws Throwable {
-                    if (currentListener != null)
-                        currentListener.unlisten();
-                }
-            };
-            Listener l1 = bba.value().listen_(out.node, h);
-            return out.addCleanup(l1).hold(za);
-            */
-	        return null;
+	        EventSink<A> out_ = new EventSink<A>();
+	        SwitchHandler<A> h = new SwitchHandler<A>(out_);
+            Listener l1 = bba.value().listen_(out_.node, h);
+            return out_.addCleanup(l1).hold(za);
 	    }
+
+        private class SwitchHandler<A> : TransactionHandler<Behavior<A>>
+        {
+            private Listener currentListener;
+            private EventSink<A> out_;
+
+            public SwitchHandler(EventSink<A> o)
+            {
+                out_ = o;
+            }
+
+            public void run(Transaction trans2, Behavior<A> ba)
+            {
+                // Note: If any switch takes place during a transaction, then the
+                // value().listen will always cause a sample to be fetched from the
+                // one we just switched to. The caller will be fetching our output
+                // using value().listen, and value() throws away all firings except
+                // for the last one. Therefore, anything from the old input behaviour
+                // that might have happened during this transaction will be suppressed.
+                if (currentListener != null)
+                    currentListener.unlisten();
+                currentListener = ba.value(trans2).listen(out_.node, trans2, new TransactionHandlerImpl<A>((t3,a) => out_.send(t3, a)), false);
+            }
+        }
 	
         /*
 	    ///

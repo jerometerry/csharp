@@ -41,7 +41,7 @@ namespace sodium
 
         protected List<TransactionHandler<A>> listeners = new List<TransactionHandler<A>>();
         protected List<Listener> finalizers = new List<Listener>();
-        private Node node = new Node(0L);
+        internal Node node = new Node(0L);
         protected List<A> firings = new List<A>();
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace sodium
             return listen_(Node.NULL, new TransactionHandlerImpl<A>((t, a) => action.run(a)));
         }
 
-        private Listener listen_(Node target, TransactionHandler<A> action)
+        internal Listener listen_(Node target, TransactionHandler<A> action)
         {
             return Transaction.apply(new Lambda1Impl<Transaction, Listener>(t => listen(target, t, action, false)));
         }
@@ -321,7 +321,7 @@ namespace sodium
         ///
         /// Clean up the output by discarding any firing other than the last one. 
         ///
-        Event<A> lastFiringOnly(Transaction trans)
+        internal Event<A> lastFiringOnly(Transaction trans)
         {
             return coalesce(trans, new Lambda2Impl<A, A, A>((a, b) => b));
         }
@@ -492,7 +492,7 @@ namespace sodium
         }
         */
 
-        private Event<A> addCleanup(Listener cleanup)
+        internal Event<A> addCleanup(Listener cleanup)
         {
             finalizers.Add(cleanup);
             return this;
