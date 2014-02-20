@@ -187,6 +187,7 @@ namespace sodium
             });
             return out.addCleanup(l);
         }
+        */
 
         ///
         /// Merge two streams of events of the same type.
@@ -197,19 +198,35 @@ namespace sodium
         /// their ordering is retained. In many common cases the ordering will
         /// be undefined.
          ///
-        public static <A> Event<A> merge(final Event<A> ea, final Event<A> eb)
+        public static  Event<A> merge<A>(Event<A> ea, Event<A> eb)
         {
-            final EventSink<A> out = new EventSink<A>() {
-                @Override
-                protected Object[] sampleNow()
+            MergeEventSink<A> out_ = new MergeEventSink<A>(ea,eb);
+            TransactionHandler<A> h = new TransactionHandlerImpl<A>(out_.send);
+            Listener l1 = ea.listen_(out_.node, h);
+            Listener l2 = eb.listen_(out_.node, h);
+            return out_.addCleanup(l1).addCleanup(l2);
+        }
+
+        private class MergeEventSink<A> : EventSink<A>
+        {
+            private Event<A> ea;
+            private Event<A> eb;
+
+            public MergeEventSink(Event<A> ea, Event<A> eb)
+            {
+                this.ea = ea;
+                this.eb = eb;
+            }
+
+            protected internal  override Object[] sampleNow()
                 {
                     Object[] oa = ea.sampleNow();
                     Object[] ob = eb.sampleNow();
                     if (oa != null && ob != null) {
-                        Object[] oo = new Object[oa.length + ob.length];
+                        Object[] oo = new Object[oa.Length + ob.Length];
                         int j = 0;
-                        for (int i = 0; i < oa.length; i++) oo[j++] = oa[i];
-                        for (int i = 0; i < ob.length; i++) oo[j++] = ob[i];
+                        for (int i = 0; i < oa.Length; i++) oo[j++] = oa[i];
+                        for (int i = 0; i < ob.Length; i++) oo[j++] = ob[i];
                         return oo;
                     }
                     else
@@ -218,17 +235,9 @@ namespace sodium
                     else
                         return ob;
                 }
-            };
-            TransactionHandler<A> h = new TransactionHandler<A>() {
-                public void run(Transaction trans, A a) {
-                    out.send(trans, a);
-                }
-            };
-            Listener l1 = ea.listen_(out.node, h);
-            Listener l2 = eb.listen_(out.node, h);
-            return out.addCleanup(l1).addCleanup(l2);
         }
 
+        /*
         ///
         /// Push each event occurrence onto a new transaction.
          ///
@@ -252,6 +261,16 @@ namespace sodium
             return out.addCleanup(l1);
         }
         */
+
+        /// <summary>
+        /// Overload of coalese that accepts a Func<A,A,A> to support C# lambdas
+        /// </summary>
+        /// <param name="f"></param>
+        /// <returns></returns>
+        public Event<A> coalesce(Func<A, A, A> f)
+        {
+            return coalesce(new Lambda2Impl<A, A, A>(f));
+        }
 
         ///
         /// If there's more than one firing in a single transaction, combine them into
@@ -310,7 +329,6 @@ namespace sodium
             return coalesce(trans, new Lambda2Impl<A, A, A>((a, b) => b));
         }
 
-        /*
         ///
         /// Merge two streams of events of the same type, combining simultaneous
         /// event occurrences.
@@ -319,11 +337,10 @@ namespace sodium
         /// within the same transaction), they are combined using the same logic as
         /// 'coalesce'.
          ///
-        public static <A> Event<A> mergeWith(Lambda2<A,A,A> f, Event<A> ea, Event<A> eb)
+        public static Event<A> mergeWith<A>(Lambda2<A, A, A> f, Event<A> ea, Event<A> eb)
         {
             return merge(ea, eb).coalesce(f);
         }
-        */
 
         /// <summary>
         /// Overload of filter that accepts a Func<A,Bool> to support C# lambda expressions

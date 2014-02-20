@@ -65,5 +65,60 @@ namespace sodium
             esb.send(123);
             Assert.AreEqual("123", results[0]);
         }
+
+        [Test]
+        public void TestCoalesce()
+        {
+            EventSink<Int32> e1 = new EventSink<Int32>();
+            EventSink<Int32> e2 = new EventSink<Int32>();
+            List<Int32> out_ = new List<Int32>();
+            Listener l =
+                 Event<Int32>.merge(e1,Event<Int32>.merge(e1.map(x => x * 100), e2))
+                .coalesce((a,b) => a+b)
+                .listen((x) => { out_.Add(x); });
+            e1.send(2);
+            e1.send(8);
+            e2.send(40);
+            l.unlisten();
+            AssertArraysEqual(Arrays<Int32>.AsList(202, 808, 40), out_);
+        }
+
+        public static void AssertArraysEqual<TA>(List<TA> l1, List<TA> l2)
+        {
+            Assert.True(Arrays<TA>.AreArraysEqual(l1, l2));
+        }
+
+        internal static class Arrays<TA>
+        {
+
+            public static List<TA> AsList(params TA[] items)
+            {
+                return new List<TA>(items);
+            }
+
+            public static bool AreArraysEqual(List<TA> l1, List<TA> l2)
+            {
+                if (l1.Count != l2.Count)
+                    return false;
+
+                l1.Sort();
+                l2.Sort();
+
+                for (int i = 0; i < l1.Count; i++)
+                {
+                    TA item1 = l1[i];
+                    TA item2 = l2[i];
+                    if (!item1.Equals(item2))
+                        return false;
+                }
+
+                return true;
+            }
+
+            public static void AssertArraysEqual(List<TA> l1, List<TA> l2)
+            {
+                Assert.True(Arrays<TA>.AreArraysEqual(l1, l2));
+            }
+        }
     }
 }
