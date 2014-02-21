@@ -176,6 +176,7 @@ namespace sodium
 	    ///
 	    public Behavior<D> lift<B,C,D>(Lambda3<A,B,C,D> f, Behavior<B> b, Behavior<C> c)
 	    {
+            // TODO
 	        Lambda1<A, Lambda1<B, Lambda1<C, D>>> ffa = null;
             //Lambda1<A, Lambda1<B, Lambda1<C,D>>> ffa = new Lambda1<A, Lambda1<B, Lambda1<C,D>>>() {
             //    public Lambda1<B, Lambda1<C,D>> apply(final A aa) {

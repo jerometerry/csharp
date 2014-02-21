@@ -96,6 +96,20 @@ namespace sodium
             AssertArraysEqual(Arrays<Int32>.AsList(202, 808, 40), out_);
         }
 
+        [Test]
+        public void testDelay()
+        {
+            EventSink<char> e = new EventSink<char>();
+            Behavior<char> b = e.hold(' ');
+            List<char> out_ = new List<char>();
+            Listener l = e.delay().snapshot(b).listen((x) => { out_.Add(x); });
+            e.send('C');
+            e.send('B');
+            e.send('A');
+            l.unlisten();
+            AssertArraysEqual(Arrays<char>.AsList('C','B','A'), out_);
+        }
+
         public static void AssertArraysEqual<TA>(List<TA> l1, List<TA> l2)
         {
             Assert.True(Arrays<TA>.AreArraysEqual(l1, l2));

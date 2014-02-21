@@ -40,7 +40,7 @@ namespace sodium
         private List<Runnable> lastQ = new List<Runnable>(); 
         private List<Runnable> postQ;
 
-        Transaction() {
+        public Transaction() {
         }
 
         private static Transaction currentTransaction;
@@ -118,16 +118,14 @@ namespace sodium
             lastQ.Add(action);
         }
 
-        /*
         ///
         /// Add an action to run after all last() actions.
          ///
         public void post(Runnable action) {
             if (postQ == null)
-                postQ = new ArrayList<Runnable>();
-            postQ.add(action);
+                postQ = new List<Runnable>();
+            postQ.Add(action);
         }
-        */
 
         ///
         /// If the priority queue has entries in it when we modify any of the nodes'

@@ -236,30 +236,28 @@ namespace sodium
                 }
         }
 
-        /*
         ///
         /// Push each event occurrence onto a new transaction.
          ///
-        public final Event<A> delay()
+        public Event<A> delay()
         {
-            final EventSink<A> out = new EventSink<A>();
-            Listener l1 = listen_(out.node, new TransactionHandler<A>() {
-                public void run(Transaction trans, final A a) {
-                    trans.post(new Runnable() {
-                        public void run() {
-                            Transaction trans = new Transaction();
+            EventSink<A> out_ = new EventSink<A>();
+            Listener l1 = listen_(out_.node, new TransactionHandlerImpl<A>((t,a) =>
+                                                                               {
+                                                                                   t.post(new RunnableImpl(() =>
+                                                                                                               {
+                                                                                                                   Transaction trans = new Transaction();
                             try {
-                                out.send(trans, a);
+                                out_.send(trans, a);
                             } finally {
                                 trans.close();
                             }
-                        }
-                    });
-                }
-            });
-            return out.addCleanup(l1);
+                                                                                                               }));
+                                                                               }));
+
+            
+            return out_.addCleanup(l1);
         }
-        */
 
         /// <summary>
         /// Overload of coalese that accepts a Func<A,A,A> to support C# lambdas
