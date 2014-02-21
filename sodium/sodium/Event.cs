@@ -516,25 +516,22 @@ namespace sodium
 
             private Lambda2<A, A, A> f;
             private EventSink<A> out_;
-            private bool accumValid = false;
-            private A accum;
+
+            private Maybe<A> accum = Maybe<A>.Null;
 
             public void run(Transaction trans1, A a)
             {
-                if (accumValid)
-                    accum = f.apply(accum, a);
+                if (accum.HasValue)
+                    accum = new Maybe<A>(f.apply(accum.Value(), a));
                 else
                 {
                     CoalesceHandler<A> thiz = this;
                     trans1.prioritized(out_.node, new HandlerImpl<Transaction>((t) =>
                     {
-                        out_.send(t, thiz.accum);
-                        thiz.accumValid = false;
-                        var v = default(A); // TODO - previously was null
-                        thiz.accum = v;
+                        out_.send(t, thiz.accum.Value());
+                        thiz.accum = Maybe<A>.Null;
                     }));
-                    accum = a;
-                    accumValid = true;
+                    accum = new Maybe<A>(a);
                 }
             }
         }

@@ -167,7 +167,11 @@ namespace sodium
 		    var b = new BehaviorSink<long>(5L);
 		    var out_ = new List<String>();
 		    var l = Behavior<Int32>.lift(
-			    (x, y) => x + " " + y,
+                (x, y) =>
+                {
+                    var res = x + " " + y;
+                    return res;
+                },
 			    a,
 			    b
 		    ).value().listen(out_.Add);
@@ -194,7 +198,7 @@ namespace sodium
             ).value().listen(out_.Add);
             a.send(12);
             l.unlisten();
-            EventTests.AssertArraysEqual(EventTests.Arrays<string>.AsList("1 5", "12 5", "12 6"), out_);
+            EventTests.AssertArraysEqual(EventTests.Arrays<string>.AsList("1 5", "12 5"), out_);
         }
 
         [Test]

@@ -31,7 +31,7 @@ namespace sodium
                     {
                         t2.last(new RunnableImpl(() =>
                         {
-                            thiz._value = thiz.valueUpdate;
+                            thiz._value = thiz.valueUpdate.Value();
                             thiz.valueUpdate = Maybe<A>.Null;
                         }));
                     }
@@ -84,14 +84,14 @@ namespace sodium
         ///
         public Event<A> value()
         {
-            return Transaction.apply(new Lambda1Impl<Transaction, Event<A>>((t) => { return value(t); }));
+            return Transaction.apply(new Lambda1Impl<Transaction, Event<A>>(value));
         }
 
         Event<A> value(Transaction trans1)
         {
     	    EventSink<A> out_ = new ValueEventSink<A>(this);
             Listener l = _event.listen(out_.node, trans1,
-    		    new TransactionHandlerImpl<A>((t2,a) => { out_.send(t2, a); }), false);
+    		    new TransactionHandlerImpl<A>(out_.send), false);
             return out_.addCleanup(l)
                 .lastFiringOnly(trans1);  // Needed in case of an initial value and an update
     	                                  // in the same transaction.
@@ -210,10 +210,15 @@ namespace sodium
 	    {
             EventSink<B> out_ = new EventSink<B>();
 	        Handler<Transaction> h = new ApplyHandler<A, B>(out_, bf, ba);
-	        Listener l1 = bf.updates().listen_(out_.node, new TransactionHandlerImpl<Lambda1<A, B>>((t, f) => h.run(t)));
-	        Listener l2 = ba.updates().listen_(out_.node, new TransactionHandlerImpl<A>((t, a) => h.run(t)));
+            Listener l1 = bf.updates().listen_(out_.node, new TransactionHandlerImpl<Lambda1<A, B>>((t, f) =>
+            {
+                h.run(t);
+            }));
+            Listener l2 = ba.updates().listen_(out_.node, new TransactionHandlerImpl<A>((t, a) =>
+            {
+                h.run(t);
+            }));
             return out_.addCleanup(l1).addCleanup(l2).hold(bf.sample().apply(ba.sample()));
-	        return null;
 	    }
 
         private class ApplyHandler<A,B> : Handler<Transaction>
@@ -238,8 +243,11 @@ namespace sodium
                 fired = true;
                 trans1.prioritized(out_.node, new HandlerImpl<Transaction>(t2 =>
                 {
-                    out_.send(t2, bf.newValue().apply(ba.newValue()));
-                    fired = true;
+                    var v = bf.newValue();
+                    var nv = ba.newValue();
+                    var b = v.apply(nv);
+                    out_.send(t2, b);
+                    fired = false;
                 }));
             }
         }
