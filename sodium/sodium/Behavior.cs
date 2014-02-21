@@ -138,15 +138,6 @@ namespace sodium
 	    public  Behavior<C> lift<B,C>(Lambda2<A,B,C> f, Behavior<B> b)
 	    {
 	        Lambda1<A, Lambda1<B, C>> ffa = new Lambda1Impl<A, Lambda1<B, C>>((aa) => new Lambda1Impl<B, C>((bb) => f.apply(aa, bb)));
-            //Lambda1<A, Lambda1<B,C>> ffa = new Lambda1<A, Lambda1<B,C>>() {
-            //    public Lambda1<B,C> apply(final A aa) {
-            //        return new Lambda1<B,C>() {
-            //            public C apply(B bb) {
-            //                return f.apply(aa,bb);
-            //            }
-            //        };
-            //    }
-            //};
 		    Behavior<Lambda1<B,C>> bf = map(ffa);
 		    return apply(bf, b);
 	    }
@@ -292,51 +283,55 @@ namespace sodium
             }
         }
 	
-        /*
 	    ///
 	    /// Unwrap an event inside a behavior to give a time-varying event implementation.
 	    ///
-	    public static <A> Event<A> switchE(final Behavior<Event<A>> bea)
+	    public static  Event<A> switchE<A>(Behavior<Event<A>> bea)
 	    {
-            return Transaction.apply(new Lambda1<Transaction, Event<A>>() {
-        	    public Event<A> apply(final Transaction trans) {
-                    return switchE(trans, bea);
-        	    }
-            });
+            return Transaction.apply(new Lambda1Impl<Transaction, Event<A>>((t) => switchE<A>(t,bea)));
         }
 
-	    private static <A> Event<A> switchE(final Transaction trans1, final Behavior<Event<A>> bea)
+	    private static  Event<A> switchE<A>(Transaction trans1, Behavior<Event<A>> bea)
 	    {
-            final EventSink<A> out = new EventSink<A>();
-            final TransactionHandler<A> h2 = new TransactionHandler<A>() {
-        	    public void run(Transaction trans2, A a) {
-	                out.send(trans2, a);
-	            }
-            };
-            TransactionHandler<Event<A>> h1 = new TransactionHandler<Event<A>>() {
-                private Listener currentListener = bea.sample().listen(out.node, trans1, h2, false);
+            EventSink<A> out_ = new EventSink<A>();
+            TransactionHandler<A> h2 = new TransactionHandlerImpl<A>(out_.send);
 
-                @Override
-                public void run(final Transaction trans2, final Event<A> ea) {
-                    trans2.last(new Runnable() {
-                	    public void run() {
-	                        if (currentListener != null)
-	                            currentListener.unlisten();
-	                        currentListener = ea.listen(out.node, trans2, h2, true);
-	                    }
-                    });
-                }
+	        TransactionHandler<Event<A>> h1 = new SwitchEHandler<A>(bea, out_, trans1, h2);
+            Listener l1 = bea.updates().listen(out_.node, trans1, h1, false);
+            return out_.addCleanup(l1);
+	    }
 
-                @Override
-                protected void finalize() throws Throwable {
+        private class SwitchEHandler<A> : TransactionHandler<Event<A>>
+        {
+            private Listener currentListener;
+            private EventSink<A> out_;
+            private Transaction trans1;
+            private TransactionHandler<A> h2;
+
+            public SwitchEHandler(Behavior<Event<A>> bea, EventSink<A> out_, Transaction trans1, TransactionHandler<A> h2)
+            {
+                this.out_ = out_;
+                this.trans1 = trans1;
+                this.h2 = h2;
+                currentListener = bea.sample().listen(out_.node, trans1, h2, false);   
+            }
+
+            public void run(Transaction trans2, Event<A> ea)
+            {
+                trans2.last(new RunnableImpl(() =>
+                {
                     if (currentListener != null)
                         currentListener.unlisten();
-                }
-            };
-            Listener l1 = bea.updates().listen(out.node, trans1, h1, false);
-            return out.addCleanup(l1);
-	    }
-        */
+                    currentListener = ea.listen(out_.node, trans2, h2, true);
+                }));
+            }
+
+            ~SwitchEHandler()
+            {
+                if (currentListener != null)
+                    currentListener.unlisten();
+            }
+        }
 
         ///
         /// Transform a behavior with a generalized state loop (a mealy machine). The function

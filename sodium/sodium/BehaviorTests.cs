@@ -173,5 +173,41 @@ namespace sodium
 		    l.unlisten();
 		    EventTests.AssertArraysEqual(EventTests.Arrays<string>.AsList("3 5", "6 10"), out_);
 	    }
+
+        class SE
+        {
+            public SE(char? a, char? b, Event<char?> sw)
+            {
+                this.a = a;
+                this.b = b;
+                this.sw = sw;
+            }
+            public char? a;
+            public char? b;
+            public Event<char?> sw;
+        }
+
+        [Test]
+        public void TestSwitchE()
+        {
+            EventSink<SE> ese = new EventSink<SE>();
+            Event<char?> ea = ese.map(s => s.a).filterNotNull();
+            Event<char?> eb = ese.map(s => s.b).filterNotNull();
+            Behavior<Event<char?>> bsw = ese.map(s => s.sw).filterNotNull().hold(ea);
+            List<char?> out_ = new List<char?>();
+            Event<char?> eo = Behavior<char?>.switchE(bsw);
+	        Listener l = eo.listen(c => { out_.Add(c); });
+	        ese.send(new SE('A','a',null));
+	        ese.send(new SE('B','b',null));
+	        ese.send(new SE('C','c',eb));
+	        ese.send(new SE('D','d',null));
+	        ese.send(new SE('E','e',ea));
+	        ese.send(new SE('F','f',null));
+	        ese.send(new SE('G','g',eb));
+	        ese.send(new SE('H','h',ea));
+	        ese.send(new SE('I','i',ea));
+	        l.unlisten();
+	        EventTests.AssertArraysEqual(EventTests.Arrays<char?>.AsList('A','B','C','d','e','F','G','h','I'), out_);
+        }
     }
 }
