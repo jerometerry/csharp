@@ -94,7 +94,7 @@ namespace sodium
             {
                 // In cases like value(), we start with an initial value.
                 for (int i = 0; i < aNow.Length; i++)
-                    action.run(trans, (A) aNow[i]); // <-- unchecked warning is here
+                    action.run(trans, (A)aNow[i]); // <-- unchecked warning is here
             }
             if (!suppressEarlierFirings)
             {
@@ -142,8 +142,8 @@ namespace sodium
 
         ///
         /// Variant of snapshot that throws away the event's value and captures the behavior's.
-         ///
-        public  Event<B> snapshot<B>(Behavior<B> beh)
+        ///
+        public Event<B> snapshot<B>(Behavior<B> beh)
         {
             return snapshot(beh, new Lambda2Impl<A, B, B>((a, b) => b));
         }
@@ -152,16 +152,16 @@ namespace sodium
         /// Sample the behavior at the time of the event firing. Note that the 'current value'
         /// of the behavior that's sampled is the value as at the start of the transaction
         /// before any state changes of the current transaction are applied through 'hold's.
-         ///
-        public  Event<C> snapshot<B,C>(Behavior<B> b, Lambda2<A,B,C> f)
+        ///
+        public Event<C> snapshot<B, C>(Behavior<B> b, Lambda2<A, B, C> f)
         {
             Event<A> ev = this;
-            EventSink<C> out_ = new SnapshotEventSink<A,B,C>(ev,f,b);
+            EventSink<C> out_ = new SnapshotEventSink<A, B, C>(ev, f, b);
             Listener l = listen_(out_.node, new TransactionHandlerImpl<A>((t2, a) => out_.send(t2, f.apply(a, b.sample()))));
             return out_.addCleanup(l);
         }
-        
-        private class SnapshotEventSink<A,B,C> : EventSink<C>
+
+        private class SnapshotEventSink<A, B, C> : EventSink<C>
         {
             private Event<A> ev;
             private Lambda2<A, B, C> _f;
@@ -174,10 +174,11 @@ namespace sodium
                 this.b = b;
             }
 
-            protected internal  override Object[] sampleNow()
+            protected internal override Object[] sampleNow()
             {
                 Object[] oi = ev.sampleNow();
-                if (oi != null) {
+                if (oi != null)
+                {
                     Object[] oo = new Object[oi.Length];
                     for (int i = 0; i < oo.Length; i++)
                         oo[i] = _f.apply((A)oi[i], b.sample());
@@ -196,10 +197,10 @@ namespace sodium
         /// transaction. If the event firings are ordered for some reason, then
         /// their ordering is retained. In many common cases the ordering will
         /// be undefined.
-         ///
-        public static  Event<A> merge<A>(Event<A> ea, Event<A> eb)
+        ///
+        public static Event<A> merge<A>(Event<A> ea, Event<A> eb)
         {
-            MergeEventSink<A> out_ = new MergeEventSink<A>(ea,eb);
+            MergeEventSink<A> out_ = new MergeEventSink<A>(ea, eb);
             TransactionHandler<A> h = new TransactionHandlerImpl<A>(out_.send);
             Listener l1 = ea.listen_(out_.node, h);
             Listener l2 = eb.listen_(out_.node, h);
@@ -217,45 +218,49 @@ namespace sodium
                 this.eb = eb;
             }
 
-            protected internal  override Object[] sampleNow()
+            protected internal override Object[] sampleNow()
+            {
+                Object[] oa = ea.sampleNow();
+                Object[] ob = eb.sampleNow();
+                if (oa != null && ob != null)
                 {
-                    Object[] oa = ea.sampleNow();
-                    Object[] ob = eb.sampleNow();
-                    if (oa != null && ob != null) {
-                        Object[] oo = new Object[oa.Length + ob.Length];
-                        int j = 0;
-                        for (int i = 0; i < oa.Length; i++) oo[j++] = oa[i];
-                        for (int i = 0; i < ob.Length; i++) oo[j++] = ob[i];
-                        return oo;
-                    }
-                    else
+                    Object[] oo = new Object[oa.Length + ob.Length];
+                    int j = 0;
+                    for (int i = 0; i < oa.Length; i++) oo[j++] = oa[i];
+                    for (int i = 0; i < ob.Length; i++) oo[j++] = ob[i];
+                    return oo;
+                }
+                else
                     if (oa != null)
                         return oa;
                     else
                         return ob;
-                }
+            }
         }
 
         ///
         /// Push each event occurrence onto a new transaction.
-         ///
+        ///
         public Event<A> delay()
         {
             EventSink<A> out_ = new EventSink<A>();
-            Listener l1 = listen_(out_.node, new TransactionHandlerImpl<A>((t,a) =>
+            Listener l1 = listen_(out_.node, new TransactionHandlerImpl<A>((t, a) =>
                                                                                {
                                                                                    t.post(new RunnableImpl(() =>
                                                                                                                {
                                                                                                                    Transaction trans = new Transaction();
-                            try {
-                                out_.send(trans, a);
-                            } finally {
-                                trans.close();
-                            }
+                                                                                                                   try
+                                                                                                                   {
+                                                                                                                       out_.send(trans, a);
+                                                                                                                   }
+                                                                                                                   finally
+                                                                                                                   {
+                                                                                                                       trans.close();
+                                                                                                                   }
                                                                                                                }));
                                                                                }));
 
-            
+
             return out_.addCleanup(l1);
         }
 
@@ -308,10 +313,10 @@ namespace sodium
                 Object[] oi = ev.sampleNow();
                 if (oi != null)
                 {
-                    A o = (A) oi[0];
+                    A o = (A)oi[0];
                     for (int i = 1; i < oi.Length; i++)
-                        o = f.apply(o, (A) oi[i]);
-                    return new Object[] {o};
+                        o = f.apply(o, (A)oi[i]);
+                    return new Object[] { o };
                 }
                 else
                     return null;
@@ -333,7 +338,7 @@ namespace sodium
         /// In the case where multiple event occurrences are simultaneous (i.e. all
         /// within the same transaction), they are combined using the same logic as
         /// 'coalesce'.
-         ///
+        ///
         public static Event<A> mergeWith<A>(Lambda2<A, A, A> f, Event<A> ea, Event<A> eb)
         {
             return merge(ea, eb).coalesce(f);
@@ -381,7 +386,7 @@ namespace sodium
                     Object[] oo = new Object[oi.Length];
                     int j = 0;
                     for (int i = 0; i < oi.Length; i++)
-                        if (f.apply((A) oi[i]))
+                        if (f.apply((A)oi[i]))
                             oo[j++] = oi[i];
                     if (j == 0)
                         oo = null;
@@ -411,7 +416,7 @@ namespace sodium
         /// Let event occurrences through only when the behavior's value is True.
         /// Note that the behavior's value is as it was at the start of the transaction,
         /// that is, no state changes from the current transaction are taken into account.
-         ///
+        ///
         public Event<A> gate(Behavior<Boolean> bPred)
         {
             var f = new Lambda2Impl<A, bool, Maybe<A>>((a, pred) => pred ? new Maybe<A>(a) : null);
@@ -421,20 +426,20 @@ namespace sodium
         ///
         /// Transform an event with a generalized state loop (a mealy machine). The function
         /// is passed the input and the old state and returns the new state and output value.
-         ///
-        public  Event<B> collect<B,S>(S initState, Lambda2<A, S, Tuple2<B, S>> f)
+        ///
+        public Event<B> collect<B, S>(S initState, Lambda2<A, S, Tuple2<B, S>> f)
         {
             Event<A> ea = this;
             EventLoop<S> es = new EventLoop<S>();
             Behavior<S> s = es.hold(initState);
-            Event<Tuple2<B,S>> ebs = ea.snapshot(s, f);
-            Event<B> eb = ebs.map(new Lambda1Impl<Tuple2<B,S>,B>(bs => bs.a));
-            Event<S> es_out = ebs.map(new Lambda1Impl<Tuple2<B,S>,S>(bs => bs.b));
+            Event<Tuple2<B, S>> ebs = ea.snapshot(s, f);
+            Event<B> eb = ebs.map(new Lambda1Impl<Tuple2<B, S>, B>(bs => bs.a));
+            Event<S> es_out = ebs.map(new Lambda1Impl<Tuple2<B, S>, S>(bs => bs.b));
             es.loop(es_out);
             return eb;
         }
 
-        
+
         public Behavior<S> accum<S>(S initState, Func<A, S, S> f)
         {
             return accum(initState, new Lambda2Impl<A, S, S>(f));
@@ -442,7 +447,7 @@ namespace sodium
 
         ///
         /// Accumulate on input event, outputting the new state each time.
-         ///
+        ///
         public Behavior<S> accum<S>(S initState, Lambda2<A, S, S> f)
         {
             Event<A> ea = this;
@@ -453,45 +458,56 @@ namespace sodium
             return es_out.hold(initState);
         }
 
-        /*
         ///
         /// Throw away all event occurrences except for the first one.
-         ///
-        public final Event<A> once()
+        ///
+        public Event<A> once()
         {
             // This is a bit long-winded but it's efficient because it deregisters
             // the listener.
-            final Event<A> ev = this;
-            final Listener[] la = new Listener[1];
-            final EventSink<A> out = new EventSink<A>() {
-                @Override
-                protected Object[] sampleNow()
+            Event<A> ev = this;
+            Listener[] la = new Listener[1];
+            EventSink<A> out_ = new OnceEventSink<A>(ev, la);
+            la[0] = ev.listen_(out_.node, new TransactionHandlerImpl<A>((t, a) =>
+            {
+                out_.send(t, a);
+                if (la[0] != null)
                 {
-                    Object[] oi = ev.sampleNow();
-                    Object[] oo = oi;
-                    if (oo != null) {
-                        if (oo.length > 1)
-                            oo = new Object[] { oi[0] };
-                        if (la[0] != null) {
-                            la[0].unlisten();
-                            la[0] = null;
-                        }
-                    }
-                    return oo;
+                    la[0].unlisten();
+                    la[0] = null;
                 }
-            };
-            la[0] = ev.listen_(out.node, new TransactionHandler<A>() {
-        	    public void run(Transaction trans, A a) {
-	                out.send(trans, a);
-	                if (la[0] != null) {
-	                    la[0].unlisten();
-	                    la[0] = null;
-	                }
-	            }
-            });
-            return out.addCleanup(la[0]);
+            }));
+            return out_.addCleanup(la[0]);
         }
-        */
+
+        private class OnceEventSink<A> : EventSink<A>
+        {
+            private Event<A> ev;
+            private Listener[] la;
+
+            public OnceEventSink(Event<A> ev, Listener[] la)
+            {
+                this.ev = ev;
+                this.la = la;
+            }
+
+            protected internal override Object[] sampleNow()
+            {
+                Object[] oi = ev.sampleNow();
+                Object[] oo = oi;
+                if (oo != null)
+                {
+                    if (oo.Length > 1)
+                        oo = new Object[] { oi[0] };
+                    if (la[0] != null)
+                    {
+                        la[0].unlisten();
+                        la[0] = null;
+                    }
+                }
+                return oo;
+            }
+        }
 
         internal Event<A> addCleanup(Listener cleanup)
         {
@@ -499,11 +515,11 @@ namespace sodium
             return this;
         }
 
-	    ~Event() 
+        ~Event()
         {
-		    foreach (Listener l in finalizers)
-			    l.unlisten();
-	    }
+            foreach (Listener l in finalizers)
+                l.unlisten();
+        }
 
         private class CoalesceHandler<A> : TransactionHandler<A>
         {
@@ -536,4 +552,4 @@ namespace sodium
         }
 
     }
-} 
+}

@@ -160,6 +160,19 @@ namespace sodium
             AssertArraysEqual(Arrays<char>.AsList('H','I'), out_);
         }
 
+        [Test]
+        public void testOnce()
+        {
+            EventSink<char> e = new EventSink<char>();
+            List<char> out_ = new List<char>();
+            Listener l = e.once().listen((x) => { out_.Add(x); });
+            e.send('A');
+            e.send('B');
+            e.send('C');
+            l.unlisten();
+            AssertArraysEqual(Arrays<char>.AsList('A'), out_);
+        }
+
         public static void AssertArraysEqual<TA>(List<TA> l1, List<TA> l2)
         {
             Assert.True(Arrays<TA>.AreArraysEqual(l1, l2));
