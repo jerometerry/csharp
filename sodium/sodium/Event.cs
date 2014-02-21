@@ -23,7 +23,7 @@ namespace sodium
                 this.target = target;
             }
 
-            public void unlisten()
+            public override void unlisten()
             {
                 lock (Transaction.listenersLock)
                 {

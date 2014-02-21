@@ -38,6 +38,89 @@ namespace sodium
 	        EventTests.AssertArraysEqual(EventTests.Arrays<char?>.AsList('A','B','c','d','E','F','f','F','g','H','I'), out_);
 	    }
 
+        [Test]
+        public void TestSwitchB2()
+        {
+            var esb = new EventSink<SB>();
+            // Split each field out_ of SB so we can update multiple behaviours in a
+            // single transaction.
+            var ba = esb.map<char?>(s => s.a).filterNotNull().hold('A');
+            var bb = esb.map(s => s.b).filterNotNull().hold('a');
+            var bsw = esb.map(s => s.sw).filterNotNull().hold(ba);
+            var bo = Behavior<char?>.switchB(bsw);
+            var out_ = new List<char?>();
+            var l = bo.value().listen(out_.Add);
+            esb.send(new SB('B', 'b', null));
+            esb.send(new SB('C', 'c', bb));
+            esb.send(new SB('D', 'd', null));
+            esb.send(new SB('E', 'e', ba));
+            l.unlisten();
+            EventTests.AssertArraysEqual(EventTests.Arrays<char?>.AsList('A', 'B', 'c', 'd', 'E'), out_);
+        }
+
+        [Test]
+        public void TestSwitchB3()
+        {
+            var esb = new EventSink<SB>();
+            // Split each field out_ of SB so we can update multiple behaviours in a
+            // single transaction.
+            var ba = esb.map<char?>(s => s.a).filterNotNull().hold('A');
+            var bb = esb.map(s => s.b).filterNotNull().hold('a');
+            var bsw = esb.map(s => s.sw).filterNotNull().hold(ba);
+            var bo = Behavior<char?>.switchB(bsw);
+            var out_ = new List<char?>();
+            var l = bo.value().listen(out_.Add);
+            esb.send(new SB('B', 'b', null));
+            esb.send(new SB('C', 'c', bb));
+            esb.send(new SB('D', 'd', null));
+            esb.send(new SB('E', 'e', ba));
+            esb.send(new SB('F', 'f', null));
+            l.unlisten();
+            EventTests.AssertArraysEqual(EventTests.Arrays<char?>.AsList('A', 'B', 'c', 'd', 'E', 'F'), out_);
+        }
+
+        [Test]
+        public void TestSwitchB4()
+        {
+            var esb = new EventSink<SB>();
+            // Split each field out_ of SB so we can update multiple behaviours in a
+            // single transaction.
+            var ba = esb.map<char?>(s => s.a).filterNotNull().hold('A');
+            var bb = esb.map(s => s.b).filterNotNull().hold('a');
+            var bsw = esb.map(s => s.sw).filterNotNull().hold(ba);
+            var bo = Behavior<char?>.switchB(bsw);
+            var out_ = new List<char?>();
+            var l = bo.value().listen(out_.Add);
+            esb.send(new SB('B', 'b', null));
+            esb.send(new SB('C', 'c', bb));
+            esb.send(new SB('D', 'd', null));
+            esb.send(new SB('E', 'e', ba));
+            esb.send(new SB('F', 'f', ba));
+            l.unlisten();
+            EventTests.AssertArraysEqual(EventTests.Arrays<char?>.AsList('A', 'B', 'c', 'd', 'E', 'F'), out_);
+        }
+
+        [Test]
+        public void TestSwitchB5()
+        {
+            var esb = new EventSink<SB>();
+            // Split each field out_ of SB so we can update multiple behaviours in a
+            // single transaction.
+            var ba = esb.map<char?>(s => s.a).filterNotNull().hold('A');
+            var bb = esb.map(s => s.b).filterNotNull().hold('a');
+            var bsw = esb.map(s => s.sw).filterNotNull().hold(ba);
+            var bo = Behavior<char?>.switchB(bsw);
+            var out_ = new List<char?>();
+            var l = bo.value().listen(out_.Add);
+            esb.send(new SB('B', 'b', null));
+            esb.send(new SB('C', 'c', bb));
+            esb.send(new SB('D', 'd', null));
+            esb.send(new SB('E', 'e', ba));
+            esb.send(new SB('F', 'f', bb));
+            l.unlisten();
+            EventTests.AssertArraysEqual(EventTests.Arrays<char?>.AsList('A', 'B', 'c', 'd', 'E', 'f'), out_);
+        }
+
         class SB
         {
             public SB(char? a, char? b, Behavior<char?> sw)

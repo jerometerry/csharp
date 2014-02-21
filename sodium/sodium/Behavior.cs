@@ -249,7 +249,21 @@ namespace sodium
                 // that might have happened during this transaction will be suppressed.
                 if (currentListener != null)
                     currentListener.unlisten();
-                currentListener = ba.value(trans2).listen(out_.node, trans2, new TransactionHandlerImpl<A>((t3,a) => out_.send(t3, a)), false);
+
+                Event<A> ev = ba.value(trans2);
+                currentListener = ev.listen(out_.node, trans2, new TransactionHandlerImpl<A>(Handler), false);
+            }
+
+            private void Handler(Transaction t3, A a)
+            {
+                out_.send(t3, a);
+            }
+
+
+            ~SwitchHandler()
+            {
+                if (currentListener != null)
+                    currentListener.unlisten();
             }
         }
 	
