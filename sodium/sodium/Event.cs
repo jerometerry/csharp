@@ -419,27 +419,25 @@ namespace sodium
         	    public A apply(A a, Boolean pred) { return pred ? a : null; }
             }).filterNotNull();
         }
+        */
 
         ///
         /// Transform an event with a generalized state loop (a mealy machine). The function
         /// is passed the input and the old state and returns the new state and output value.
          ///
-        public final <B,S> Event<B> collect(final S initState, final Lambda2<A, S, Tuple2<B, S>> f)
+        public  Event<B> collect<B,S>(S initState, Lambda2<A, S, Tuple2<B, S>> f)
         {
-            final Event<A> ea = this;
+            Event<A> ea = this;
             EventLoop<S> es = new EventLoop<S>();
             Behavior<S> s = es.hold(initState);
             Event<Tuple2<B,S>> ebs = ea.snapshot(s, f);
-            Event<B> eb = ebs.map(new Lambda1<Tuple2<B,S>,B>() {
-                public B apply(Tuple2<B,S> bs) { return bs.a; }
-            });
-            Event<S> es_out = ebs.map(new Lambda1<Tuple2<B,S>,S>() {
-                public S apply(Tuple2<B,S> bs) { return bs.b; }
-            });
+            Event<B> eb = ebs.map(new Lambda1Impl<Tuple2<B,S>,B>(bs => bs.a));
+            Event<S> es_out = ebs.map(new Lambda1Impl<Tuple2<B,S>,S>(bs => bs.b));
             es.loop(es_out);
             return eb;
         }
 
+        /*
         ///
         /// Accumulate on input event, outputting the new state each time.
          ///

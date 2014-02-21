@@ -110,6 +110,24 @@ namespace sodium
             AssertArraysEqual(Arrays<char>.AsList('C','B','A'), out_);
         }
 
+        [Test]
+        public void testCollect()
+        {
+            EventSink<Int32> ea = new EventSink<Int32>();
+            List<Int32> out_ = new List<Int32>();
+            Event<Int32> sum = ea.collect(100,
+                //(a,s) -> new Tuple2(a+s, a+s)
+                new Lambda2Impl<Int32, Int32, Tuple2<Int32,Int32>>((a,s) => new Tuple2<int, int>(a+s,a+s)));
+            Listener l = sum.listen((x) => { out_.Add(x); });
+            ea.send(5);
+            ea.send(7);
+            ea.send(1);
+            ea.send(2);
+            ea.send(3);
+            l.unlisten();
+            AssertArraysEqual(Arrays<Int32>.AsList(105,112,113,115,118), out_);
+        }
+
         public static void AssertArraysEqual<TA>(List<TA> l1, List<TA> l2)
         {
             Assert.True(Arrays<TA>.AreArraysEqual(l1, l2));
