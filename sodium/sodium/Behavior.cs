@@ -113,15 +113,26 @@ namespace sodium
             }
         }
 
-        /*
+        /// <summary>
+        /// Overload of map that accepts a Func<A,B> to support C# lambdas
+        /// </summary>
+        /// <typeparam name="B"></typeparam>
+        /// <param name="f"></param>
+        /// <returns></returns>
+        public Behavior<B> map<B>(Func<A,B> f)
+        {
+            return map(new Lambda1Impl<A, B>(f));
+        }
+        
         ///
         /// Transform the behavior's value according to the supplied function.
         ///
-	    public final <B> Behavior<B> map(Lambda1<A,B> f)
+        public Behavior<B> map<B>(Lambda1<A, B> f)
 	    {
 		    return updates().map(f).hold(f.apply(sample()));
 	    }
 
+        /*
 	    ///
 	    /// Lift a binary function into behaviors.
 	    ///
@@ -311,34 +322,24 @@ namespace sodium
             Listener l1 = bea.updates().listen(out.node, trans1, h1, false);
             return out.addCleanup(l1);
 	    }
+        */
 
         ///
         /// Transform a behavior with a generalized state loop (a mealy machine). The function
         /// is passed the input and the old state and returns the new state and output value.
         ///
-        public final <B,S> Behavior<B> collect(final S initState, final Lambda2<A, S, Tuple2<B, S>> f)
+        public  Behavior<B> collect<B,S>(S initState, Lambda2<A, S, Tuple2<B, S>> f)
         {
-            final Event<A> ea = updates().coalesce(new Lambda2<A,A,A>() {
-        	    public A apply(A fst, A snd) { return snd; }
-            });
-            final A za = sample();
-            final Tuple2<B, S> zbs = f.apply(za, initState);
+            Event<A> ea = updates().coalesce(new Lambda2Impl<A, A, A>((a, b) => b));
+            A za = sample();
+            Tuple2<B, S> zbs = f.apply(za, initState);
             EventLoop<Tuple2<B,S>> ebs = new EventLoop<Tuple2<B,S>>();
             Behavior<Tuple2<B,S>> bbs = ebs.hold(zbs);
-            Behavior<S> bs = bbs.map(new Lambda1<Tuple2<B,S>,S>() {
-                public S apply(Tuple2<B,S> x) {
-                    return x.b;
-                }
-            });
+            Behavior<S> bs = bbs.map(new Lambda1Impl<Tuple2<B, S>, S>(x => x.b));
             Event<Tuple2<B,S>> ebs_out = ea.snapshot(bs, f);
             ebs.loop(ebs_out);
-            return bbs.map(new Lambda1<Tuple2<B,S>,B>() {
-                public B apply(Tuple2<B,S> x) {
-                    return x.a;
-                }
-            });
+            return bbs.map(new Lambda1Impl<Tuple2<B, S>, B>(x => x.a));
         }
-        */
 
 	    ~Behavior() {
 	        if (cleanup != null)

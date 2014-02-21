@@ -140,17 +140,12 @@ namespace sodium
             return Transaction.apply(new Lambda1Impl<Transaction, Behavior<A>>(t => new Behavior<A>(lastFiringOnly(t), initValue)));
         }
 
-        /*
         ///
         /// Variant of snapshot that throws away the event's value and captures the behavior's.
          ///
-        public final <B> Event<B> snapshot(Behavior<B> beh)
+        public  Event<B> snapshot<B>(Behavior<B> beh)
         {
-            return snapshot(beh, new Lambda2<A,B,B>() {
-                public B apply(A a, B b) {
-                    return b;
-                }
-            });
+            return snapshot(beh, new Lambda2Impl<A, B, B>((a, b) => b));
         }
 
         ///
@@ -158,33 +153,40 @@ namespace sodium
         /// of the behavior that's sampled is the value as at the start of the transaction
         /// before any state changes of the current transaction are applied through 'hold's.
          ///
-        public final <B,C> Event<C> snapshot(final Behavior<B> b, final Lambda2<A,B,C> f)
+        public  Event<C> snapshot<B,C>(Behavior<B> b, Lambda2<A,B,C> f)
         {
-            final Event<A> ev = this;
-            final EventSink<C> out = new EventSink<C>() {
-                @SuppressWarnings("unchecked")
-                @Override
-                protected Object[] sampleNow()
-                {
-                    Object[] oi = ev.sampleNow();
-                    if (oi != null) {
-                        Object[] oo = new Object[oi.length];
-                        for (int i = 0; i < oo.length; i++)
-                            oo[i] = f.apply((A)oi[i], b.sample());
-                        return oo;
-                    }
-                    else
-                        return null;
-                }
-            };
-            Listener l = listen_(out.node, new TransactionHandler<A>() {
-                public void run(Transaction trans2, A a) {
-                    out.send(trans2, f.apply(a, b.sample()));
-                }
-            });
-            return out.addCleanup(l);
+            Event<A> ev = this;
+            EventSink<C> out_ = new SnapshotEventSink<A,B,C>(ev,f,b);
+            Listener l = listen_(out_.node, new TransactionHandlerImpl<A>((t2, a) => out_.send(t2, f.apply(a, b.sample()))));
+            return out_.addCleanup(l);
         }
-        */
+        
+        private class SnapshotEventSink<A,B,C> : EventSink<C>
+        {
+            private Event<A> ev;
+            private Lambda2<A, B, C> _f;
+            private Behavior<B> b;
+
+            public SnapshotEventSink(Event<A> ev, Lambda2<A, B, C> f, Behavior<B> b)
+            {
+                this.ev = ev;
+                _f = f;
+                this.b = b;
+            }
+
+            protected internal  override Object[] sampleNow()
+            {
+                Object[] oi = ev.sampleNow();
+                if (oi != null) {
+                    Object[] oo = new Object[oi.Length];
+                    for (int i = 0; i < oo.Length; i++)
+                        oo[i] = _f.apply((A)oi[i], b.sample());
+                    return oo;
+                }
+                else
+                    return null;
+            }
+        }
 
         ///
         /// Merge two streams of events of the same type.
