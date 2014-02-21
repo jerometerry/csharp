@@ -4,8 +4,8 @@ namespace sodium
 
     public class Behavior<A> {
 	    protected Event<A> _event;
-	    A _value;
-	    A valueUpdate;
+	    protected A _value;
+	    Maybe<A> valueUpdate = Maybe<A>.Null;
 	    private Listener cleanup;
 
 	    ///
@@ -27,16 +27,15 @@ namespace sodium
             {
                 var handler = new TransactionHandlerImpl<A>((t2, a) =>
                 { 
-                    if (thiz.valueUpdate == null)
+                    if (!thiz.valueUpdate.HasValue)
                     {
                         t2.last(new RunnableImpl(() =>
                         {
                             thiz._value = thiz.valueUpdate;
-                            var v = default(A); // TODO - used to be set to null
-                            thiz.valueUpdate = v;
+                            thiz.valueUpdate = Maybe<A>.Null;
                         }));
                     }
-                    this.valueUpdate = a;
+                    this.valueUpdate = new Maybe<A>(a);
 
                 });
                 this.cleanup = evt.listen(Node.NULL, t1, handler, false);
@@ -48,7 +47,7 @@ namespace sodium
         ///
         A newValue()
         {
-    	    return valueUpdate == null ? _value :  valueUpdate;
+    	    return !valueUpdate.HasValue ? _value :  valueUpdate.Value();
         }
 
         ///
@@ -135,9 +134,16 @@ namespace sodium
 	    ///
 	    /// Lift a binary function into behaviors.
 	    ///
-	    public  Behavior<C> lift<B,C>(Lambda2<A,B,C> f, Behavior<B> b)
+	    public Behavior<C> lift<B,C>(Lambda2<A,B,C> f, Behavior<B> b)
 	    {
-	        Lambda1<A, Lambda1<B, C>> ffa = new Lambda1Impl<A, Lambda1<B, C>>((aa) => new Lambda1Impl<B, C>((bb) => f.apply(aa, bb)));
+	        Lambda1<A, Lambda1<B, C>> ffa = new Lambda1Impl<A, Lambda1<B, C>>((aa) =>
+	        {
+
+                return new Lambda1Impl<B, C>((bb) =>
+                                                 {
+                                                     return f.apply(aa, bb);
+                                                 });
+	        });
 		    Behavior<Lambda1<B,C>> bf = map(ffa);
 		    return apply(bf, b);
 	    }
@@ -229,7 +235,12 @@ namespace sodium
                 if (fired)
                     return;
 
-                trans1.prioritized(out_.node, new HandlerImpl<Transaction>(t2 => out_.send(t2, bf.newValue().apply(ba.newValue()))));
+                fired = true;
+                trans1.prioritized(out_.node, new HandlerImpl<Transaction>(t2 =>
+                {
+                    out_.send(t2, bf.newValue().apply(ba.newValue()));
+                    fired = true;
+                }));
             }
         }
 
@@ -274,7 +285,6 @@ namespace sodium
             {
                 out_.send(t3, a);
             }
-
 
             ~SwitchHandler()
             {

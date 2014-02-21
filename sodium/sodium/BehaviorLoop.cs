@@ -7,8 +7,8 @@ namespace sodium
 
 		public void loop(Behavior<A> a_out)
 		{
-			((EventLoop<A>)event).loop(a_out.updates());
-			value = a_out.sample();
+			((EventLoop<A>)_event).loop(a_out.updates());
+			_value = a_out.sample();
 		}
 	}
 

@@ -37,6 +37,19 @@ namespace sodium
         }
 
         [Test]
+        public void TestFilter2()
+        {
+            var e = new EventSink<char>();
+            var out_ = new List<char>();
+            var l = e.filter(char.IsUpper).listen(out_.Add);
+            e.send('H');
+            e.send('o');
+            e.send('I');
+            l.unlisten();
+            AssertArraysEqual(Arrays<char>.AsList('H','I'), out_);
+        }
+
+        [Test]
         public void TestFilterNotNull()
         {
             EventSink<Int32?> esb = new EventSink<Int32?>();
