@@ -32,7 +32,8 @@ namespace sodium
                         t2.last(new RunnableImpl(() =>
                         {
                             thiz._value = thiz.valueUpdate;
-                            thiz.valueUpdate = default(A); // TODO - used to be set to null
+                            var v = default(A); // TODO - used to be set to null
+                            thiz.valueUpdate = v;
                         }));
                     }
                     this.valueUpdate = a;
@@ -323,12 +324,12 @@ namespace sodium
                 }
             });
         }
+        */
 
-	    @Override
-	    protected void finalize() throws Throwable {
+	    ~Behavior() {
 	        if (cleanup != null)
                 cleanup.unlisten();
 	    }
-        */
+        
     }
 }

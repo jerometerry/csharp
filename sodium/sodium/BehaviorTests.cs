@@ -15,15 +15,15 @@ namespace sodium
         [Test]
         public void TestSwitchB()
 	    {
-	        EventSink<SB> esb = new EventSink<SB>();
+	        var esb = new EventSink<SB>();
 	        // Split each field out_ of SB so we can update multiple behaviours in a
 	        // single transaction.
-	        Behavior<char?> ba = esb.map<char?>(s => s.a).filterNotNull().hold('A');
-	        Behavior<char?> bb = esb.map(s => s.b).filterNotNull().hold('a');
-	        Behavior<Behavior<char?>> bsw = esb.map(s => s.sw).filterNotNull().hold(ba);
-	        Behavior<char?> bo = Behavior<char?>.switchB(bsw);
-		    List<char?> out_ = new List<char?>();
-	        Listener l = bo.value().listen(c => { out_.Add(c); });
+	        var ba = esb.map<char?>(s => s.a).filterNotNull().hold('A');
+	        var bb = esb.map(s => s.b).filterNotNull().hold('a');
+	        var bsw = esb.map(s => s.sw).filterNotNull().hold(ba);
+	        var bo = Behavior<char?>.switchB(bsw);
+		    var out_ = new List<char?>();
+	        var l = bo.value().listen(out_.Add);
 	        esb.send(new SB('B','b',null));
 	        esb.send(new SB('C','c',bb));
 	        esb.send(new SB('D','d',null));

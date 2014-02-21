@@ -32,7 +32,7 @@ namespace sodium
                 }
             }
 
-            protected void finalize()
+            ~ListenerImplementation()
             {
                 unlisten();
             }
@@ -498,14 +498,11 @@ namespace sodium
             return this;
         }
 
-        /*
-	    @Override
-	    protected void finalize() throws Throwable {
-		    for (Listener l : finalizers)
+	    ~Event() 
+        {
+		    foreach (Listener l in finalizers)
 			    l.unlisten();
 	    }
-    }
-    */
 
         private class CoalesceHandler<A> : TransactionHandler<A>
         {
@@ -528,12 +525,12 @@ namespace sodium
                 {
                     CoalesceHandler<A> thiz = this;
                     trans1.prioritized(out_.node, new HandlerImpl<Transaction>((t) =>
-                                                                                   {
-                                                                                       out_.send(t, thiz.accum);
-                                                                                       thiz.accumValid = false;
-                                                                                       thiz.accum = default(A);
-                                                                                           // TODO - previously was null
-                                                                                   }));
+                    {
+                        out_.send(t, thiz.accum);
+                        thiz.accumValid = false;
+                        var v = default(A); // TODO - previously was null
+                        thiz.accum = v;
+                    }));
                     accum = a;
                     accumValid = true;
                 }
