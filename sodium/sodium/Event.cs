@@ -407,19 +407,16 @@ namespace sodium
             return filter(new Lambda1Impl<A, Boolean>(a => a != null));
         }
 
-        /*
         ///
         /// Let event occurrences through only when the behavior's value is True.
         /// Note that the behavior's value is as it was at the start of the transaction,
         /// that is, no state changes from the current transaction are taken into account.
          ///
-        public final Event<A> gate(Behavior<Boolean> bPred)
+        public Event<A> gate(Behavior<Boolean> bPred)
         {
-            return snapshot(bPred, new Lambda2<A,Boolean,A>() {
-        	    public A apply(A a, Boolean pred) { return pred ? a : null; }
-            }).filterNotNull();
+            var f = new Lambda2Impl<A, bool, Maybe<A>>((a, pred) => pred ? new Maybe<A>(a) : null);
+            return snapshot(bPred, f).filterNotNull().map(a => a.Value());
         }
-        */
 
         ///
         /// Transform an event with a generalized state loop (a mealy machine). The function
