@@ -161,6 +161,23 @@ namespace sodium
         }
 
         [Test]
+        public void TestLift() 
+        {
+		    BehaviorSink<Int32> a = new BehaviorSink<Int32>(1);
+		    BehaviorSink<long> b = new BehaviorSink<long>(5L);
+		    List<String> out_ = new List<String>();
+		    Listener l = Behavior<Int32>.lift<Int32,long,string>(
+			    (x, y) => x + " " + y,
+			    a,
+			    b
+		    ).value().listen(out_.Add);
+		    a.send(12);
+		    b.send(6L);
+            l.unlisten();
+            EventTests.AssertArraysEqual(EventTests.Arrays<string>.AsList("1 5", "12 5", "12 6"), out_);
+	    }
+
+        [Test]
         public void TestLiftGlitch() {
 		    BehaviorSink<Int32> a = new BehaviorSink<Int32>(1);
 		    Behavior<Int32> a3 = a.map((x) => x * 3);
