@@ -137,7 +137,7 @@ namespace sodium
 	    ///
 	    public  Behavior<C> lift<B,C>(Lambda2<A,B,C> f, Behavior<B> b)
 	    {
-	        Lambda1<A, Lambda1<B, C>> ffa = null;
+	        Lambda1<A, Lambda1<B, C>> ffa = new Lambda1Impl<A, Lambda1<B, C>>((aa) => new Lambda1Impl<B, C>((bb) => f.apply(aa, bb)));
             //Lambda1<A, Lambda1<B,C>> ffa = new Lambda1<A, Lambda1<B,C>>() {
             //    public Lambda1<B,C> apply(final A aa) {
             //        return new Lambda1<B,C>() {
@@ -211,38 +211,36 @@ namespace sodium
 	    ///
 	    public static Behavior<B> apply<A,B>(Behavior<Lambda1<A,B>> bf, Behavior<A> ba)
 	    {
-            //final EventSink<B> out = new EventSink<B>();
-
-            //final Handler<Transaction> h = new Handler<Transaction>() {
-            //    boolean fired = false;			
-            //    @Override
-            //    public void run(Transaction trans1) {
-            //        if (fired) 
-            //            return;
-
-            //        fired = true;
-            //        trans1.prioritized(out.node, new Handler<Transaction>() {
-            //            public void run(Transaction trans2) {
-            //                out.send(trans2, bf.newValue().apply(ba.newValue()));
-            //                fired = false;
-            //            }
-            //        });
-            //    }
-            //};
-
-            //Listener l1 = bf.updates().listen_(out.node, new TransactionHandler<Lambda1<A,B>>() {
-            //    public void run(Transaction trans1, Lambda1<A,B> f) {
-            //        h.run(trans1);
-            //    }
-            //});
-            //Listener l2 = ba.updates().listen_(out.node, new TransactionHandler<A>() {
-            //    public void run(Transaction trans1, A a) {
-            //        h.run(trans1);
-            //    }
-            //});
-            //return out.addCleanup(l1).addCleanup(l2).hold(bf.sample().apply(ba.sample()));
+            EventSink<B> out_ = new EventSink<B>();
+	        Handler<Transaction> h = new ApplyHandler<A, B>(out_, bf, ba);
+	        Listener l1 = bf.updates().listen_(out_.node, new TransactionHandlerImpl<Lambda1<A, B>>((t, f) => h.run(t)));
+	        Listener l2 = ba.updates().listen_(out_.node, new TransactionHandlerImpl<A>((t, a) => h.run(t)));
+            return out_.addCleanup(l1).addCleanup(l2).hold(bf.sample().apply(ba.sample()));
 	        return null;
 	    }
+
+        private class ApplyHandler<A,B> : Handler<Transaction>
+        {
+            private bool fired = false;
+            private EventSink<B> out_;
+            private Behavior<Lambda1<A, B>> bf;
+            private Behavior<A> ba;
+
+            public ApplyHandler(EventSink<B> ev, Behavior<Lambda1<A, B>> bf, Behavior<A> ba)
+            {
+                out_ = ev;
+                this.bf = bf;
+                this.ba = ba;
+            }
+
+            public void run(Transaction trans1)
+            {
+                if (fired)
+                    return;
+
+                trans1.prioritized(out_.node, new HandlerImpl<Transaction>(t2 => out_.send(t2, bf.newValue().apply(ba.newValue()))));
+            }
+        }
 
 	    ///
 	    /// Unwrap a behavior inside another behavior to give a time-varying behavior implementation.
