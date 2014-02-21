@@ -437,13 +437,18 @@ namespace sodium
             return eb;
         }
 
-        /*
+        
+        public Behavior<S> accum<S>(S initState, Func<A, S, S> f)
+        {
+            return accum(initState, new Lambda2Impl<A, S, S>(f));
+        }
+
         ///
         /// Accumulate on input event, outputting the new state each time.
          ///
-        public final <S> Behavior<S> accum(final S initState, final Lambda2<A, S, S> f)
+        public Behavior<S> accum<S>(S initState, Lambda2<A, S, S> f)
         {
-            final Event<A> ea = this;
+            Event<A> ea = this;
             EventLoop<S> es = new EventLoop<S>();
             Behavior<S> s = es.hold(initState);
             Event<S> es_out = ea.snapshot(s, f);
@@ -451,6 +456,7 @@ namespace sodium
             return es_out.hold(initState);
         }
 
+        /*
         ///
         /// Throw away all event occurrences except for the first one.
          ///
