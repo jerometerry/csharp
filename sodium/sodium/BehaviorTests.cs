@@ -159,5 +159,19 @@ namespace sodium
             impl.run("hello world!");
             Assert.AreEqual("hello world!", results[0]);
         }
+
+        [Test]
+        public void TestLiftGlitch() {
+		    BehaviorSink<Int32> a = new BehaviorSink<Int32>(1);
+		    Behavior<Int32> a3 = a.map((x) => x * 3);
+		    Behavior<Int32> a5 = a.map((x) => x * 5);
+		    Behavior<String> b = Behavior<Int32>.lift<Int32, Int32, String>((x, y) => x + " " + y, a3, a5);
+		    List<String> out_ = new List<String>();
+            Listener l = b.value().listen(out_.Add);
+
+		    a.send(2);
+		    l.unlisten();
+		    EventTests.AssertArraysEqual(EventTests.Arrays<string>.AsList("3 5", "6 10"), out_);
+	    }
     }
 }
