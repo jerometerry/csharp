@@ -14,6 +14,9 @@ namespace jterry.nunit.multithreaded
         private readonly Thread thread;
         private readonly ThreadStart start;
 
+        private const string RemoteStackTraceFieldName = "_remoteStackTraceString";
+        private static readonly FieldInfo RemoteStackTraceField = typeof(Exception).GetField(RemoteStackTraceFieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+
         public CrossThreadTestRunner(ThreadStart start)
         {
             this.start = start;
@@ -52,10 +55,9 @@ namespace jterry.nunit.multithreaded
         [ReflectionPermission(SecurityAction.Demand)]
         private static void ThrowExceptionPreservingStack(Exception exception)
         {
-            var remoteStackTraceString = typeof(Exception).GetField("_remoteStackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);
-            if (remoteStackTraceString != null)
+            if (RemoteStackTraceField != null)
             {
-                remoteStackTraceString.SetValue(exception, exception.StackTrace + Environment.NewLine);
+                RemoteStackTraceField.SetValue(exception, exception.StackTrace + Environment.NewLine);
             }
             throw exception;
         }

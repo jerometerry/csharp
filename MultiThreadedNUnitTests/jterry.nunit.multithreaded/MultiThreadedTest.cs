@@ -8,35 +8,17 @@ namespace jterry.nunit.multithreaded
     [TestFixture]
     public class MultiThreadedTest
     {
+        readonly ThreadStart[] delegates = {
+            () => {
+                Console.WriteLine("Nothing to see here");
+            }, () => {
+                throw new InvalidOperationException("Exception in test should fail test");
+            }
+        };
+
         [Test]
         [ExpectedException(typeof(InvalidOperationException))]
-        public void NaieveMultiThreading()
-        {
-            SimpleRunInParallel(GetDelegates());
-        }
-
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void BetterMultiThreading()
-        {
-            RunInParallel(GetDelegates());
-        }
-
-        protected static void RunInParallel(params ThreadStart[] delegates)
-        {
-            var threads = delegates.Select(d => new CrossThreadTestRunner(d)).ToList();
-            foreach (var t in threads)
-            {
-                t.Start();
-            }
-
-            foreach (var t in threads)
-            {
-                t.Join();
-            }
-        }
-
-        protected static void SimpleRunInParallel(params ThreadStart[] delegates)
+        public void SimpleMultiThreading()
         {
             var threads = delegates.Select(d => new Thread(d)).ToList();
             foreach (var t in threads)
@@ -50,15 +32,20 @@ namespace jterry.nunit.multithreaded
             }
         }
 
-        private static ThreadStart[] GetDelegates()
+        [Test]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void BetterMultiThreading()
         {
-            return new ThreadStart[]{() =>
+            var threads = delegates.Select(d => new CrossThreadTestRunner(d)).ToList();
+            foreach (var t in threads)
             {
-                Console.WriteLine("Nothing to see here");
-            }, () => 
+                t.Start();
+            }
+
+            foreach (var t in threads)
             {
-                throw new InvalidOperationException("Unhandled exceptions should fail the test, but they just silently terminate the running thread");
-            }};
+                t.Join();
+            }
         }
     }
 }
