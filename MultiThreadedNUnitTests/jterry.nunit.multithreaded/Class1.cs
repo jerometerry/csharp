@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Connect4.Api
+namespace MultiThreadedNUnitTests
 {
-    public enum DiskColour
+    public class Class1
     {
-        Empty,
-        Red,
-        Black
     }
 }

@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Connect4")]
+[assembly: AssemblyTitle("MultiThreadedNUnitTests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Connect4")]
-[assembly: AssemblyCopyright("Copyright ©  2013")]
+[assembly: AssemblyCompany("Desire2Learn")]
+[assembly: AssemblyProduct("MultiThreadedNUnitTests")]
+[assembly: AssemblyCopyright("Copyright © Desire2Learn 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("9648f517-db9e-4978-a915-fae8e0f23997")]
+[assembly: Guid("2464caa3-8770-4a80-a1dc-d17ed9003765")]
 
 // Version information for an assembly consists of the following four values:
 //
